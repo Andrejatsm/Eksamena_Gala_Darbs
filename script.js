@@ -43,13 +43,20 @@ document.addEventListener('DOMContentLoaded', () => {
             modalTitle.textContent = vards;
             
             // Ģenerē Modālā loga saturu
-            modalBody.innerHTML = `
-                <img src="${attels}" class="img-fluid rounded-circle mb-3 border border-dark border-3 profile-img-sm" alt="${vards}">
+modalBody.innerHTML = `
+                <img src="${attels}" class="img-fluid rounded-circle mb-3 border border-dark border-3" style="width: 150px; height: 150px; object-fit: cover;" alt="${vards}">
                 <p><strong>Specializācija:</strong> ${spec}</p>
                 <p><strong>Pieredze:</strong> ${pieredze} gadi</p>
                 <p><strong>Cena (1h):</strong> ${cena} EUR</p>
                 <p class="text-start mt-3"><strong>Apraksts:</strong> ${apraksts}</p>
-                <button class="btn btn-success mt-3 w-100" onclick="alert('Novirzīšana uz Stripe maksājuma lapu...')">Pieteikties konsultācijai un Maksāt</button>
+                
+                <form action="checkout.php" method="POST">
+                    <input type="hidden" name="psihologs_vards" value="${vards}">
+                    <input type="hidden" name="cena" value="${parseFloat(cena.replace(',', '.'))}">
+                    <button type="submit" class="btn btn-success mt-3 w-100">
+                        Pieteikties un Maksāt (${cena} EUR)
+                    </button>
+                </form>
             `;
         });
     });
