@@ -1,7 +1,7 @@
 <?php
 require 'vendor/autoload.php'; // Ielādē Stripe bibliotēku
 // Šeit ievieto savu Secret Key no Stripe paneļa
-\Stripe\Stripe::setApiKey('sk_test_TAVS_SECRET_KEY_SHEIT');
+\Stripe\Stripe::setApiKey('sk_test_51S7XQt3b1XY7a31CCbstqHPSNYoEFGXr5zcqQaaB5t25CYs3mFuYzOl1GB9jQ0Hzh7MJC8Gc1XneHycmqUYbqn5O00hVcvezVP');
 
 header('Content-Type: application/json');
 
