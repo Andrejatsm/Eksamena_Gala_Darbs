@@ -1,14 +1,13 @@
 <?php
 require 'db.php';
 
+// 1. VISPIRMS LOĢIKA (Pirms Header)
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vards = trim($_POST['vards']);
     $uzvards = trim($_POST['uzvards']);
     $epasts = trim($_POST['epasts']);
     $lietotajvards = trim($_POST['lietotajvards']);
-    
-    // Paroli obligāti šifrējam
     $parole = password_hash($_POST['parole'], PASSWORD_DEFAULT);
 
     // Pārbaudām, vai lietotājvārds jau eksistē
@@ -24,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("sssss", $vards, $uzvards, $epasts, $lietotajvards, $parole);
 
         if ($stmt->execute()) {
+            // Pārsūtīšana notiek šeit, pirms jebkāda HTML
             header("Location: login.php?success=1");
             exit();
         } else {
@@ -33,83 +33,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $check->close();
 }
+
+// 2. TAGAD HEADER
+require 'header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="lv">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reģistrācija - Saprasts</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="d-flex flex-column min-vh-100">
+<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-zinc-900">
+    <div class="max-w-md w-full space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700">
+        <div>
+            <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                Izveidot profilu
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                Jau ir profils? <a href="login.php" class="font-medium text-primary hover:text-green-500 transition">Ielogoties</a>
+            </p>
+        </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.php">Saprasts</a>
-            <div class="d-flex align-items-center">
-                <div class="navbar-nav">
-                    <a class="nav-link" href="login.php">Ielogoties</a>
+        <?php if(!empty($error)): ?>
+            <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm text-center">
+                <?php echo $error; ?>
+            </div>
+        <?php endif; ?>
+
+        <form class="mt-8 space-y-6" method="POST">
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vārds</label>
+                        <input type="text" name="vards" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Uzvārds</label>
+                        <input type="text" name="uzvards" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-pasts</label>
+                    <input type="email" name="epasts" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lietotājvārds</label>
+                    <input type="text" name="lietotajvards" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parole</label>
+                    <input type="password" name="parole" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Vismaz 1 lielais burts, 1 simbols.</p>
                 </div>
             </div>
-        </div>
-    </nav>
 
-    <div class="container mt-5 flex-grow-1 d-flex justify-content-center">
-        <div class="card shadow-sm card-form card-form--register">
-            <div class="card-body p-4">
-                <h3 class="card-title text-center mb-4">Izveidot profilu</h3>
-
-                <?php if(!empty($error)): ?>
-                    <div class="alert alert-danger"><?php echo $error; ?></div>
-                <?php endif; ?>
-
-                <form method="POST">
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">Vārds</label>
-                            <input type="text" name="vards" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">Uzvārds</label>
-                            <input type="text" name="uzvards" class="form-control" required>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-2">
-                        <label class="form-label">E-pasts</label>
-                        <input type="email" name="epasts" class="form-control" required>
-                    </div>
-                    
-                    <div class="mb-2">
-                        <label class="form-label">Lietotājvārds</label>
-                        <input type="text" name="lietotajvards" class="form-control" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Parole</label>
-                        <input type="password" name="parole" class="form-control" required>
-                        <div class="form-text">Vismaz 1 lielais burts, 1 simbols.</div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-success w-100">Reģistrēties</button>
-                </form>
-                <div class="text-center mt-3">
-                    <small>Jau ir profils? <a href="login.php">Ielogoties</a></small>
-                </div>
-            </div>
-        </div>
+            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:scale-[1.02]">
+                Reģistrēties
+            </button>
+        </form>
     </div>
+</div>
 
-    <footer class="mt-auto py-3 text-center">
-        <div class="container">
-            <p class="mb-0">&copy; <?php echo date("Y"); ?> Saprasts. Visas tiesības aizsargātas.</p>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+<?php require 'footer.php'; ?>

@@ -28,38 +28,40 @@ if ($result && $result->num_rows > 0) {
 }
 
 if (empty($psihologi)) {
-    echo '<div class="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">Netika atrasts neviens psihologs.</div>';
+    echo '<div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400 bg-white dark:bg-zinc-800 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700">Netika atrasts neviens psihologs.</div>';
 } else {
     foreach ($psihologi as $psi) {
-        // Tailwind Kartīte
         ?>
-        <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full">
+        <div class="group bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full transform hover:-translate-y-1">
             <div class="relative h-64 overflow-hidden">
-                <img src="<?php echo htmlspecialchars($psi['attels']); ?>" class="w-full h-full object-cover transform hover:scale-105 transition duration-500" alt="Psihologs">
+                <img src="<?php echo htmlspecialchars($psi['attels']); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500" alt="Psihologs">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
             </div>
             <div class="p-6 flex flex-col flex-grow">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <h5 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($psi['vards_uzvards']); ?></h5>
-                        <p class="text-sm text-primary font-medium"><?php echo htmlspecialchars($psi['specializacija']); ?></p>
-                    </div>
+                <div class="mb-4">
+                    <h5 class="text-xl font-bold text-gray-900 dark:text-white mb-1"><?php echo htmlspecialchars($psi['vards_uzvards']); ?></h5>
+                    <p class="text-sm text-primary font-medium uppercase tracking-wider"><?php echo htmlspecialchars($psi['specializacija']); ?></p>
                 </div>
                 
-                <div class="flex items-center text-gray-500 dark:text-gray-400 text-sm mb-4">
-                    <span class="mr-3"><i class="fas fa-briefcase mr-1"></i> <?php echo $psi['pieredze']; ?> gadi</span>
+                <div class="flex items-center text-gray-500 dark:text-gray-400 text-sm mb-6">
+                    <span class="flex items-center bg-gray-100 dark:bg-zinc-700 px-3 py-1 rounded-full"><i class="fas fa-briefcase mr-2 text-primary"></i> <?php echo $psi['pieredze']; ?> gadi</span>
                 </div>
 
                 <div class="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-700 flex justify-between items-center">
-                    <span class="text-lg font-bold text-gray-900 dark:text-white"><?php echo number_format($psi['cena_h'], 2); ?> €/h</span>
+                    <div>
+                        <span class="text-xs text-gray-400 uppercase">Stundas likme</span>
+                        <div class="text-lg font-bold text-gray-900 dark:text-white"><?php echo number_format($psi['cena_h'], 2); ?> €</div>
+                    </div>
                     
-                    <button type="button" class="details-btn px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition font-medium text-sm" 
+                    <button type="button" class="details-btn px-5 py-2.5 bg-primary text-white rounded-xl shadow-lg shadow-primary/30 hover:bg-green-600 hover:shadow-primary/50 transition font-medium text-sm flex items-center gap-2" 
                             data-vards="<?php echo htmlspecialchars($psi['vards_uzvards']); ?>"
                             data-spec="<?php echo htmlspecialchars($psi['specializacija']); ?>"
                             data-pieredze="<?php echo $psi['pieredze']; ?>"
                             data-cena="<?php echo number_format($psi['cena_h'], 2); ?>"
                             data-apraksts="<?php echo htmlspecialchars($psi['apraksts']); ?>"
                             data-attels="<?php echo htmlspecialchars($psi['attels']); ?>">
-                        Vairāk
+                        Skatīt
+                        <i class="fas fa-arrow-right text-xs"></i>
                     </button>
                 </div>
             </div>

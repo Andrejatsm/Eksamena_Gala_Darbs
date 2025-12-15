@@ -31,7 +31,7 @@ $btn_text = isset($_SESSION['user_id']) ? 'Doties uz sistēmu' : 'Sākt lietot b
                 </div>
             </div>
             <div class="relative">
-                <div class="w-full h-96 bg-gray-200 dark:bg-zinc-700 rounded-2xl shadow-2xl animate-pulse flex items-center justify-center">
+                <div class="w-full h-96 bg-gray-200 dark:bg-zinc-700 rounded-2xl shadow-2xl flex items-center justify-center">
                     <span class="text-gray-400 dark:text-gray-500 font-bold text-xl"><img src="Images/psih8.png"></span>
                 </div>
             </div>

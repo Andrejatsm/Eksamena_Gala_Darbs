@@ -2,9 +2,7 @@
 session_start();
 require 'db.php';
 
-// 1. VISPIRMS LOĢIKA (Pirms jebkāda HTML)
-
-// Ja lietotājs jau ir ielogojies, sūtam uz dashboard
+// 1. VISPIRMS LOĢIKA (Pirms Header)
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit();
@@ -15,7 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $lietotajvards = trim($_POST['lietotajvards']);
     $parole = $_POST['parole'];
 
-    // Izmantojam prepared statements drošībai
     $stmt = $conn->prepare("SELECT id, vards, parole FROM users WHERE lietotajvards = ?");
     $stmt->bind_param("s", $lietotajvards);
     $stmt->execute();
@@ -37,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 }
 
-// 2. TIKAI TAGAD IELĀDĒJAM HEADER (jo tas satur HTML)
+// 2. TAGAD HEADER
 require 'header.php';
 ?>
 
@@ -48,39 +45,37 @@ require 'header.php';
                 Ielogoties
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                Vai <a href="register.php" class="font-medium text-primary hover:text-green-500">izveidot jaunu profilu</a>
+                Vai <a href="register.php" class="font-medium text-primary hover:text-green-500 transition">izveidot jaunu profilu</a>
             </p>
         </div>
 
         <?php if(!empty($error)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline"><?php echo $error; ?></span>
+            <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm text-center">
+                <?php echo $error; ?>
             </div>
         <?php endif; ?>
 
         <?php if(isset($_GET['success'])): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline">Reģistrācija veiksmīga! Lūdzu, ielogojieties.</span>
+            <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg text-sm text-center">
+                Reģistrācija veiksmīga! Lūdzu, ielogojieties.
             </div>
         <?php endif; ?>
 
         <form class="mt-8 space-y-6" method="POST">
-            <div class="rounded-md shadow-sm -space-y-px">
+            <div class="space-y-4">
                 <div>
-                    <label for="lietotajvards" class="sr-only">Lietotājvārds</label>
-                    <input id="lietotajvards" name="lietotajvards" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Lietotājvārds">
+                    <label for="lietotajvards" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lietotājvārds</label>
+                    <input id="lietotajvards" name="lietotajvards" type="text" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition" placeholder="Ievadiet lietotājvārdu">
                 </div>
                 <div>
-                    <label for="parole" class="sr-only">Parole</label>
-                    <input id="parole" name="parole" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Parole">
+                    <label for="parole" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parole</label>
+                    <input id="parole" name="parole" type="password" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition" placeholder="••••••••">
                 </div>
             </div>
 
-            <div>
-                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition">
-                    Ielogoties
-                </button>
-            </div>
+            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:scale-[1.02]">
+                Ielogoties
+            </button>
         </form>
     </div>
 </div>
