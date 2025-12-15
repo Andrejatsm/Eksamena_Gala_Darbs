@@ -2,6 +2,8 @@
 session_start();
 require 'db.php';
 
+// 1. VISPIRMS LOĢIKA (Pirms jebkāda HTML)
+
 // Ja lietotājs jau ir ielogojies, sūtam uz dashboard
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
@@ -34,68 +36,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt->close();
 }
+
+// 2. TIKAI TAGAD IELĀDĒJAM HEADER (jo tas satur HTML)
+require 'header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="lv">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ielogoties - Saprasts</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="d-flex flex-column min-vh-100">
+<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-zinc-900">
+    <div class="max-w-md w-full space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700">
+        <div>
+            <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                Ielogoties
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                Vai <a href="register.php" class="font-medium text-primary hover:text-green-500">izveidot jaunu profilu</a>
+            </p>
+        </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.php">Saprasts</a>
-            <div class="d-flex align-items-center">
-                <div class="navbar-nav">
-                    <a class="nav-link" href="register.php">Reģistrēties</a>
+        <?php if(!empty($error)): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline"><?php echo $error; ?></span>
+            </div>
+        <?php endif; ?>
+
+        <?php if(isset($_GET['success'])): ?>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">Reģistrācija veiksmīga! Lūdzu, ielogojieties.</span>
+            </div>
+        <?php endif; ?>
+
+        <form class="mt-8 space-y-6" method="POST">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="lietotajvards" class="sr-only">Lietotājvārds</label>
+                    <input id="lietotajvards" name="lietotajvards" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Lietotājvārds">
+                </div>
+                <div>
+                    <label for="parole" class="sr-only">Parole</label>
+                    <input id="parole" name="parole" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Parole">
                 </div>
             </div>
-        </div>
-    </nav>
 
-    <div class="container mt-5 flex-grow-1 d-flex justify-content-center">
-        <div class="card shadow-sm card-form card-form--login">
-            <div class="card-body p-4">
-                <h3 class="card-title text-center mb-4">Ielogoties</h3>
-                
-                <?php if(!empty($error)): ?>
-                    <div class="alert alert-danger"><?php echo $error; ?></div>
-                <?php endif; ?>
-
-                <?php if(isset($_GET['success'])): ?>
-                    <div class="alert alert-success">Reģistrācija veiksmīga! Lūdzu, ielogojieties.</div>
-                <?php endif; ?>
-
-                <form method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Lietotājvārds</label>
-                        <input type="text" name="lietotajvards" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Parole</label>
-                        <input type="password" name="parole" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Ielogoties</button>
-                </form>
-                <div class="text-center mt-3">
-                    <small>Nav profila? <a href="register.php">Reģistrēties</a></small>
-                </div>
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition">
+                    Ielogoties
+                </button>
             </div>
-        </div>
+        </form>
     </div>
+</div>
 
-    <footer class="mt-auto py-3 text-center">
-        <div class="container">
-            <p class="mb-0">&copy; <?php echo date("Y"); ?> Saprasts. Visas tiesības aizsargātas.</p>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+<?php require 'footer.php'; ?>

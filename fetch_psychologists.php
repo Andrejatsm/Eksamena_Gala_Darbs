@@ -1,25 +1,21 @@
 <?php
 require 'db.php';
 
-// Iegūstam meklēšanas frāzi un lapas numuru
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 3; // Cik psihologus rādīt vienā lapā
+$limit = 3; 
 $offset = ($page - 1) * $limit;
 
-// SQL vaicājums ar filtru un pagināciju
 $whereSQL = "";
 if (!empty($search)) {
     $whereSQL = "WHERE vards_uzvards LIKE '%$search%' OR specializacija LIKE '%$search%'";
 }
 
-// 1. Iegūstam kopējo skaitu (priekš paginācijas pogām)
 $total_sql = "SELECT COUNT(*) as count FROM psychologists $whereSQL";
 $total_result = $conn->query($total_sql);
 $total_rows = $total_result->fetch_assoc()['count'];
 $total_pages = ceil($total_rows / $limit);
 
-// 2. Iegūstam konkrētos datus
 $sql = "SELECT * FROM psychologists $whereSQL LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
 
@@ -31,31 +27,39 @@ if ($result && $result->num_rows > 0) {
     }
 }
 
-// Ģenerējam HTML atbildi
 if (empty($psihologi)) {
-    echo '<div class="col-12 text-center py-5"><div class="alert alert-info">Netika atrasts neviens psihologs.</div></div>';
+    echo '<div class="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">Netika atrasts neviens psihologs.</div>';
 } else {
     foreach ($psihologi as $psi) {
+        // Tailwind Kartīte
         ?>
-        <div class="col-md-4 col-sm-6 d-flex align-items-stretch">
-            <div class="card mb-4 shadow-sm w-100">
-                <img src="<?php echo htmlspecialchars($psi['attels']); ?>" class="card-img-top" alt="Psihologs" style="height: 250px; object-fit: cover;">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold"><?php echo htmlspecialchars($psi['vards_uzvards']); ?></h5>
-                    <h6 class="card-subtitle mb-2 text-muted"><?php echo htmlspecialchars($psi['specializacija']); ?></h6>
-                    <p class="card-text mb-1">Pieredze: <strong><?php echo $psi['pieredze']; ?></strong> gadi</p>
-                    <p class="card-text mb-3">Cena: <strong><?php echo number_format($psi['cena_h'], 2); ?></strong> EUR/h</p>
+        <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full">
+            <div class="relative h-64 overflow-hidden">
+                <img src="<?php echo htmlspecialchars($psi['attels']); ?>" class="w-full h-full object-cover transform hover:scale-105 transition duration-500" alt="Psihologs">
+            </div>
+            <div class="p-6 flex flex-col flex-grow">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <h5 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($psi['vards_uzvards']); ?></h5>
+                        <p class="text-sm text-primary font-medium"><?php echo htmlspecialchars($psi['specializacija']); ?></p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center text-gray-500 dark:text-gray-400 text-sm mb-4">
+                    <span class="mr-3"><i class="fas fa-briefcase mr-1"></i> <?php echo $psi['pieredze']; ?> gadi</span>
+                </div>
 
-                    <button type="button" class="btn btn-outline-success mt-auto details-btn w-100" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#psychologistModal"
+                <div class="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-700 flex justify-between items-center">
+                    <span class="text-lg font-bold text-gray-900 dark:text-white"><?php echo number_format($psi['cena_h'], 2); ?> €/h</span>
+                    
+                    <button type="button" class="details-btn px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition font-medium text-sm" 
                             data-vards="<?php echo htmlspecialchars($psi['vards_uzvards']); ?>"
                             data-spec="<?php echo htmlspecialchars($psi['specializacija']); ?>"
                             data-pieredze="<?php echo $psi['pieredze']; ?>"
                             data-cena="<?php echo number_format($psi['cena_h'], 2); ?>"
                             data-apraksts="<?php echo htmlspecialchars($psi['apraksts']); ?>"
                             data-attels="<?php echo htmlspecialchars($psi['attels']); ?>">
-                        Vairāk informācijas
+                        Vairāk
                     </button>
                 </div>
             </div>
@@ -64,6 +68,5 @@ if (empty($psihologi)) {
     }
 }
 
-// Paginācijas dati (paslēpti, lai JS tos nolasītu)
 echo '<div id="pagination-data" style="display:none;" data-total-pages="' . $total_pages . '" data-current-page="' . $page . '"></div>';
 ?>

@@ -3,43 +3,65 @@ $pageTitle = "Privātuma Politika";
 require 'header.php'; 
 ?>
 
-<div class="container mt-5 flex-grow-1">
-    <h2 class="mb-4 fw-bold">Privātuma Politika</h2>
+<div class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
     
-    <div id="privacy-policy-text" class="card p-4 shadow-sm">
-        <p class="lead mb-4">Mūsu mērķis ir nodrošināt caurspīdīgu un drošu datu apstrādi. Šajā dokumentā aprakstīts, kā "Saprasts" ievāc, izmanto un aizsargā jūsu personas datus.</p>
+    <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-8 text-center">
+        Privātuma Politika
+    </h1>
+    
+    <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-100 dark:border-zinc-700 p-8 md:p-10">
+        
+        <p class="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+            Mūsu mērķis ir nodrošināt caurspīdīgu un drošu datu apstrādi. Šajā dokumentā aprakstīts, kā "Saprasts" ievāc, izmanto un aizsargā jūsu personas datus.
+        </p>
 
-        <hr class="mb-4">
+        <hr class="my-8 border-gray-200 dark:border-zinc-700">
 
-        <h4 class="fw-bold text-success">1. Ievāktie dati</h4>
-        <p>Lai nodrošinātu pilnvērtīgu pakalpojumu sniegšanu un autorizāciju sistēmā, reģistrācijas brīdī mēs ievācam šādu informāciju:</p>
-        <ul>
-            <li><strong>Personas identifikācija:</strong> Vārds, Uzvārds;</li>
-            <li><strong>Kontaktinformācija:</strong> E-pasta adrese, Tālruņa numurs;</li>
-            <li><strong>Piekļuves dati:</strong> Lietotājvārds un parole (tiek glabāta šifrētā veidā).</li>
+        <h3 class="text-xl font-bold text-primary mb-3">1. Ievāktie dati</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-3">
+            Lai nodrošinātu pilnvērtīgu pakalpojumu sniegšanu un autorizāciju sistēmā, reģistrācijas brīdī mēs ievācam šādu informāciju:
+        </p>
+        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2 mb-6 ml-2">
+            <li><strong class="text-gray-900 dark:text-white">Personas identifikācija:</strong> Vārds, Uzvārds;</li>
+            <li><strong class="text-gray-900 dark:text-white">Kontaktinformācija:</strong> E-pasta adrese, Tālruņa numurs;</li>
+            <li><strong class="text-gray-900 dark:text-white">Piekļuves dati:</strong> Lietotājvārds un parole (tiek glabāta šifrētā veidā).</li>
         </ul>
 
-        <h4 class="fw-bold text-success mt-4">2. Datu drošība un GDPR</h4>
-        <p>Mēs apstrādājam datus saskaņā ar <strong>GDPR (Vispārīgā datu aizsardzības regula)</strong> prasībām un Latvijas Republikas likumdošanu.</p>
-        <ul>
-            <li>Visi lietotāju dati tiek pārsūtīti, izmantojot drošu <strong>HTTPS</strong> protokolu.</li>
-            <li>Paroles datubāzē tiek glabātas tikai <strong>šifrētā (hash) formātā</strong>, kas nozīmē, ka pat sistēmas administratori tās nevar redzēt.</li>
+        <h3 class="text-xl font-bold text-primary mb-3 mt-8">2. Datu drošība un GDPR</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-3">
+            Mēs apstrādājam datus saskaņā ar <strong class="text-gray-900 dark:text-white">GDPR (Vispārīgā datu aizsardzības regula)</strong> prasībām un Latvijas Republikas likumdošanu.
+        </p>
+        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2 mb-6 ml-2">
+            <li>Visi lietotāju dati tiek pārsūtīti, izmantojot drošu <strong class="text-gray-900 dark:text-white">HTTPS</strong> protokolu.</li>
+            <li>Paroles datubāzē tiek glabātas tikai <strong class="text-gray-900 dark:text-white">šifrētā (hash) formātā</strong>, kas nozīmē, ka pat sistēmas administratori tās nevar redzēt.</li>
             <li>Mēs neizpaužam jūsu datus trešajām pusēm bez jūsu piekrišanas, izņemot gadījumus, kad to pieprasa likums.</li>
         </ul>
         
-        <h4 class="fw-bold text-success mt-4">3. Maksājumu drošība (Stripe)</h4>
-        <p>Visi maksājumi par psihologu konsultācijām tiek apstrādāti, izmantojot sertificētu maksājumu apstrādātāju <strong>Stripe</strong>.</p>
-        <p>Vietne "Saprasts" <strong>neievāc, neuzglabā un neapstrādā</strong> jūsu kredītkartes vai debetkartes datus savos serveros. Visa finanšu informācija tiek ievadīta tieši Stripe drošajā vidē.</p>
+        <h3 class="text-xl font-bold text-primary mb-3 mt-8">3. Maksājumu drošība (Stripe)</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-3">
+            Visi maksājumi par psihologu konsultācijām tiek apstrādāti, izmantojot sertificētu maksājumu apstrādātāju <strong class="text-gray-900 dark:text-white">Stripe</strong>.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Vietne "Saprasts" <strong class="text-gray-900 dark:text-white">neievāc, neuzglabā un neapstrādā</strong> jūsu kredītkartes vai debetkartes datus savos serveros. Visa finanšu informācija tiek ievadīta tieši Stripe drošajā vidē.
+        </p>
         
-        <h4 class="fw-bold text-success mt-4">4. Konfidencialitāte</h4>
-        <p>Psiholoģiskā atbalsta būtība ir uzticēšanās. Konsultāciju saturs (video zvani, čata sarakste) ir stingri konfidenciāls starp klientu un speciālistu.</p>
+        <h3 class="text-xl font-bold text-primary mb-3 mt-8">4. Konfidencialitāte</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Psiholoģiskā atbalsta būtība ir uzticēšanās. Konsultāciju saturs (video zvani, čata sarakste) ir stingri konfidenciāls starp klientu un speciālistu.
+        </p>
 
-        <h4 class="fw-bold text-success mt-4">5. Sīkdatnes (Cookies)</h4>
-        <p>Mēs izmantojam sesijas sīkdatnes (Session Cookies), lai nodrošinātu jūsu autorizāciju sistēmā (ielogošanos). Tās ir nepieciešamas sistēmas darbībai.</p>
+        <h3 class="text-xl font-bold text-primary mb-3 mt-8">5. Sīkdatnes (Cookies)</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Mēs izmantojam sesijas sīkdatnes (Session Cookies), lai nodrošinātu jūsu autorizāciju sistēmā (ielogošanos). Tās ir nepieciešamas sistēmas darbībai.
+        </p>
 
-        <div class="mt-5 p-3 bg-light border rounded text-dark">
-            <small>Ja jums ir jautājumi par jūsu datu apstrādi vai vēlaties pieprasīt datu dzēšanu, lūdzu, sazinieties ar mums, izmantojot sadaļu "Kontakti".</small>
+        <div class="mt-10 p-5 bg-gray-50 dark:bg-zinc-700/50 border border-gray-200 dark:border-zinc-600 rounded-xl flex items-start gap-3">
+            <i class="fas fa-info-circle text-primary mt-1"></i>
+            <small class="text-gray-500 dark:text-gray-400 text-sm">
+                Ja jums ir jautājumi par jūsu datu apstrādi vai vēlaties pieprasīt datu dzēšanu, lūdzu, sazinieties ar mums, izmantojot sadaļu "Kontakti" lapas apakšā.
+            </small>
         </div>
+
     </div>
 </div>
 
