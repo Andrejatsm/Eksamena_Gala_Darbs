@@ -17,6 +17,7 @@ $btn_text = isset($_SESSION['user_id']) ? 'Doties uz sistēmu' : 'Sākt lietot b
                 <p class="mt-3 text-base text-gray-500 dark:text-gray-400 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                     "Saprasts" savieno tevi ar sertificētiem psihologiem ātrai un ērtai palīdzībai. Anonīmi, droši un tev ērtā laikā.
                 </p>
+                
                 <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start gap-4">
                     <div class="rounded-md shadow">
                         <a href="<?php echo $btn_link; ?>" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-primary hover:bg-green-600 md:py-4 md:text-lg transition transform hover:scale-105">
@@ -29,10 +30,20 @@ $btn_text = isset($_SESSION['user_id']) ? 'Doties uz sistēmu' : 'Sākt lietot b
                         </a>
                     </div>
                 </div>
+
+                <div class="mt-6 sm:flex sm:justify-center lg:justify-start">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Esi speciālists? 
+                        <a href="login_specialist.php" class="font-medium text-primary hover:text-green-600 underline transition ml-1">
+                            Piekļūt speciālista panelim
+                        </a>
+                    </p>
+                </div>
+
             </div>
             <div class="relative">
-                <div class="w-full h-96 bg-gray-200 dark:bg-zinc-700 rounded-2xl shadow-2xl flex items-center justify-center">
-                    <span class="text-gray-400 dark:text-gray-500 font-bold text-xl"><img src="Images/psih8.png"></span>
+                <div class="w-full h-96 bg-gray-200 dark:bg-zinc-700 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden">
+                    <img src="Images/psih8.png" alt="Saprasts ilustrācija" class="w-full h-full object-cover">
                 </div>
             </div>
         </div>

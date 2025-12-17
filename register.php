@@ -1,7 +1,17 @@
 <?php
+session_start(); // Ja nav jau startēta db.php
 require 'db.php';
 
-// 1. VISPIRMS LOĢIKA (Pirms Header)
+
+if (isset($_SESSION['user_id'])) {
+    header("Location: dashboard.php");
+    exit();
+}
+if (isset($_SESSION['psihologs_id'])) {
+    header("Location: specialist_dashboard.php");
+    exit();
+}
+
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vards = trim($_POST['vards']);
@@ -10,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $lietotajvards = trim($_POST['lietotajvards']);
     $parole = password_hash($_POST['parole'], PASSWORD_DEFAULT);
 
-    // Pārbaudām, vai lietotājvārds jau eksistē
+    // Pārbaude, vai lietotājvārds vai e-pasts jau eksistē
     $check = $conn->prepare("SELECT id FROM users WHERE lietotajvards = ? OR epasts = ?");
     $check->bind_param("ss", $lietotajvards, $epasts);
     $check->execute();

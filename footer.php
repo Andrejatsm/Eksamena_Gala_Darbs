@@ -24,7 +24,7 @@
     <div id="chat-container" class="hidden fixed bottom-24 right-6 z-50 w-80 md:w-96 h-[500px] bg-white dark:bg-zinc-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-700 flex flex-col overflow-hidden transition-all duration-300">
         <div class="bg-primary p-4 flex justify-between items-center text-white shadow-sm">
             <div class="font-bold flex items-center gap-2">
-                <i class="fas fa-robot"></i> AI Aģents
+                <i class="fas fa-robot"></i> AI Aģents (nepilnīgs)
             </div>
             <button id="chat-close-btn" class="hover:text-gray-200 focus:outline-none transition">
                 <i class="fas fa-times"></i>

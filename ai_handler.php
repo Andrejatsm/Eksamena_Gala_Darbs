@@ -22,10 +22,8 @@ if ($result) {
 }
 
 // TAVA API ATSLĒGA
-$apiKey = 'AIzaSyBpYXI6x2fkNNSGDUk4FbI_L0qFhg-FsVY'; 
+$apiKey = 'AIzaSyABkRLH7hJExQCMXA4OMwOjzjgNPzMcIIc'; 
 
-// --- ŠEIT IR GALVENĀS IZMAIŅAS (Gudrāks Prompts) ---
-// Mēs iedodam AI "kontekstu" par lapas saitēm un noteikumiem.
 $prompt = "
 Tu esi vietnes 'Saprasts' virtuālais asistents.
 Tavā rīcībā ir šāda informācija:
@@ -81,7 +79,6 @@ $json = json_decode($response, true);
 
 // Kļūdu apstrāde
 if (isset($json['error'])) {
-    // Ja modelis pārslogots, pasakām to lietotājam saprotamāk
     if (strpos($json['error']['message'], 'overloaded') !== false) {
         echo json_encode(['reply' => 'AI serveri pašlaik ir pārslogoti. Lūdzu, mēģiniet vēlreiz pēc minūtes.']);
     } else {

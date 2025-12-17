@@ -2,9 +2,17 @@
 session_start();
 require 'db.php';
 
-// 1. VISPIRMS LOĢIKA (Pirms Header)
+
+// Ja jau ielogojies kā lietotājs -> ej uz sistēmu
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
+    exit();
+}
+
+// JAUNS: Ja esi ielogojies kā psihologs -> ej uz speciālista paneli
+// Tu nevari būt ielogojies abos vienlaicīgi šajā loģikā.
+if (isset($_SESSION['psihologs_id'])) {
+    header("Location: specialist_dashboard.php");
     exit();
 }
 
@@ -34,11 +42,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 }
 
-// 2. TAGAD HEADER
 require 'header.php';
 ?>
 
-<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-zinc-900">
+<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-zinc-900 transition-colors duration-300">
     <div class="max-w-md w-full space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700">
         <div>
             <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
