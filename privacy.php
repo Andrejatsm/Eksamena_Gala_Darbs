@@ -3,13 +3,13 @@ $pageTitle = "Privātuma Politika";
 require 'header.php'; 
 ?>
 
-<div class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+<div class="flex-grow ui-container py-12">
     
     <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-8 text-center">
         Privātuma Politika
     </h1>
     
-    <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-100 dark:border-zinc-700 p-8 md:p-10">
+    <div class="ui-card p-8 md:p-10">
         
         <p class="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
             Mūsu mērķis ir nodrošināt caurspīdīgu un drošu datu apstrādi. Šajā dokumentā aprakstīts, kā "Saprasts" ievāc, izmanto un aizsargā jūsu personas datus.
@@ -55,7 +55,7 @@ require 'header.php';
             Mēs izmantojam sesijas sīkdatnes (Session Cookies), lai nodrošinātu jūsu autorizāciju sistēmā (ielogošanos). Tās ir nepieciešamas sistēmas darbībai.
         </p>
 
-        <div class="mt-10 p-5 bg-gray-50 dark:bg-zinc-700/50 border border-gray-200 dark:border-zinc-600 rounded-xl flex items-start gap-3">
+        <div class="mt-10 p-5 bg-white/60 dark:bg-zinc-700/50 border border-gray-200 dark:border-zinc-600 rounded-xl flex items-start gap-3">
             <i class="fas fa-info-circle text-primary mt-1"></i>
             <small class="text-gray-500 dark:text-gray-400 text-sm">
                 Ja jums ir jautājumi par jūsu datu apstrādi vai vēlaties pieprasīt datu dzēšanu, lūdzu, sazinieties ar mums, izmantojot sadaļu "Kontakti" lapas apakšā.

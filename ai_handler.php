@@ -12,12 +12,15 @@ if (empty($userMessage)) {
 }
 
 // 2. Iegūstam ārstus kontekstam
-$sql = "SELECT vards_uzvards, specializacija, apraksts FROM psychologists";
+$sql = "SELECT p.full_name, p.specialization, p.description
+        FROM psychologist_profiles p
+        INNER JOIN accounts a ON a.id = p.account_id
+        WHERE a.role = 'psychologist' AND a.status = 'active' AND p.approved_at IS NOT NULL";
 $result = $conn->query($sql);
 $doctors_text = "";
 if ($result) {
     while($row = $result->fetch_assoc()) {
-        $doctors_text .= $row['vards_uzvards'] . " (" . $row['specializacija'] . "), ";
+        $doctors_text .= $row['full_name'] . " (" . $row['specialization'] . "), ";
     }
 }
 
@@ -25,21 +28,39 @@ if ($result) {
 $apiKey = 'AIzaSyABkRLH7hJExQCMXA4OMwOjzjgNPzMcIIc'; 
 
 $prompt = "
-Tu esi vietnes 'Saprasts' virtuālais asistents.
-Tavā rīcībā ir šāda informācija:
-1. Pieejamie psihologi: [$doctors_text]
-2. Vietnes saites:
-   - Reģistrācija: <a href='register.php'>register.php</a>
-   - Ielogošanās: <a href='login.php'>login.php</a>
-   - Sākumlapa: <a href='index.php'>index.php</a>
+Tu esi 'Saprasts' virtuālais asistents - draudzīgs un profesionāls AI palīgs psihiskās veselības platformā.
 
-Tavi uzdevumi:
-- Ja lietotājs sūdzas par pašsajūtu, iesaki KONKRĒTU speciālistu no saraksta.
-- Ja lietotājs jautā, kā pieteikties, reģistrēties vai ielogoties, iedod atbilstošo saiti no saraksta.
-- Atbildi īsi, laipni un latviski vari arī angliski.
-- Nekad neizdomā saites, kas nav sarakstā.
+**Tava loma:**
+- Palīdzēt lietotājiem atrast piemērotu psihologu
+- Atbildēt uz jautājumiem par platformu
+- Sniegt atbalstu emocionālos jautājumos
+- Veicināt pozitīvu un konfidenciālu komunikāciju
 
-Lietotāja jautājums: '$userMessage'
+**Pieejamie psihologi:**
+" . $doctors_text . "
+
+**Platformas iespējas:**
+- Anonīmas konsultācijas
+- Tiešsaistes un klātienes tikšanās
+- Pašnovērtējuma testi
+- Raksti un resursi
+- 24/7 AI atbalsts
+
+**Saites:**
+- Reģistrācija: register.php
+- Ielogošanās: login.php
+- Sākumlapa: index.php
+- Speciālistu meklēšana: fetch_psychologists.php
+
+**Norādījumi:**
+- Atbildi latviski, ja lietotājs raksta latviski
+- Būt laipnam, empātiskam un profesionālam
+- Ja lietotājs izsaka emocionālas grūtības, iesaki konkrētu speciālistu no saraksta
+- Piedāvā reģistrēties vai ielogoties, ja nepieciešams
+- Nekad neizdomā saites vai informāciju
+- Ja nevari palīdzēt, piedāvā sazināties ar administratoru
+
+Lietotāja ziņojums: '$userMessage'
 ";
 
 $data = [

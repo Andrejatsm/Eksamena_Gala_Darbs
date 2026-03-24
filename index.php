@@ -1,110 +1,199 @@
-<?php 
+﻿<?php
 $pageTitle = "Saprasts - Sākums";
-require 'header.php'; 
+require 'header.php';
 
-$btn_link = isset($_SESSION['user_id']) ? 'dashboard.php' : 'login.php';
-$btn_text = isset($_SESSION['user_id']) ? 'Doties uz sistēmu' : 'Sākt lietot bez maksas';
+$btn_link = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'dashboard.php' : 'login.php';
+$btn_text = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'Doties uz sistēmu' : 'Atrodi savu psihologu';
 ?>
 
-<section class="relative bg-gradient-to-br from-green-50 to-blue-50 dark:from-zinc-900 dark:to-zinc-800 pt-20 pb-24 overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div class="text-center lg:text-left">
-                <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-                    <span class="block">Tava drošā vieta</span>
-                    <span class="block text-primary">emocionālajam atbalstam</span>
+<!-- Main Content -->
+<main class="pt-0">
+    
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center px-6 overflow-hidden bg-white dark:bg-zinc-900">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent dark:from-primary/10"></div>
+        
+        <div class="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center relative z-10">
+            <!-- Left Content -->
+            <div>
+                <div class="inline-block px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary text-xs font-bold tracking-widest uppercase mb-6 border border-primary/30">
+                    Tava labsajūta ir prioritāte
+                </div>
+                
+                <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-8">
+                    Atrodi mieru un <span class="text-primary italic">profesionālu</span> atbalstu
                 </h1>
-                <p class="mt-3 text-base text-gray-500 dark:text-gray-400 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                    "Saprasts" savieno tevi ar sertificētiem psihologiem ātrai un ērtai palīdzībai. Anonīmi, droši un tev ērtā laikā.
+                
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-lg mb-10 leading-relaxed">
+                    Personalizēta pieeja jūsu garīgajai veselībai. Mūsu platforma savieno jūs ar sertificētiem psihologiem, lai palīdzētu pārvarēt dzīves izaicinājumus.
                 </p>
                 
-                <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start gap-4">
-                    <div class="rounded-md shadow">
-                        <a href="<?php echo $btn_link; ?>" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-primary hover:bg-green-600 md:py-4 md:text-lg transition transform hover:scale-105">
-                            <?php echo $btn_text; ?>
-                        </a>
-                    </div>
-                    <div class="mt-3 sm:mt-0 sm:ml-3">
-                        <a href="#how-it-works" class="w-full flex items-center justify-center px-8 py-3 border border-gray-300 dark:border-zinc-600 text-base font-medium rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 md:py-4 md:text-lg transition">
-                            Uzzināt vairāk
-                        </a>
-                    </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="<?php echo $btn_link; ?>" class="px-10 py-4 bg-gradient-to-r from-primary to-primaryHover text-white rounded-full font-bold text-lg flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/30 transition-all transform hover:scale-105">
+                        <?php echo $btn_text; ?>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#how-it-works" class="px-10 py-4 bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white rounded-full font-bold text-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors border border-gray-300 dark:border-zinc-700">
+                        Kā tas darbojas
+                    </a>
                 </div>
-
-                <div class="mt-6 sm:flex sm:justify-center lg:justify-start">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Esi speciālists? 
-                        <a href="login_specialist.php" class="font-medium text-primary hover:text-green-600 underline transition ml-1">
-                            Piekļūt speciālista panelim
-                        </a>
-                    </p>
-                </div>
-
             </div>
-            <div class="relative">
-                <div class="w-full h-96 bg-gray-200 dark:bg-zinc-700 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden">
-                    <img src="Images/psih8.png" alt="Saprasts ilustrācija" class="w-full h-full object-cover">
+            
+            <!-- Right Image -->
+            <div class="relative lg:h-[600px] hidden lg:block">
+                <div class="absolute inset-0 bg-primary/10 rounded-2xl transform scale-105"></div>
+                <img src="Images/psih8.png" alt="Profesionāla psihologa konsultācija" class="relative z-10 w-full h-full object-cover rounded-2xl shadow-2xl">
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 bg-gray-50 dark:bg-zinc-800/50 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Kā tas darbojas</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">Trīs vienkārši soļi līdz labākai pašsajūtai un iekšējam mieram.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Step 1 -->
+                <div class="p-8 bg-white dark:bg-zinc-800 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 dark:border-zinc-700">
+                    <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
+                        <i class="fas fa-search text-2xl text-primary"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">1. Solis</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Izvēlies speciālistu</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Pārlūko mūsu sertificēto speciālistu profilus un atrodi sev piemērotāko pēc specializācijas un pieredzes.</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="p-8 bg-white dark:bg-zinc-800 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 dark:border-zinc-700">
+                    <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
+                        <i class="fas fa-calendar text-2xl text-primary"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">2. Solis</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Piesaki vizīti</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Izvēlies ērtāko laiku tiešsaistes vai klātienes konsultācijai un rezervē to dažu sekunžu laikā.</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="p-8 bg-white dark:bg-zinc-800 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 dark:border-zinc-700">
+                    <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
+                        <i class="fas fa-comments text-2xl text-primary"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">3. Solis</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Sāc sarunu</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Saņem profesionālu atbalstu drošā un konfidenciālā vidē, lai kur tu atrastos.</p>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section id="how-it-works" class="py-16 bg-white dark:bg-zinc-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-            <h2 class="text-base text-primary font-semibold tracking-wide uppercase">Iespējas</h2>
-            <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                Viss nepieciešamais tavai labsajūtai
+    <!-- Featured Specialists Section -->
+    <section class="py-24 px-6 bg-white dark:bg-zinc-900">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+                <div>
+                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Mūsu speciālisti</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Labākie savas jomas eksperti, gatavi jums palīdzēt.</p>
+                </div>
+                <a href="dashboard.php" class="text-primary font-bold flex items-center gap-2 hover:gap-4 transition-all group">
+                    Skatīt visus speciālistus
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <?php
+                require 'db.php';
+                
+                // Fetch featured psychologists
+                $stmt = $conn->prepare("
+                    SELECT p.account_id, p.full_name, p.specialization, p.hourly_rate, p.experience_years,
+                           COUNT(DISTINCT a.id) as total_appointments
+                    FROM psychologist_profiles p
+                    LEFT JOIN appointments a ON p.account_id = a.psychologist_account_id AND a.status = 'approved'
+                    WHERE p.approved_at IS NOT NULL
+                    GROUP BY p.account_id
+                    ORDER BY total_appointments DESC, p.full_name ASC
+                    LIMIT 3
+                ");
+                $stmt->execute();
+                $result = $stmt->get_result();
+                
+                if ($result->num_rows > 0) {
+                    while ($specialist = $result->fetch_assoc()) {
+                        $initials = strtoupper(substr($specialist['full_name'], 0, 1));
+                        $total_appointments = (int)$specialist['total_appointments'];
+                        ?>
+                        <div class="bg-gray-50 dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-700 hover:shadow-lg transition-shadow">
+                            <!-- Image Placeholder -->
+                            <div class="h-80 relative overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                                <div class="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <span class="text-4xl font-bold text-primary"><?php echo $initials; ?></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Info -->
+                            <div class="p-8">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($specialist['full_name']); ?></h3>
+                                        <p class="text-primary text-sm font-semibold"><?php echo htmlspecialchars($specialist['specialization']); ?></p>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-yellow-400">★</span>
+                                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">4.9</span>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-6">
+                                    <?php echo $specialist['experience_years']; ?> gadu pieredze • <?php echo $total_appointments; ?> pacienti
+                                </p>
+                                
+                                <a href="psychologist_profile.php?id=<?php echo (int)$specialist['account_id']; ?>" class="w-full py-3 bg-white dark:bg-zinc-700 text-primary dark:text-primary font-bold rounded-full hover:bg-primary hover:text-white dark:hover:text-white transition-colors border border-primary">
+                                    Profila apskate
+                                </a>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                }
+                ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="py-20 bg-gradient-to-r from-primary to-primaryHover relative overflow-hidden px-6">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl"></div>
+            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl"></div>
+        </div>
+        
+        <div class="max-w-4xl mx-auto relative z-10 text-center">
+            <h2 class="text-4xl lg:text-5xl font-bold text-white mb-4">
+                Vai tu gatavs sākt? 🌟
+            </h2>
+            <p class="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
+                Tūkstošiem cilvēku jau ir atraduši mieru un atbalstu. Jūsu kārta ir šodien.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="register.php" class="px-8 py-4 bg-white text-primary font-bold rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
+                    Reģistrēties bezmaksas
+                </a>
+                <a href="login.php" class="px-8 py-4 bg-white/20 text-white font-bold rounded-full border border-white hover:bg-white/30 transition-colors">
+                    Pierakstīties
+                </a>
+            </div>
+            
+            <p class="text-sm text-white/80 mt-8">
+                💳 Pašreiz ir mīļš periods - slēptā 50% atlaide uz pirmo konsultāciju!
             </p>
         </div>
+    </section>
 
-        <div class="mt-16">
-            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                <div class="pt-6">
-                    <div class="flow-root bg-gray-50 dark:bg-zinc-800 rounded-2xl px-6 pb-8 h-full hover:shadow-lg transition border border-transparent hover:border-primary/30">
-                        <div class="-mt-6">
-                            <div class="inline-flex items-center justify-center p-3 bg-primary rounded-xl shadow-lg">
-                                <i class="fas fa-lock text-white text-xl"></i>
-                            </div>
-                            <h3 class="mt-8 text-lg font-medium text-gray-900 dark:text-white tracking-tight">Droša Autorizācija</h3>
-                            <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
-                                Datu šifrēšana un pilnīga konfidencialitāte. Tavi dati ir drošībā.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-6">
-                    <div class="flow-root bg-gray-50 dark:bg-zinc-800 rounded-2xl px-6 pb-8 h-full hover:shadow-lg transition border border-transparent hover:border-primary/30">
-                        <div class="-mt-6">
-                            <div class="inline-flex items-center justify-center p-3 bg-primary rounded-xl shadow-lg">
-                                <i class="fas fa-search text-white text-xl"></i>
-                            </div>
-                            <h3 class="mt-8 text-lg font-medium text-gray-900 dark:text-white tracking-tight">Gudra Meklēšana</h3>
-                            <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
-                                Atrodi speciālistu pēc pieredzes, tēmas un cenas.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-6">
-                    <div class="flow-root bg-gray-50 dark:bg-zinc-800 rounded-2xl px-6 pb-8 h-full hover:shadow-lg transition border border-transparent hover:border-primary/30">
-                        <div class="-mt-6">
-                            <div class="inline-flex items-center justify-center p-3 bg-primary rounded-xl shadow-lg">
-                                <i class="fas fa-robot text-white text-xl"></i>
-                            </div>
-                            <h3 class="mt-8 text-lg font-medium text-gray-900 dark:text-white tracking-tight">AI Aģents</h3>
-                            <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
-                                Mākslīgais intelekts palīdzēs noteikt piemērotāko speciālistu 24/7.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+</main>
 
 <?php require 'footer.php'; ?>

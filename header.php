@@ -3,22 +3,26 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Nosakām, kurš ir ielogojies (Lietotājs vai Psihologs)
+// Nosakām, kurš ir ielogojies (vienota autorizācija: account_id + role)
 $user_name = '';
 $user_role = '';
 $dashboard_link = 'login.php';
 $is_logged_in = false;
 
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     $is_logged_in = true;
-    $user_name = $_SESSION['vards'];
-    $user_role = 'Lietotājs'; // Klienta loma
-    $dashboard_link = 'dashboard.php';
-} elseif (isset($_SESSION['psihologs_id'])) {
-    $is_logged_in = true;
-    $user_name = $_SESSION['psihologs_vards'];
-    $user_role = 'Psihologs'; // Speciālista loma
-    $dashboard_link = 'specialist_dashboard.php';
+    $user_name = $_SESSION['display_name'] ?? '';
+    $role = $_SESSION['role'];
+    if ($role === 'admin') {
+        $user_role = 'Administrators';
+        $dashboard_link = 'admin_dashboard.php';
+    } elseif ($role === 'psychologist') {
+        $user_role = 'Psihologs';
+        $dashboard_link = 'specialist_dashboard.php';
+    } else {
+        $user_role = 'Lietotājs';
+        $dashboard_link = 'dashboard.php';
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -35,7 +39,14 @@ if (isset($_SESSION['user_id'])) {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#10b981', 
+                        primary: '#356763',
+                        primaryHover: '#285b57',
+                        secondary: '#49655a',
+                        surface: '#fcf9f5',
+                        background: '#fcf9f5',
+                        onSurface: '#32332e',
+                        onSurfaceVariant: '#5f5f5a',
+                        tertiary: '#56625b',
                         dark: {
                             bg: '#121212',
                             card: '#1e1e1e',
@@ -46,21 +57,13 @@ if (isset($_SESSION['user_id'])) {
             }
         }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* Pielāgots slēdža stils */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #10b981;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #10b981;
-        }
-        body { display: flex; flex-direction: column; min-height: 100vh; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-zinc-900 dark:text-gray-100 transition-colors duration-300">
+<body class="bg-surface text-gray-900 dark:bg-zinc-900 dark:text-gray-100 transition-colors duration-300">
 
     <nav class="sticky top-0 z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,10 +105,49 @@ if (isset($_SESSION['user_id'])) {
                                 <ul class="py-2" aria-labelledby="user-menu-button">
                                     <li>
                                         <a href="<?php echo $dashboard_link; ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-columns w-5 text-center mr-2"></i> Sistēma
+                                            <i class="fas fa-columns w-5 text-center mr-2"></i> Panelis
                                         </a>
                                     </li>
                                     <li>
+                                        <a href="user_profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                            <i class="fas fa-user-circle w-5 text-center mr-2"></i> Mans profils
+                                        </a>
+                                    </li>
+                                    
+                                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
+                                    <!-- User-only features -->
+                                    <li>
+                                        <a href="tests.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                            <i class="fas fa-clipboard-list w-5 text-center mr-2"></i> Pašnovērtējuma testi
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="appointments.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                            <i class="fas fa-calendar-check w-5 text-center mr-2"></i> Mani pieraksti
+                                        </a>
+                                    </li>
+                                    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'psychologist'): ?>
+                                    <!-- Psychologist-only features -->
+                                    <li>
+                                        <a href="articles.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                            <i class="fas fa-newspaper w-5 text-center mr-2"></i> Mani raksti
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="availability.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                            <i class="fas fa-clock w-5 text-center mr-2"></i> Pieejamības laiki
+                                        </a>
+                                    </li>
+                                    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                    <!-- Admin-only features -->
+                                    <li>
+                                        <a href="admin_dashboard.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                            <i class="fas fa-cogs w-5 text-center mr-2"></i> Pārvaldība
+                                        </a>
+                                    </li>
+                                    <?php endif; ?>
+                                    
+                                    <li class="border-t border-gray-100 dark:border-zinc-700">
                                         <a href="logout.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-red-400 transition">
                                             <i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> Iziet
                                         </a>
@@ -144,7 +186,19 @@ if (isset($_SESSION['user_id'])) {
                             </div>
                         </div>
                     </div>
-                    <a href="<?php echo $dashboard_link; ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Sistēma</a>
+                    <a href="<?php echo $dashboard_link; ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Panelis</a>
+                    <a href="user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mans profils</a>
+                    
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
+                    <a href="tests.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pašnovērtējuma testi</a>
+                    <a href="appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani pieraksti</a>
+                    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'psychologist'): ?>
+                    <a href="articles.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani raksti</a>
+                    <a href="availability.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pieejamības laiki</a>
+                    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                    <a href="admin_dashboard.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pārvaldība</a>
+                    <?php endif; ?>
+                    
                     <a href="logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10">Iziet</a>
                  <?php else: ?>
                     <a href="login.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ielogoties</a>

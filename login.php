@@ -2,17 +2,16 @@
 session_start();
 require 'db.php';
 
-
-// Ja jau ielogojies kā lietotājs -> ej uz sistēmu
-if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
-    exit();
-}
-
-// JAUNS: Ja esi ielogojies kā psihologs -> ej uz speciālista paneli
-// Tu nevari būt ielogojies abos vienlaicīgi šajā loģikā.
-if (isset($_SESSION['psihologs_id'])) {
-    header("Location: specialist_dashboard.php");
+// Ja jau ielogojies -> ej uz atbilstošo paneli
+if (isset($_SESSION['account_id'], $_SESSION['role'])) {
+    $role = $_SESSION['role'];
+    if ($role === 'admin') {
+        header("Location: admin_dashboard.php");
+    } elseif ($role === 'psychologist') {
+        header("Location: specialist_dashboard.php");
+    } else {
+        header("Location: dashboard.php");
+    }
     exit();
 }
 
@@ -21,20 +20,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $lietotajvards = trim($_POST['lietotajvards']);
     $parole = $_POST['parole'];
 
-    $stmt = $conn->prepare("SELECT id, vards, parole FROM users WHERE lietotajvards = ?");
+    $stmt = $conn->prepare("SELECT id, password_hash, role, status FROM accounts WHERE username = ?");
     $stmt->bind_param("s", $lietotajvards);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        if (password_verify($parole, $row['parole'])) {
-            $_SESSION['user_id'] = $row['id'];
-            $_SESSION['vards'] = $row['vards'];
-            header("Location: dashboard.php");
-            exit();
-        } else {
+        if (!password_verify($parole, $row['password_hash'])) {
             $error = "Nepareiza parole!";
+        } elseif ($row['status'] !== 'active') {
+            $error = match($row['status']) {
+                'pending' => 'Jūsu profils vēl nav apstiprināts.',
+                'rejected' => 'Jūsu pieteikums tika noraidīts.',
+                'disabled' => 'Profils ir deaktivizēts.',
+                default => 'Nav atļauts ielogoties.',
+            };
+        } else {
+            $accountId = (int)$row['id'];
+            $role = $row['role'];
+
+            $_SESSION['account_id'] = $accountId;
+            $_SESSION['role'] = $role;
+
+            // Display name
+            $displayName = $lietotajvards;
+            if ($role === 'psychologist') {
+                $s2 = $conn->prepare("SELECT full_name FROM psychologist_profiles WHERE account_id = ?");
+                $s2->bind_param("i", $accountId);
+                $s2->execute();
+                $r2 = $s2->get_result();
+                if ($p = $r2->fetch_assoc()) $displayName = $p['full_name'];
+                $s2->close();
+            } elseif ($role === 'user') {
+                $s2 = $conn->prepare("SELECT first_name FROM user_profiles WHERE account_id = ?");
+                $s2->bind_param("i", $accountId);
+                $s2->execute();
+                $r2 = $s2->get_result();
+                if ($p = $r2->fetch_assoc()) $displayName = $p['first_name'];
+                $s2->close();
+            }
+            $_SESSION['display_name'] = $displayName;
+
+            if ($role === 'admin') {
+                header("Location: admin_dashboard.php");
+            } elseif ($role === 'psychologist') {
+                header("Location: specialist_dashboard.php");
+            } else {
+                header("Location: dashboard.php");
+            }
+            exit();
         }
     } else {
         $error = "Lietotājs nav atrasts!";
@@ -45,14 +80,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 require 'header.php';
 ?>
 
-<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-zinc-900 transition-colors duration-300">
+<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-surface dark:bg-zinc-900 transition-colors duration-300">
     <div class="max-w-md w-full space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700">
         <div>
             <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
                 Ielogoties
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                Vai <a href="register.php" class="font-medium text-primary hover:text-green-500 transition">izveidot jaunu profilu</a>
+                Vai <a href="register.php" class="font-medium text-primary hover:text-primaryHover transition">izveidot jaunu profilu</a>
             </p>
         </div>
 
@@ -80,7 +115,7 @@ require 'header.php';
                 </div>
             </div>
 
-            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:scale-[1.02]">
+            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-primary hover:bg-primaryHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:scale-[1.02] shadow-lg shadow-primary/20">
                 Ielogoties
             </button>
         </form>

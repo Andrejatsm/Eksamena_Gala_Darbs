@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function renderPagination(totalPages, currentPage) {
             let buttons = '';
             const baseClass = "px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-zinc-800 dark:border-zinc-700 dark:text-gray-400 dark:hover:bg-zinc-700 dark:hover:text-white transition";
-            const activeClass = "px-3 py-2 leading-tight text-white bg-primary border border-primary hover:bg-green-600 hover:text-white dark:border-zinc-700 dark:bg-zinc-700 dark:text-white transition";
+            const activeClass = "px-3 py-2 leading-tight text-white bg-primary border border-primary hover:bg-primaryHover hover:text-white dark:border-zinc-700 dark:bg-zinc-700 dark:text-white transition";
 
             // Prev
             buttons += `<li><a href="#" onclick="changePage(${currentPage - 1}); return false;" class="${baseClass} rounded-l-lg ${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}">Atpakaļ</a></li>`;
@@ -172,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const apraksts = btn.getAttribute('data-apraksts');
                 const cena = btn.getAttribute('data-cena');
                 const attels = btn.getAttribute('data-attels');
+                const psychologistId = btn.getAttribute('data-psychologist-id');
                 
                 modalContent.innerHTML = `
                     <div class="text-center">
@@ -187,9 +188,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-gray-600 dark:text-gray-400 text-left mb-6 text-sm leading-relaxed">${apraksts}</p>
 
                         <form action="checkout.php" method="POST">
+                            <input type="hidden" name="psychologist_account_id" value="${psychologistId}">
                             <input type="hidden" name="psihologs_vards" value="${vards}">
                             <input type="hidden" name="cena" value="${parseFloat(cena.replace(',', '.'))}">
-                            <button type="submit" class="w-full bg-primary hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition transform hover:scale-105 flex justify-center items-center gap-2">
+                            <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-3 px-4 rounded-lg shadow-md transition transform hover:scale-105 flex justify-center items-center gap-2">
                                 <i class="fas fa-credit-card"></i> Pieteikties un Maksāt
                             </button>
                         </form>
@@ -199,71 +201,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-// --- AI ČATA LOĢIKA ---
-    const chatToggleBtn = document.getElementById('chat-toggle-btn');
-    const chatContainer = document.getElementById('chat-container');
-    const chatCloseBtn = document.getElementById('chat-close-btn');
-    const chatInput = document.getElementById('chat-input');
-    const chatSendBtn = document.getElementById('chat-send-btn');
-    const chatMessages = document.getElementById('chat-messages');
-
-    if (chatToggleBtn) {
-        // Atvērt/Aizvērt čatu
-        chatToggleBtn.addEventListener('click', () => {
-            chatContainer.classList.remove('d-none');
-            chatToggleBtn.classList.add('d-none');
-        });
-
-        chatCloseBtn.addEventListener('click', () => {
-            chatContainer.classList.add('d-none');
-            chatToggleBtn.classList.remove('d-none');
-        });
-
-        // Sūtīt ziņu
-        function sendMessage() {
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-
-            addMessage(text, 'user-message');
-            chatInput.value = '';
-
-
-            const loadingMsg = addMessage('AI domā...', 'bot-message');
-
-
-            fetch('ai_handler.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
-            })
-            .then(res => res.json())
-            .then(data => {
-                loadingMsg.remove(); 
-                addMessage(data.reply, 'bot-message');
-            })
-            .catch(err => {
-                loadingMsg.remove();
-                addMessage('Kļūda savienojumā.', 'bot-message');
-                console.error(err);
-            });
-        }
-
-        chatSendBtn.addEventListener('click', sendMessage);
-        
-
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-function addMessage(text, className) {
-            const div = document.createElement('div');
-            div.classList.add('message', className);
-            div.innerHTML = text; 
-            
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight; 
-            return div;
-        }
-    }
