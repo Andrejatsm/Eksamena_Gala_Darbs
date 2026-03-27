@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $psihologs_vards = $_POST['psihologs_vards'];
-    $cena_h = $_POST['cena']; 
+    $cena_h = 50.00; // Fixed session price 
     $psychologist_account_id = isset($_POST['psychologist_account_id']) ? (int)$_POST['psychologist_account_id'] : 0;
     $slot_id = isset($_POST['slot_id']) ? (int)$_POST['slot_id'] : 0;
 

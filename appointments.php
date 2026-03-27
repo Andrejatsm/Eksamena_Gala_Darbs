@@ -1,12 +1,14 @@
 <?php
+session_start();
 $pageTitle = "Mani pieraksti";
 require 'db.php';
-require 'header.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
     header("Location: login.php");
     exit();
 }
+
+require 'header.php';
 
 $account_id = (int)$_SESSION['account_id'];
 $message = "";
@@ -51,21 +53,21 @@ while($row = $result->fetch_assoc()) {
 $stmt->close();
 ?>
 
-<div class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Mani pieraksti</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-2">Skatiet un pārvaldiet savus pierakstus.</p>
+<div class="page-shell page-surface">
+    <div class="page-heading">
+        <h1 class="page-title">Mani pieraksti</h1>
+        <p class="page-subtitle">Skatiet un pārvaldiet savus pierakstus.</p>
     </div>
 
     <?php if(!empty($message)): ?>
-        <div class="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg">
+        <div class="alert-success">
             <?php echo $message; ?>
         </div>
     <?php endif; ?>
 
     <div class="space-y-4">
         <?php foreach($appointments as $appt): ?>
-            <div class="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-100 dark:border-zinc-700 p-6">
+            <div class="panel-card">
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($appt['full_name']); ?></h3>
@@ -113,9 +115,9 @@ $stmt->close();
     </div>
 
     <?php if(empty($appointments)): ?>
-        <div class="bg-gray-50 dark:bg-zinc-800 border border-dashed border-gray-300 dark:border-zinc-700 rounded-2xl p-12 text-center">
+        <div class="empty-card">
             <p class="text-gray-500 dark:text-gray-400 mb-4">Jums nav nekādu pierakstu.</p>
-            <a href="dashboard.php" class="inline-block bg-primary hover:bg-primaryHover text-white px-6 py-2 rounded-lg transition font-medium">
+            <a href="dashboard.php" class="button-primary">
                 Atrast speciālistu
             </a>
         </div>

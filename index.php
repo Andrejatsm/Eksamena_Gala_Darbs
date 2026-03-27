@@ -1,9 +1,34 @@
 ﻿<?php
 $pageTitle = "Saprasts - Sākums";
+$pageStyles = ['home.css'];
+require 'db.php';
 require 'header.php';
 
 $btn_link = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'dashboard.php' : 'login.php';
 $btn_text = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'Doties uz sistēmu' : 'Atrodi savu psihologu';
+
+$tests = [];
+$tests_result = $conn->query("SELECT id, title, description FROM tests WHERE status = 'published' ORDER BY created_at DESC LIMIT 3");
+if ($tests_result) {
+    while ($row = $tests_result->fetch_assoc()) {
+        $tests[] = $row;
+    }
+}
+
+$articles = [];
+$articles_result = $conn->query(
+    "SELECT a.id, a.title, a.content, a.category, a.created_at, p.full_name
+     FROM articles a
+     JOIN psychologist_profiles p ON a.psychologist_account_id = p.account_id
+     WHERE a.is_published = 1
+     ORDER BY a.created_at DESC
+     LIMIT 3"
+);
+if ($articles_result) {
+    while ($row = $articles_result->fetch_assoc()) {
+        $articles[] = $row;
+    }
+}
 ?>
 
 <!-- Main Content -->
@@ -89,108 +114,81 @@ $btn_text = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['rol
         </div>
     </section>
 
-    <!-- Featured Specialists Section -->
-    <section class="py-24 px-6 bg-white dark:bg-zinc-900">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-                <div>
-                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Mūsu speciālisti</h2>
-                    <p class="text-lg text-gray-600 dark:text-gray-400">Labākie savas jomas eksperti, gatavi jums palīdzēt.</p>
-                </div>
-                <a href="dashboard.php" class="text-primary font-bold flex items-center gap-2 hover:gap-4 transition-all group">
-                    Skatīt visus speciālistus
-                    <i class="fas fa-arrow-right"></i>
-                </a>
+    <!-- Self Tests Section -->
+    <section id="self-tests" class="home-section home-section-light">
+        <div class="home-shell">
+            <div class="home-section-head">
+                <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Pildi pašnovērtējuma testus jau tagad</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl">Testus vari aizpildīt arī bez ielogošanās. Rezultātu varēsi atvērt pēc ielogošanās vai reģistrācijas.</p>
+                <a href="tests.php" class="home-section-link home-section-link-button">Skatīt visus testus</a>
             </div>
-            
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <?php
-                require 'db.php';
-                
-                // Fetch featured psychologists
-                $stmt = $conn->prepare("
-                    SELECT p.account_id, p.full_name, p.specialization, p.hourly_rate, p.experience_years,
-                           COUNT(DISTINCT a.id) as total_appointments
-                    FROM psychologist_profiles p
-                    LEFT JOIN appointments a ON p.account_id = a.psychologist_account_id AND a.status = 'approved'
-                    WHERE p.approved_at IS NOT NULL
-                    GROUP BY p.account_id
-                    ORDER BY total_appointments DESC, p.full_name ASC
-                    LIMIT 3
-                ");
-                $stmt->execute();
-                $result = $stmt->get_result();
-                
-                if ($result->num_rows > 0) {
-                    while ($specialist = $result->fetch_assoc()) {
-                        $initials = strtoupper(substr($specialist['full_name'], 0, 1));
-                        $total_appointments = (int)$specialist['total_appointments'];
-                        ?>
-                        <div class="bg-gray-50 dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-700 hover:shadow-lg transition-shadow">
-                            <!-- Image Placeholder -->
-                            <div class="h-80 relative overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                                <div class="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
-                                    <span class="text-4xl font-bold text-primary"><?php echo $initials; ?></span>
-                                </div>
-                            </div>
-                            
-                            <!-- Info -->
-                            <div class="p-8">
-                                <div class="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h3 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($specialist['full_name']); ?></h3>
-                                        <p class="text-primary text-sm font-semibold"><?php echo htmlspecialchars($specialist['specialization']); ?></p>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <span class="text-yellow-400">★</span>
-                                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">4.9</span>
-                                    </div>
-                                </div>
-                                
-                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-6">
-                                    <?php echo $specialist['experience_years']; ?> gadu pieredze • <?php echo $total_appointments; ?> pacienti
-                                </p>
-                                
-                                <a href="psychologist_profile.php?id=<?php echo (int)$specialist['account_id']; ?>" class="w-full py-3 bg-white dark:bg-zinc-700 text-primary dark:text-primary font-bold rounded-full hover:bg-primary hover:text-white dark:hover:text-white transition-colors border border-primary">
-                                    Profila apskate
-                                </a>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                }
-                ?>
+
+            <div class="home-card-grid">
+                <?php foreach ($tests as $test): ?>
+                <div class="home-test-card">
+                    <div class="home-test-icon">
+                        <i class="fas fa-clipboard-check text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2"><?php echo htmlspecialchars($test['title']); ?></h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-5 flex-grow home-card-copy"><?php echo htmlspecialchars($test['description'] ?? 'Nav apraksta.'); ?></p>
+                    <a href="test_view.php?test_id=<?php echo (int)$test['id']; ?>" class="button-primary home-card-action">
+                        Pildīt testu
+                    </a>
+                </div>
+                <?php endforeach; ?>
+
+                <?php if (empty($tests)): ?>
+                <div class="empty-card col-span-full">
+                    <p class="text-gray-500 dark:text-gray-400">Pašlaik nav pieejamu testu.</p>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
 
-    <!-- Call to Action Section -->
-    <section class="py-20 bg-gradient-to-r from-primary to-primaryHover relative overflow-hidden px-6">
+    <!-- Articles Section -->
+    <section class="home-section home-section-articles">
         <div class="absolute inset-0 opacity-10">
             <div class="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl"></div>
             <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl"></div>
         </div>
-        
-        <div class="max-w-4xl mx-auto relative z-10 text-center">
-            <h2 class="text-4xl lg:text-5xl font-bold text-white mb-4">
-                Vai tu gatavs sākt? 🌟
-            </h2>
-            <p class="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-                Tūkstošiem cilvēku jau ir atraduši mieru un atbalstu. Jūsu kārta ir šodien.
-            </p>
-            
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="register.php" class="px-8 py-4 bg-white text-primary font-bold rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
-                    Reģistrēties bezmaksas
-                </a>
-                <a href="login.php" class="px-8 py-4 bg-white/20 text-white font-bold rounded-full border border-white hover:bg-white/30 transition-colors">
-                    Pierakstīties
-                </a>
+
+        <div class="home-shell relative z-10">
+            <div class="home-section-head home-section-head-dark">
+                <h2 class="text-4xl font-bold text-white mb-3">Psihologu raksti un resursi</h2>
+                <p class="text-lg text-white/90 max-w-3xl">Ieskaties mūsu speciālistu publicētajos rakstos par labsajūtu, attiecībām un ikdienas mentālo veselību.</p>
+                <a href="published_articles.php" class="home-link-light">Skatīt visus rakstus</a>
             </div>
-            
-            <p class="text-sm text-white/80 mt-8">
-                💳 Pašreiz ir mīļš periods - slēptā 50% atlaide uz pirmo konsultāciju!
-            </p>
+
+            <div class="home-card-grid">
+                <?php foreach ($articles as $article): ?>
+                <article class="home-article-card">
+                    <div class="mb-3">
+                        <?php if (!empty($article['category'])): ?>
+                        <span class="home-article-tag">
+                            <?php echo htmlspecialchars($article['category']); ?>
+                        </span>
+                        <?php endif; ?>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-snug"><?php echo htmlspecialchars($article['title']); ?></h3>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                        <i class="fas fa-user mr-1"></i><?php echo htmlspecialchars($article['full_name']); ?>
+                        <span class="mx-2">•</span>
+                        <?php echo date('d.m.Y', strtotime($article['created_at'])); ?>
+                    </p>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                        <?php echo htmlspecialchars(mb_substr($article['content'], 0, 170)); ?>...
+                    </p>
+                    <a href="published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary home-card-action mt-6">Lasīt rakstu</a>
+                </article>
+                <?php endforeach; ?>
+
+                <?php if (empty($articles)): ?>
+                <div class="empty-card col-span-full">
+                    <p class="text-gray-700 dark:text-gray-300">Pašlaik nav publicētu rakstu.</p>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
     </section>
 

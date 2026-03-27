@@ -60,8 +60,8 @@ $pageTitle = "Maksājums veiksmīgs";
 require __DIR__ . '/header.php'; 
 ?>
 
-<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-surface dark:bg-zinc-900">
-    <div class="max-w-md w-full bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-xl border-2 border-green-100 dark:border-green-900/30 text-center">
+<div class="auth-shell page-surface">
+    <div class="result-card max-w-md w-full text-center border-2 border-green-100 dark:border-green-900/30">
         
         <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 dark:bg-green-900/50 mb-6">
             <i class="fas fa-check text-4xl text-green-600 dark:text-green-400"></i>
@@ -89,7 +89,7 @@ require __DIR__ . '/header.php';
             Jūsu pieteikums konsultācijai ir reģistrēts sistēmā. Apstiprinājums nosūtīts uz <strong><?php echo htmlspecialchars($user_email); ?></strong>.
         </p>
         
-        <a href="dashboard.php" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-primary hover:bg-primaryHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:scale-[1.02] shadow-lg shadow-primary/20">
+        <a href="dashboard.php" class="button-primary w-full">
             Atgriezties sistēmā
         </a>
     </div>

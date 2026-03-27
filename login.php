@@ -2,10 +2,25 @@
 session_start();
 require 'db.php';
 
+function sanitize_next(string $next): string {
+    $next = trim($next);
+    if ($next === '' || str_contains($next, '://') || str_starts_with($next, '//') || str_contains($next, "\n") || str_contains($next, "\r")) {
+        return '';
+    }
+    if (!preg_match('/^[a-zA-Z0-9_\-\/\.\?=&%#]+$/', $next)) {
+        return '';
+    }
+    return $next;
+}
+
+$next = sanitize_next($_GET['next'] ?? $_POST['next'] ?? '');
+
 // Ja jau ielogojies -> ej uz atbilstošo paneli
 if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     $role = $_SESSION['role'];
-    if ($role === 'admin') {
+    if ($role === 'user' && $next !== '') {
+        header("Location: " . $next);
+    } elseif ($role === 'admin') {
         header("Location: admin_dashboard.php");
     } elseif ($role === 'psychologist') {
         header("Location: specialist_dashboard.php");
@@ -62,7 +77,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             $_SESSION['display_name'] = $displayName;
 
-            if ($role === 'admin') {
+            if ($role === 'user' && $next !== '') {
+                header("Location: " . $next);
+            } elseif ($role === 'admin') {
                 header("Location: admin_dashboard.php");
             } elseif ($role === 'psychologist') {
                 header("Location: specialist_dashboard.php");
@@ -80,8 +97,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 require 'header.php';
 ?>
 
-<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-surface dark:bg-zinc-900 transition-colors duration-300">
-    <div class="max-w-md w-full space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700">
+<div class="auth-shell page-surface transition-colors duration-300">
+    <div class="auth-card stack-md">
         <div>
             <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
                 Ielogoties
@@ -103,19 +120,22 @@ require 'header.php';
             </div>
         <?php endif; ?>
 
-        <form class="mt-8 space-y-6" method="POST">
+        <form class="mt-8 stack-md" method="POST">
+            <?php if ($next !== ''): ?>
+            <input type="hidden" name="next" value="<?php echo htmlspecialchars($next); ?>">
+            <?php endif; ?>
             <div class="space-y-4">
                 <div>
-                    <label for="lietotajvards" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lietotājvārds</label>
-                    <input id="lietotajvards" name="lietotajvards" type="text" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition" placeholder="Ievadiet lietotājvārdu">
+                    <label for="lietotajvards" class="field-label">Lietotājvārds</label>
+                    <input id="lietotajvards" name="lietotajvards" type="text" required class="input-control" placeholder="Ievadiet lietotājvārdu">
                 </div>
                 <div>
-                    <label for="parole" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parole</label>
-                    <input id="parole" name="parole" type="password" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition" placeholder="••••••••">
+                    <label for="parole" class="field-label">Parole</label>
+                    <input id="parole" name="parole" type="password" required class="input-control" placeholder="••••••••">
                 </div>
             </div>
 
-            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-primary hover:bg-primaryHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:scale-[1.02] shadow-lg shadow-primary/20">
+            <button type="submit" class="button-primary w-full">
                 Ielogoties
             </button>
         </form>

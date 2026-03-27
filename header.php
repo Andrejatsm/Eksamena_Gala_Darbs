@@ -42,8 +42,8 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                         primary: '#356763',
                         primaryHover: '#285b57',
                         secondary: '#49655a',
-                        surface: '#fcf9f5',
-                        background: '#fcf9f5',
+                        surface: '#ffffff',
+                        background: '#ffffff',
                         onSurface: '#32332e',
                         onSurfaceVariant: '#5f5f5a',
                         tertiary: '#56625b',
@@ -61,7 +61,13 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <?php $cssVersion = '20260327b'; ?>
+    <link rel="stylesheet" href="style.css?v=<?php echo $cssVersion; ?>">
+    <?php if (!empty($pageStyles) && is_array($pageStyles)): ?>
+        <?php foreach ($pageStyles as $pageStyle): ?>
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($pageStyle); ?>?v=<?php echo $cssVersion; ?>">
+        <?php endforeach; ?>
+    <?php endif; ?>
 </head>
 <body class="bg-surface text-gray-900 dark:bg-zinc-900 dark:text-gray-100 transition-colors duration-300">
 
@@ -108,11 +114,14 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                             <i class="fas fa-columns w-5 text-center mr-2"></i> Panelis
                                         </a>
                                     </li>
+                                    
+                                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
                                     <li>
                                         <a href="user_profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
                                             <i class="fas fa-user-circle w-5 text-center mr-2"></i> Mans profils
                                         </a>
                                     </li>
+                                    <?php endif; ?>
                                     
                                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
                                     <!-- User-only features -->
@@ -124,18 +133,6 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                     <li>
                                         <a href="appointments.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
                                             <i class="fas fa-calendar-check w-5 text-center mr-2"></i> Mani pieraksti
-                                        </a>
-                                    </li>
-                                    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'psychologist'): ?>
-                                    <!-- Psychologist-only features -->
-                                    <li>
-                                        <a href="articles.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-newspaper w-5 text-center mr-2"></i> Mani raksti
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="availability.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-clock w-5 text-center mr-2"></i> Pieejamības laiki
                                         </a>
                                     </li>
                                     <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
@@ -187,14 +184,14 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                         </div>
                     </div>
                     <a href="<?php echo $dashboard_link; ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Panelis</a>
+                    
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
                     <a href="user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mans profils</a>
+                    <?php endif; ?>
                     
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
                     <a href="tests.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pašnovērtējuma testi</a>
                     <a href="appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani pieraksti</a>
-                    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'psychologist'): ?>
-                    <a href="articles.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani raksti</a>
-                    <a href="availability.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pieejamības laiki</a>
                     <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                     <a href="admin_dashboard.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pārvaldība</a>
                     <?php endif; ?>

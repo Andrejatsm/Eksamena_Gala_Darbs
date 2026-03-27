@@ -1,13 +1,15 @@
 <?php
+session_start();
 $pageTitle = "Psihologa profils";
 require 'db.php';
-require 'header.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['account_id'])) {
     header("Location: login.php");
     exit();
 }
+
+require 'header.php';
 
 // Get psychologist ID from URL
 $psychologist_id = intval($_GET['id'] ?? 0);
@@ -19,7 +21,7 @@ if ($psychologist_id === 0) {
 
 // Fetch psychologist profile and articles
 $stmt = $conn->prepare("
-    SELECT a.id, a.email, a.phone, p.full_name, p.specialization, p.experience_years, p.description, p.hourly_rate, p.approved_at,
+    SELECT a.id, a.email, a.phone, p.full_name, p.specialization, p.experience_years, p.description, p.image_path, p.approved_at,
            (SELECT COUNT(*) FROM appointments WHERE psychologist_account_id = a.id AND status = 'approved') as total_appointments
     FROM accounts a
     JOIN psychologist_profiles p ON a.id = p.account_id
@@ -61,7 +63,7 @@ $slots_result = $stmt->get_result();
 $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
 ?>
 
-<div class="min-h-screen bg-gray-50 dark:bg-zinc-900">
+<div class="min-h-screen page-surface dark:bg-zinc-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <!-- Back button -->
@@ -74,21 +76,21 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Profile Info -->
                 <div>
-                    <div class="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-primary/30">
-                        <div class="text-5xl font-bold text-primary">
-                            <?php echo strtoupper(substr($psychologist['full_name'], 0, 1)); ?>
+                        <?php if (!empty($psychologist['image_path'])): ?>
+                        <img src="<?php echo htmlspecialchars($psychologist['image_path']); ?>"
+                             alt="<?php echo htmlspecialchars($psychologist['full_name']); ?>"
+                             class="w-32 h-32 rounded-full object-cover mx-auto mb-4 shadow-lg border-4 border-primary/30">
+                        <?php else: ?>
+                        <div class="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-primary/30">
+                            <div class="text-5xl font-bold text-primary">
+                                <?php echo strtoupper(substr($psychologist['full_name'], 0, 1)); ?>
+                            </div>
                         </div>
-                    </div>
+                        <?php endif; ?>
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-2" data-psychologist-name>
                         <?php echo htmlspecialchars($psychologist['full_name']); ?>
                     </h1>
                     <p class="text-center text-primary font-semibold mb-4"><?php echo htmlspecialchars($psychologist['specialization']); ?></p>
-                    
-                    <!-- Rating -->
-                    <div class="flex items-center justify-center gap-2 mb-4">
-                        <span class="text-yellow-400">★★★★★</span>
-                        <span class="font-bold text-gray-900 dark:text-white">4.9 (<?php echo (int)$psychologist['total_appointments']; ?> atsauksmes)</span>
-                    </div>
                 </div>
 
                 <!-- Key Info -->
@@ -99,7 +101,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Konsultācijas cena</p>
-                        <p class="text-2xl font-bold text-primary">€<?php echo number_format($psychologist['hourly_rate'], 2); ?>/h</p>
+                        <p class="text-2xl font-bold text-primary">€50 / sesija</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Pieņemti pacienti</p>
@@ -195,7 +197,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                     </div>
                     <div>
                         <p class="opacity-80 text-sm mb-1">Cena par konsultāciju</p>
-                        <p class="text-3xl font-bold">€<?php echo number_format($psychologist['hourly_rate'], 2); ?></p>
+                        <p class="text-3xl font-bold">€50</p>
                     </div>
                 </div>
 
@@ -206,7 +208,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
 
-                <button id="paymentBtn" onclick="openPayment(<?php echo $psychologist_id; ?>, <?php echo $psychologist['hourly_rate']; ?>)" 
+                <button id="paymentBtn" onclick="openPayment(<?php echo $psychologist_id; ?>)" 
                         class="w-full px-6 py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
                     Turpināt uz maksājumu
                 </button>
@@ -233,7 +235,7 @@ function selectSlot(slotId, slotTime) {
     document.querySelector('.sticky').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function openPayment(psychologistId, rate) {
+function openPayment(psychologistId) {
     if (!selectedSlotId) {
         alert('Lūdzu izvēlieties laiku');
         return;
@@ -248,7 +250,7 @@ function openPayment(psychologistId, rate) {
     const fields = {
         'psychologist_account_id': psychologistId,
         'psihologs_vards': document.querySelector('[data-psychologist-name]').textContent.trim(),
-        'cena': rate,
+        'cena': 50,
         'slot_id': selectedSlotId
     };
 

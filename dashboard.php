@@ -1,11 +1,13 @@
 <?php
+session_start();
 require 'db.php';
-require 'header.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
     header("Location: login.php");
     exit();
 }
+
+require 'header.php';
 ?>
 
 <div class="flex-grow ui-container py-10">

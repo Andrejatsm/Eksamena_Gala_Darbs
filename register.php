@@ -2,13 +2,22 @@
 session_start(); // Ja nav jau startēta db.php
 require 'db.php';
 
+function sanitize_next(string $next): string {
+    $next = trim($next);
+    if ($next === '' || str_contains($next, '://') || str_starts_with($next, '//') || str_contains($next, "\n") || str_contains($next, "\r")) {
+        return '';
+    }
+    if (!preg_match('/^[a-zA-Z0-9_\-\/\.\?=&%#]+$/', $next)) {
+        return '';
+    }
+    return $next;
+}
+
+$next = sanitize_next($_GET['next'] ?? $_POST['next'] ?? '');
+
 
 if (isset($_SESSION['account_id'])) {
     header("Location: dashboard.php");
-    exit();
-}
-if (isset($_SESSION['account_id'])) {
-    header("Location: specialist_dashboard.php");
     exit();
 }
 
@@ -25,9 +34,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Additional for psychologist
     $specialization = trim($_POST['specialization'] ?? '');
-    $experience_years = (int)($_POST['experience_years'] ?? 0);
+    $experience_years = min(50, max(0, (int)($_POST['experience_years'] ?? 0)));
     $description = trim($_POST['description'] ?? '');
-    $hourly_rate = (float)($_POST['hourly_rate'] ?? 0.00);
 
     // Paroles validācija: vismaz 1 lielais, 1 mazais, 1 simbols
     $hasUpper = preg_match('/[A-ZĀČĒĢĪĶĻŅŠŪŽ]/u', $rawPassword);
@@ -37,6 +45,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Parolei jāietver vismaz 1 lielais burts, 1 mazais burts un 1 simbols.";
     } else {
         $parole = password_hash($rawPassword, PASSWORD_DEFAULT);
+    }
+
+    $certificate_path = null;
+    if ($role === 'psychologist' && empty($error)) {
+        if (isset($_FILES['certificate']) && $_FILES['certificate']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = 'uploads/certificates/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            $fileName = time() . '_' . basename($_FILES['certificate']['name']);
+            $targetFilePath = $uploadDir . $fileName;
+            
+            $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+            $allowedTypes = array('pdf', 'jpg', 'jpeg', 'png');
+            
+            if (in_array($fileType, $allowedTypes)) {
+                if (move_uploaded_file($_FILES['certificate']['tmp_name'], $targetFilePath)) {
+                    $certificate_path = $targetFilePath;
+                } else {
+                    $error = "Kļūda augšupielādējot sertifikātu.";
+                }
+            } else {
+                $error = "Atļautie sertifikāta formāti ir: PDF, JPG, JPEG, PNG.";
+            }
+        } else {
+            $error = "Sertifikāta augšupielāde ir obligāta psihologiem.";
+        }
     }
 
     if (empty($error)) {
@@ -66,8 +101,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt2->bind_param("iss", $accountId, $vards, $uzvards);
                 } else {
                     $full_name = $vards . ' ' . $uzvards;
-                    $stmt2 = $conn->prepare("INSERT INTO psychologist_profiles (account_id, full_name, specialization, experience_years, description, hourly_rate) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt2->bind_param("issisd", $accountId, $full_name, $specialization, $experience_years, $description, $hourly_rate);
+                    $session_price = 50.00;
+                    $stmt2 = $conn->prepare("INSERT INTO psychologist_profiles (account_id, full_name, specialization, experience_years, description, hourly_rate, certificate_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt2->bind_param("issisds", $accountId, $full_name, $specialization, $experience_years, $description, $session_price, $certificate_path);
                 }
                 if (!$stmt2->execute()) {
                     throw new Exception($conn->error);
@@ -76,9 +112,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $conn->commit();
                 if ($role === 'psychologist') {
-                    header("Location: login.php?message=Pieteikums iesniegts. Administrators pārbaudīs jūsu kvalifikāciju.");
+                    $redirect = "login.php?message=Pieteikums iesniegts. Administrators pārbaudīs jūsu kvalifikāciju.";
+                    if ($next !== '') {
+                        $redirect .= "&next=" . rawurlencode($next);
+                    }
+                    header("Location: " . $redirect);
                 } else {
-                    header("Location: login.php?success=1");
+                    $redirect = "login.php?success=1";
+                    if ($next !== '') {
+                        $redirect .= "&next=" . rawurlencode($next);
+                    }
+                    header("Location: " . $redirect);
                 }
                 exit();
             } catch (Exception $e) {
@@ -94,14 +138,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 require 'header.php';
 ?>
 
-<div class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-surface dark:bg-zinc-900">
-    <div class="max-w-md w-full space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700">
+<div class="auth-shell page-surface">
+    <div class="auth-card stack-md">
         <div>
             <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
                 Izveidot profilu
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                Jau ir profils? <a href="login.php" class="font-medium text-primary hover:text-primaryHover transition">Ielogoties</a>
+                Jau ir profils? <a href="login.php<?php echo $next !== '' ? '?next=' . rawurlencode($next) : ''; ?>" class="font-medium text-primary hover:text-primaryHover transition">Ielogoties</a>
             </p>
         </div>
 
@@ -111,11 +155,14 @@ require 'header.php';
             </div>
         <?php endif; ?>
 
-        <form class="mt-8 space-y-6" method="POST">
+        <form class="mt-8 stack-md" method="POST" enctype="multipart/form-data">
+            <?php if ($next !== ''): ?>
+            <input type="hidden" name="next" value="<?php echo htmlspecialchars($next); ?>">
+            <?php endif; ?>
             <div class="space-y-4">
                 <!-- Role Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reģistrēties kā</label>
+                    <label class="field-label mb-2">Reģistrēties kā</label>
                     <div class="space-y-2">
                         <label class="flex items-center">
                             <input type="radio" name="role" value="user" checked class="text-primary focus:ring-primary">
@@ -130,58 +177,58 @@ require 'header.php';
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vārds</label>
-                        <input type="text" name="vards" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                        <label class="field-label">Vārds</label>
+                        <input type="text" name="vards" required class="input-control">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Uzvārds</label>
-                        <input type="text" name="uzvards" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                        <label class="field-label">Uzvārds</label>
+                        <input type="text" name="uzvards" required class="input-control">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefons</label>
-                    <input type="text" name="telefons" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition" placeholder="+371...">
+                    <label class="field-label">Telefons</label>
+                    <input type="text" name="telefons" required class="input-control" placeholder="+371...">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-pasts</label>
-                    <input type="email" name="epasts" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                    <label class="field-label">E-pasts</label>
+                    <input type="email" name="epasts" required class="input-control">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lietotājvārds</label>
-                    <input type="text" name="lietotajvards" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                    <label class="field-label">Lietotājvārds</label>
+                    <input type="text" name="lietotajvards" required class="input-control">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parole</label>
-                    <input type="password" name="parole" required class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                    <label class="field-label">Parole</label>
+                    <input type="password" name="parole" required class="input-control">
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Vismaz 1 lielais burts, 1 simbols.</p>
                 </div>
 
                 <!-- Psychologist specific fields -->
                 <div id="psychologist-fields" class="hidden space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Specializācija</label>
-                        <input type="text" name="specialization" class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition" placeholder="piem. ģimenes terapija">
+                        <label class="field-label">Specializācija</label>
+                        <input type="text" name="specialization" class="input-control" placeholder="piem. ģimenes terapija">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pieredze (gadi)</label>
-                        <input type="number" name="experience_years" min="0" class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                        <label class="field-label">Pieredze (gadi)</label>
+                        <input type="number" name="experience_years" min="0" max="50" class="input-control">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Apraksts</label>
-                        <textarea name="description" rows="3" class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition" placeholder="Īss apraksts par sevi un pakalpojumiem"></textarea>
+                        <label class="field-label">Apraksts</label>
+                        <textarea name="description" rows="3" class="textarea-control" placeholder="Īss apraksts par sevi un pakalpojumiem"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stundas tarifa (EUR)</label>
-                        <input type="number" name="hourly_rate" min="0" step="0.01" class="appearance-none block w-full px-3 py-3 border border-gray-300 dark:border-zinc-600 placeholder-gray-400 text-gray-900 dark:text-white dark:bg-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition">
+                        <label class="field-label">Sertifikāts (obligāts: PDF, JPG, PNG)</label>
+                        <input type="file" name="certificate" accept=".pdf,.jpg,.jpeg,.png" class="input-control">
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-primary hover:bg-primaryHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:scale-[1.02] shadow-lg shadow-primary/20">
+            <button type="submit" class="button-primary w-full">
                 Reģistrēties
             </button>
         </form>

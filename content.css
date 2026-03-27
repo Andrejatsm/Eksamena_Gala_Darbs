@@ -1,0 +1,32 @@
+.articles-page {
+  padding-top: 2.75rem;
+}
+
+.articles-grid {
+  align-items: stretch;
+}
+
+.article-tile {
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 34px rgba(2, 8, 23, 0.08);
+}
+
+.article-tile h2 {
+  line-height: 1.35;
+}
+
+.article-detail-card {
+  border-radius: 1.25rem;
+  box-shadow: 0 15px 40px rgba(2, 8, 23, 0.09);
+}
+
+.article-detail-card .article-content,
+.article-detail-card .text-gray-700 {
+  font-size: 1.02rem;
+}
+
+@media (min-width: 1024px) {
+  .articles-page {
+    padding-top: 3rem;
+  }
+}

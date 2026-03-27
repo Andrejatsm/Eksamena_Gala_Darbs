@@ -43,12 +43,12 @@ VALUES
 -- TEST DATA: PSYCHOLOGIST PROFILES
 -- ============================================
 
-INSERT INTO psychologist_profiles (account_id, full_name, specialization, experience_years, description, hourly_rate, approved_at)
+INSERT INTO psychologist_profiles (account_id, full_name, specialization, experience_years, description, image_path, hourly_rate, approved_at)
 VALUES 
-(6, 'Dr. Jānis Sīmons', 'Depresija un anxiety', 8, 'Specializejos depresijas un trauksmes traucējumu ārstēšanā. Pieredze ar kognitīvi-uzvedības terapiju.', 60.00, NOW()),
-(7, 'Dr. Dina Rāvens', 'Attiecību problēmas', 12, 'Speci alizācija pāru terapijā un ģimenes problēmu risināšanā. Draudzīga un empātiska pieeja.', 75.00, NOW()),
-(8, 'Dr. Māris Ozoliņš', 'Traumas un PTSD', 15, 'Pieredzējis speciālists PTSD un traumu terapijā. EMDR un trauma-informēas terapijas metodes.', 85.00, NOW()),
-(9, 'Dr. Anna Brinina', 'Bērnu psihologija', 6, 'Specialiste bērnu un pusaudžu psiholoģiskajās problēmās. Lojāla un mierīga pieeja.', 50.00, NULL);
+(6, 'Dr. Jānis Sīmons', 'Depresija un anxiety', 8, 'Specializējos depresijas un trauksmes traucējumu ārstēšanā. Pieredze ar kognitīvi-uzvedības terapiju.', 'Images/psih1.png', 50.00, NOW()),
+(7, 'Dr. Dina Rāvens', 'Attiecību problēmas', 12, 'Specializācija pāru terapijā un ģimenes problēmu risināšanā. Draudzīga un empātiska pieeja.', 'Images/psih2.png', 50.00, NOW()),
+(8, 'Dr. Māris Ozoliņš', 'Traumas un PTSD', 15, 'Pieredzējis speciālists PTSD un traumu terapijā. EMDR un trauma-informētas terapijas metodes.', 'Images/psih3.png', 50.00, NOW()),
+(9, 'Dr. Anna Brinina', 'Bērnu psihologija', 6, 'Specialiste bērnu un pusaudžu psiholoģiskajās problēmās. Lojāla un mierīga pieeja.', 'Images/psih4.png', 50.00, NULL);
 
 -- ============================================
 -- TEST DATA: AVAILABILITY SLOTS

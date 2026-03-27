@@ -113,6 +113,109 @@
                 });
             });
         }
+
+        // AI Chat funkcionalitāte
+        const chatToggleBtn = document.getElementById('chat-toggle-btn');
+        const chatContainer = document.getElementById('chat-container');
+        const chatCloseBtn = document.getElementById('chat-close-btn');
+        const chatInput = document.getElementById('chat-input');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+        const chatMessages = document.getElementById('chat-messages');
+
+        // Atvērt/Aizvērt čatu
+        if(chatToggleBtn && chatContainer && chatCloseBtn) {
+            chatToggleBtn.addEventListener('click', () => {
+                chatContainer.classList.remove('hidden');
+                chatToggleBtn.classList.add('hidden');
+                setTimeout(() => chatInput.focus(), 100);
+            });
+            chatCloseBtn.addEventListener('click', () => {
+                chatContainer.classList.add('hidden');
+                chatToggleBtn.classList.remove('hidden');
+            });
+        }
+
+        // Palīgfunkcija ziņas pievienošanai UI
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function formatChatMessage(text) {
+            let html = escapeHtml(text);
+
+            // Normalize known wrong route names from model outputs
+            html = html.replace(/\btest\.php\b/gi, 'tests.php');
+            html = html.replace(/\barticle\.php\b/gi, 'published_articles.php');
+            html = html.replace(/\barticles\.php\b/gi, 'published_articles.php');
+            html = html.replace(/\bprofile\.php\b/gi, 'user_profile.php');
+
+            // Add links for common action words if model did not include URLs
+            html = html.replace(/\bReģistrēties\b/g, '<a class="ai-link" href="register.php">Reģistrēties</a>');
+            html = html.replace(/\bIelogoties\b/g, '<a class="ai-link" href="login.php">Ielogoties</a>');
+            html = html.replace(/\bPašnovērtējuma testi\b/g, '<a class="ai-link" href="tests.php">Pašnovērtējuma testi</a>');
+
+            html = html.replace(/\[([^\]]+)\]\(([^)]+\.php(?:\?[^)\s]+)?)\)/g, '<a class="ai-link" href="$2">$1</a>');
+            html = html.replace(/(^|\s)([a-z0-9_\-/]+\.php(?:\?[a-z0-9_\-=&%]+)?)(?=$|\s|[.,!?:;])/gi, '$1<a class="ai-link" href="$2">$2</a>');
+
+            return html.replace(/\n/g, '<br>');
+        }
+
+        function appendMessage(text, isUser = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = isUser ? 'flex justify-end mt-2' : 'flex justify-start mt-2';
+            
+            const innerDiv = document.createElement('div');
+            innerDiv.className = isUser 
+                ? 'chat-message bg-primary text-white rounded-2xl rounded-tr-sm py-3 px-4 max-w-[85%] text-sm shadow-sm'
+                : 'chat-message bg-white dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-sm py-3 px-4 max-w-[85%] text-sm shadow-sm border border-gray-100 dark:border-zinc-600';
+            
+            innerDiv.innerHTML = formatChatMessage(text);
+            msgDiv.appendChild(innerDiv);
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Sūtīt ziņu uz backend
+        async function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            appendMessage(message, true);
+            chatInput.value = '';
+            chatInput.disabled = true;
+            chatSendBtn.disabled = true;
+
+            const loadingId = 'loading-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'flex justify-start mt-2';
+            loadingDiv.innerHTML = `<div class="bg-white dark:bg-zinc-700 text-gray-500 rounded-2xl rounded-tl-sm py-3 px-4 max-w-[85%] text-sm shadow-sm border border-gray-100 dark:border-zinc-600"><i class="fas fa-circle-notch fa-spin"></i> Domā...</div>`;
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const res = await fetch('ai_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
+                const data = await res.json();
+                document.getElementById(loadingId).remove();
+                appendMessage(data.error ? "Kļūda: " + data.error : data.reply);
+            } catch (err) {
+                document.getElementById(loadingId).remove();
+                appendMessage("Pievienojuma kļūda serverim.");
+            }
+            chatInput.disabled = false;
+            chatSendBtn.disabled = false;
+            chatInput.focus();
+        }
+
+        if(chatSendBtn && chatInput) {
+            chatSendBtn.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+        }
     </script>
 </body>
 </html>

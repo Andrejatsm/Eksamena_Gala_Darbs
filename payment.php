@@ -1,13 +1,15 @@
 <?php
+session_start();
 $pageTitle = "Maksājums";
 require 'db.php';
-require 'header.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['account_id'])) {
     header("Location: login.php");
     exit();
 }
+
+require 'header.php';
 
 $user_account_id = (int)$_SESSION['account_id'];
 $psychologist_id = intval($_GET['psychologist_id'] ?? 0);
@@ -64,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<div class="min-h-screen bg-gray-50 dark:bg-zinc-900">
+<div class="min-h-screen page-surface dark:bg-zinc-900">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <a href="javascript:history.back()" class="inline-flex items-center text-primary hover:text-primaryHover mb-8 font-semibold">

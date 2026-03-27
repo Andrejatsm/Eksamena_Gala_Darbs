@@ -1,13 +1,15 @@
 <?php
+session_start();
 $pageTitle = "Apstiprinājums";
 require 'db.php';
-require 'header.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['account_id'])) {
     header("Location: login.php");
     exit();
 }
+
+require 'header.php';
 
 $appointment_id = intval($_GET['appointment_id'] ?? 0);
 
@@ -38,7 +40,7 @@ if (!$appointment) {
 }
 ?>
 
-<div class="min-h-screen bg-gray-50 dark:bg-zinc-900">
+<div class="min-h-screen page-surface dark:bg-zinc-900">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <!-- Success Card -->
@@ -101,15 +103,15 @@ if (!$appointment) {
             <ul class="space-y-3 text-blue-900 dark:text-blue-300">
                 <li class="flex items-start">
                     <i class="fas fa-check-circle text-blue-600 dark:text-blue-400 mt-1 mr-3 text-lg flex-shrink-0"></i>
-                    <span><strong>1. Sola apstiprinājums</strong> - Speciālists apstiprinās jūsu pierakstu 24 stundu laikā</span>
+                    <span><strong>1. Solas apstiprinājums</strong> - Speciālists apstiprinās jūsu pierakstu 24 stundu laikā</span>
                 </li>
                 <li class="flex items-start">
                     <i class="fas fa-check-circle text-blue-600 dark:text-blue-400 mt-1 mr-3 text-lg flex-shrink-0"></i>
-                    <span><strong>2. Saņemsit linku</strong> - Jūs saņemsit video saites vai instrukcijas</span>
+                    <span><strong>2. Saņemsiet saiti</strong> - Jūs saņemsiet video saites vai instrukcijas</span>
                 </li>
                 <li class="flex items-start">
                     <i class="fas fa-check-circle text-blue-600 dark:text-blue-400 mt-1 mr-3 text-lg flex-shrink-0"></i>
-                    <span><strong>3. Konsultācija</strong> - Nokļūstiet pierakstā norādītajā laikā</span>
+                    <span><strong>3. Konsultācija</strong> - Nokļūsiet pierakstā norādītajā laikā</span>
                 </li>
             </ul>
         </div>

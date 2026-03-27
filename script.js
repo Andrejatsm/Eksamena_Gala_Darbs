@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         <div class="bg-gray-50 dark:bg-zinc-700/50 rounded-lg p-4 mb-4 text-left">
                             <p class="text-gray-600 dark:text-gray-300 mb-2"><i class="fas fa-history w-6 text-center"></i> <strong>Pieredze:</strong> ${pieredze} gadi</p>
-                            <p class="text-gray-600 dark:text-gray-300"><i class="fas fa-tag w-6 text-center"></i> <strong>Cena:</strong> ${cena} EUR/h</p>
+                            <p class="text-gray-600 dark:text-gray-300"><i class="fas fa-tag w-6 text-center"></i> <strong>Cena:</strong> €50 / sesija</p>
                         </div>
 
                         <p class="text-gray-600 dark:text-gray-400 text-left mb-6 text-sm leading-relaxed">${apraksts}</p>
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <form action="checkout.php" method="POST">
                             <input type="hidden" name="psychologist_account_id" value="${psychologistId}">
                             <input type="hidden" name="psihologs_vards" value="${vards}">
-                            <input type="hidden" name="cena" value="${parseFloat(cena.replace(',', '.'))}">
+                            <input type="hidden" name="cena" value="50">
                             <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-3 px-4 rounded-lg shadow-md transition transform hover:scale-105 flex justify-center items-center gap-2">
                                 <i class="fas fa-credit-card"></i> Pieteikties un Maksāt
                             </button>

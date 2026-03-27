@@ -65,8 +65,8 @@ if (empty($psihologi)) {
 
                 <div class="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-700 flex justify-between items-center">
                     <div>
-                        <span class="text-xs text-gray-400 uppercase">Stundas likme</span>
-                        <div class="text-lg font-bold text-gray-900 dark:text-white"><?php echo number_format((float)$psi['hourly_rate'], 2); ?> €</div>
+                        <span class="text-xs text-gray-400 uppercase">Sesijas cena</span>
+                        <div class="text-lg font-bold text-gray-900 dark:text-white">50 € / sesija</div>
                     </div>
                     
                     <div class="text-primary group-hover:text-primaryHover transition">
