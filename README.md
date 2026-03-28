@@ -8,7 +8,7 @@
 
 Sistēma ir sadalīta 3 galvenajās lietotāju lomās:
 
-** Klientiem (Lietotājiem):**
+**Klientiem (Lietotājiem):**
 * Psihologu meklēšana un profilu apskate.
 * Ērta pieteikšanās klātienes vai tiešsaistes vizītēm.
 * Droša apmaksa, izmantojot Stripe integrāciju.
@@ -17,7 +17,8 @@ Sistēma ir sadalīta 3 galvenajās lietotāju lomās:
 
 <img width="1920" height="2439" alt="bilde2" src="https://github.com/user-attachments/assets/18a06d88-52b4-43a5-8db8-03cb812f59c9" />
 
-** Psihologiem:**
+
+**Psihologiem:**
 * Sava profila, specializācijas un pakalpojumu cenu pārvaldība.
 * Pieejamības grafika (slotu) veidošana un rediģēšana.
 * Klientu pierakstu apstiprināšana, noraidīšana vai pārcelšana.
@@ -25,7 +26,8 @@ Sistēma ir sadalīta 3 galvenajās lietotāju lomās:
 
 <img width="1905" height="1221" alt="localhost_psihologi_specialist_dashboard php" src="https://github.com/user-attachments/assets/7d421f23-7a92-4dac-a319-c03a2867ce3d" />
 
-** Administratoram:**
+
+**Administratoram:**
 * Vispārēja lietotāju kontu pārvaldība (bloķēšana/dzēšana).
 * Jaunu psihologu profilu verificēšana un apstiprināšana platformā.
 
