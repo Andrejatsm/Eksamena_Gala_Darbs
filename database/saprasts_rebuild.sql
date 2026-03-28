@@ -1,6 +1,6 @@
--- Saprasts database rebuild (unified login: user/psychologist/admin)
--- NOTE: Run this in phpMyAdmin / MySQL client.
--- It will DROP existing tables in database `saprasts`.
+-- Saprasts datubāzes pārbūves skripts (vienota ielogošanās: lietotājs/psihologs/administrators)
+-- Palaid šo phpMyAdmin vai MySQL klientā.
+-- Tas dzēsīs esošās tabulas datubāzē `saprasts`.
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -22,7 +22,7 @@ DROP TABLE IF EXISTS accounts;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- Core accounts (shared login)
+-- Pamatkonti (kopīga ielogošanās)
 CREATE TABLE accounts (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   username VARCHAR(64) NOT NULL,
@@ -68,12 +68,13 @@ CREATE TABLE psychologist_profiles (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Availability slots (psychologist-managed)
+-- Pieejamības sloti (psihologs tos pārvalda pats)
 CREATE TABLE availability_slots (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   psychologist_account_id INT UNSIGNED NOT NULL,
   starts_at DATETIME NOT NULL,
   ends_at DATETIME NOT NULL,
+  consultation_type ENUM('in_person','online') NOT NULL DEFAULT 'online',
   note VARCHAR(255) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -84,7 +85,7 @@ CREATE TABLE availability_slots (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Appointments (user -> psychologist)
+-- Pieraksti (lietotājs -> psihologs)
 CREATE TABLE appointments (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_account_id INT UNSIGNED NOT NULL,
@@ -109,7 +110,7 @@ CREATE TABLE appointments (
     ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Optional event log for appointment changes (accept/reject/cancel/reschedule)
+-- Neobligāts notikumu žurnāls pierakstu izmaiņām (apstiprināt/noraidīt/atcelt/pārcelt)
 CREATE TABLE appointment_events (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   appointment_id INT UNSIGNED NOT NULL,
@@ -128,7 +129,7 @@ CREATE TABLE appointment_events (
     ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Contact form submissions
+-- Kontaktformas iesniegumi
 CREATE TABLE contact_messages (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(160) NOT NULL,
@@ -140,7 +141,7 @@ CREATE TABLE contact_messages (
   KEY idx_contact_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Psychologist articles/resources
+-- Psihologu raksti un resursi
 CREATE TABLE articles (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   psychologist_account_id INT UNSIGNED NOT NULL,
@@ -160,7 +161,7 @@ CREATE TABLE articles (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Self-assessment tests
+-- Pašnovērtējuma testi
 CREATE TABLE tests (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   title VARCHAR(255) NOT NULL,
@@ -222,8 +223,8 @@ CREATE TABLE test_answers (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Seed an initial admin account (change password after import)
--- Password: Admin123!  (bcrypt hash below)
+-- Sākotnējais administratora konts (pēc importa nomaini paroli)
+-- Parole: Admin123! (bcrypt hash zemāk)
 INSERT INTO accounts (username, email, phone, password_hash, role, status)
 VALUES (
   'admin',

@@ -1,29 +1,51 @@
 <?php
 session_start();
-require 'db.php';
+require '../database/db.php';
 
 // Check admin access BEFORE including header.php to prevent headers already sent error
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 
 $pageTitle = "Admin panelis";
-require 'header.php';
+require '../header.php';
 
 $success_msg = '';
 $error_msg = '';
 
-// Handle psychologist approval
+$countQuery = static function (mysqli $conn, string $query): int {
+    $result = $conn->query($query);
+    if (!$result) {
+        return 0;
+    }
+    $row = $result->fetch_assoc();
+    return (int)($row['count'] ?? 0);
+};
+
+// Apstrādājam administratora darbības
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
     $account_id = intval($_POST['account_id'] ?? 0);
     
     if ($action === 'approve_psych') {
-        $stmt = $conn->prepare("UPDATE psychologist_profiles SET approved_at = NOW() WHERE account_id = ?");
-        $stmt->bind_param("i", $account_id);
-        if ($stmt->execute()) {
+        $conn->begin_transaction();
+        try {
+            $stmt = $conn->prepare("UPDATE psychologist_profiles SET approved_at = NOW() WHERE account_id = ?");
+            $stmt->bind_param("i", $account_id);
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt = $conn->prepare("UPDATE accounts SET status = 'active' WHERE id = ? AND role = 'psychologist'");
+            $stmt->bind_param("i", $account_id);
+            $stmt->execute();
+            $stmt->close();
+
+            $conn->commit();
             $success_msg = "Psihologs apstiprināts sekmīgi!";
+        } catch (Throwable $e) {
+            $conn->rollback();
+            $error_msg = "Neizdevās apstiprināt psihologa profilu.";
         }
     } elseif ($action === 'reject_psych') {
         $stmt = $conn->prepare("UPDATE accounts SET status = 'rejected' WHERE id = ?");
@@ -59,10 +81,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($stmt->execute()) {
             $success_msg = "Tests noraidīts.";
         }
+    } elseif ($action === 'add_article_category') {
+        $name = trim($_POST['name'] ?? '');
+        if ($name === '') {
+            $error_msg = "Kategorijas nosaukums nedrīkst būt tukšs.";
+        } else {
+            $stmt = $conn->prepare("INSERT INTO article_categories (name, is_active, sort_order) VALUES (?, 1, 999)");
+            $stmt->bind_param("s", $name);
+            if ($stmt->execute()) {
+                $success_msg = "Kategorija pievienota.";
+            } else {
+                $error_msg = ((int)$conn->errno === 1062)
+                    ? "Šāda kategorija jau eksistē."
+                    : "Neizdevās pievienot kategoriju.";
+            }
+            $stmt->close();
+        }
+    } elseif ($action === 'add_specialization') {
+        $name = trim($_POST['name'] ?? '');
+        if ($name === '') {
+            $error_msg = "Specializācijas nosaukums nedrīkst būt tukšs.";
+        } else {
+            $stmt = $conn->prepare("INSERT INTO psychologist_specializations (name, is_active, sort_order) VALUES (?, 1, 999)");
+            $stmt->bind_param("s", $name);
+            if ($stmt->execute()) {
+                $success_msg = "Specializācija pievienota.";
+            } else {
+                $error_msg = ((int)$conn->errno === 1062)
+                    ? "Šāda specializācija jau eksistē."
+                    : "Neizdevās pievienot specializāciju.";
+            }
+            $stmt->close();
+        }
+    } elseif ($action === 'toggle_lookup_status') {
+        $lookup_type = $_POST['lookup_type'] ?? '';
+        $lookup_id = (int)($_POST['lookup_id'] ?? 0);
+        $new_status = (int)($_POST['new_status'] ?? 0);
+        $new_status = $new_status === 1 ? 1 : 0;
+
+        $table = null;
+        if ($lookup_type === 'article_category') {
+            $table = 'article_categories';
+        } elseif ($lookup_type === 'specialization') {
+            $table = 'psychologist_specializations';
+        }
+
+        if ($table === null || $lookup_id <= 0) {
+            $error_msg = "Nederīgs ieraksts statusa maiņai.";
+        } else {
+            $sql = "UPDATE {$table} SET is_active = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ii", $new_status, $lookup_id);
+            if ($stmt->execute()) {
+                $success_msg = $new_status === 1 ? "Ieraksts aktivizēts." : "Ieraksts deaktivizēts.";
+            } else {
+                $error_msg = "Neizdevās mainīt ieraksta statusu.";
+            }
+            $stmt->close();
+        }
     }
 }
 
-// Fetch statistics
+// Iegūstam statistiku
 $stats = [
     'total_users' => 0,
     'total_psychologists' => 0,
@@ -72,23 +152,29 @@ $stats = [
     'published_tests' => 0
 ];
 
-$result = $conn->query("SELECT COUNT(*) as count FROM accounts WHERE role = 'user' AND status = 'active'");
-$stats['total_users'] = $result->fetch_assoc()['count'];
+$stats['total_users'] = $countQuery($conn, "SELECT COUNT(*) AS count FROM accounts WHERE role = 'user' AND status = 'active'");
+$stats['total_psychologists'] = $countQuery($conn, "SELECT COUNT(*) AS count FROM accounts WHERE role = 'psychologist' AND status = 'active'");
+$stats['pending_psychologists'] = $countQuery($conn, "SELECT COUNT(*) AS count FROM accounts WHERE role = 'psychologist' AND status = 'pending'");
+$stats['total_appointments'] = $countQuery($conn, "SELECT COUNT(*) AS count FROM appointments WHERE status IN ('pending', 'approved')");
+$stats['pending_articles'] = $countQuery($conn, "SELECT COUNT(*) AS count FROM articles WHERE is_published = 0");
+$stats['published_tests'] = $countQuery($conn, "SELECT COUNT(*) AS count FROM tests WHERE status = 'published'");
 
-$result = $conn->query("SELECT COUNT(*) as count FROM psychologist_profiles WHERE approved_at IS NOT NULL");
-$stats['total_psychologists'] = $result->fetch_assoc()['count'];
+$lookup_categories = [];
+$lookup_specs = [];
 
-$result = $conn->query("SELECT COUNT(*) as count FROM psychologist_profiles WHERE approved_at IS NULL");
-$stats['pending_psychologists'] = $result->fetch_assoc()['count'];
+$lookupCatRes = $conn->query("SELECT id, name, is_active, sort_order FROM article_categories ORDER BY sort_order ASC, name ASC");
+if ($lookupCatRes) {
+    while ($row = $lookupCatRes->fetch_assoc()) {
+        $lookup_categories[] = $row;
+    }
+}
 
-$result = $conn->query("SELECT COUNT(*) as count FROM appointments WHERE status IN ('pending', 'approved')");
-$stats['total_appointments'] = $result->fetch_assoc()['count'];
-
-$result = $conn->query("SELECT COUNT(*) as count FROM articles WHERE is_published = 0");
-$stats['pending_articles'] = $result->fetch_assoc()['count'];
-
-$result = $conn->query("SELECT COUNT(*) as count FROM tests WHERE status = 'published'");
-$stats['published_tests'] = $result->fetch_assoc()['count'];
+$lookupSpecRes = $conn->query("SELECT id, name, is_active, sort_order FROM psychologist_specializations ORDER BY sort_order ASC, name ASC");
+if ($lookupSpecRes) {
+    while ($row = $lookupSpecRes->fetch_assoc()) {
+        $lookup_specs[] = $row;
+    }
+}
 ?>
 
 <div class="min-h-screen page-surface dark:bg-zinc-900">
@@ -97,6 +183,12 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
         <?php if ($success_msg): ?>
         <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400">
             <i class="fas fa-check-circle mr-2"></i><?php echo $success_msg; ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($error_msg): ?>
+        <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+            <i class="fas fa-triangle-exclamation mr-2"></i><?php echo $error_msg; ?>
         </div>
         <?php endif; ?>
 
@@ -180,6 +272,9 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                 <button data-tab="tests" class="tab-btn flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                     <i class="fas fa-clipboard-list mr-2"></i>Testi
                 </button>
+                <button data-tab="lookups" class="tab-btn flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    <i class="fas fa-sliders mr-2"></i>Iestatījumi
+                </button>
             </nav>
         </div>
 
@@ -201,12 +296,12 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                             SELECT a.id, a.username, a.email, a.phone, p.full_name, p.specialization, p.experience_years, p.description, p.certificate_path
                             FROM psychologist_profiles p
                             JOIN accounts a ON p.account_id = a.id
-                            WHERE p.approved_at IS NULL
+                            WHERE a.status = 'pending'
                             ORDER BY a.created_at DESC
                         ");
                         
                         if ($result->num_rows === 0) {
-                            echo '<p class="text-gray-600 dark:text-gray-400">Nav psihologu, kas gaidītu apstiprinājuma.</p>';
+                            echo '<p class="text-gray-600 dark:text-gray-400">Nav psihologu, kas gaidītu apstiprinājumu.</p>';
                         } else {
                             while ($psy = $result->fetch_assoc()):
                         ?>
@@ -264,7 +359,7 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                             SELECT a.id, a.username, a.email, p.full_name, p.specialization, p.experience_years, p.hourly_rate
                             FROM psychologist_profiles p
                             JOIN accounts a ON p.account_id = a.id
-                            WHERE p.approved_at IS NOT NULL
+                            WHERE p.approved_at IS NOT NULL AND a.status = 'active'
                             ORDER BY a.created_at DESC
                         ");
                         
@@ -375,7 +470,7 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                             <p class="text-sm text-gray-600 dark:text-gray-400"><?php echo substr(htmlspecialchars($test['description'] ?? 'Nav apraksta'), 0, 100); ?></p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button type="button" class="view-test-btn px-3 py-1 bg-primary/15 dark:bg-primary/25 text-primary rounded-lg hover:bg-primary/25 dark:hover:bg-primary/35 transition text-sm font-medium" title="Priekšskatīt testu" data-test-url="test_view.php?test_id=<?php echo (int)$test['id']; ?>">
+                            <button type="button" class="view-test-btn px-3 py-1 bg-primary/15 dark:bg-primary/25 text-primary rounded-lg hover:bg-primary/25 dark:hover:bg-primary/35 transition text-sm font-medium" title="Priekšskatīt testu" data-test-url="../tests/test_preview.php?test_id=<?php echo (int)$test['id']; ?>">
                                 <i class="fas fa-eye"></i>
                             </button>
                             <span class="px-3 py-1 rounded-full text-sm font-semibold <?php echo $status_color; ?>">
@@ -392,7 +487,7 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                             <form method="POST" class="inline m-0">
                                 <input type="hidden" name="action" value="decline_test">
                                 <input type="hidden" name="test_id" value="<?php echo (int)$test['id']; ?>">
-                                <button type="submit" class="px-3 py-1 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition text-sm font-medium" title="Noraidīt testu" onclick="return confirm('Vai tiešām noraidīt šo testu?');">
+                                <button type="submit" class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition text-sm font-medium" title="Noraidīt testu" onclick="return confirm('Vai tiešām noraidīt šo testu?');">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </form>
@@ -400,6 +495,92 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                         </div>
                     </div>
                     <?php endwhile; ?>
+                </div>
+            </div>
+        </div>
+
+        <div id="lookups" class="tab-content hidden">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 border border-gray-200 dark:border-zinc-700">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Rakstu kategorijas</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">Šīs kategorijas redzamas psihologiem raksta izveidē.</p>
+
+                    <form method="POST" class="flex gap-2 mb-5">
+                        <input type="hidden" name="action" value="add_article_category">
+                        <input type="text" name="name" required maxlength="120" class="input-control" placeholder="Jauna kategorija">
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap">
+                            <i class="fas fa-plus mr-1"></i>Pievienot
+                        </button>
+                    </form>
+
+                    <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                        <?php foreach ($lookup_categories as $cat): ?>
+                            <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-zinc-700 rounded-lg">
+                                <div>
+                                    <p class="font-semibold text-gray-900 dark:text-white"><?php echo htmlspecialchars($cat['name']); ?></p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-1 text-xs rounded-full <?php echo ((int)$cat['is_active'] === 1) ? 'bg-primary/15 text-primary' : 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-300'; ?>">
+                                        <?php echo ((int)$cat['is_active'] === 1) ? 'Aktīvs' : 'Neaktīvs'; ?>
+                                    </span>
+                                    <form method="POST" class="inline">
+                                        <input type="hidden" name="action" value="toggle_lookup_status">
+                                        <input type="hidden" name="lookup_type" value="article_category">
+                                        <input type="hidden" name="lookup_id" value="<?php echo (int)$cat['id']; ?>">
+                                        <input type="hidden" name="new_status" value="<?php echo ((int)$cat['is_active'] === 1) ? '0' : '1'; ?>">
+                                        <button type="submit" class="px-3 py-1 text-xs rounded-lg <?php echo ((int)$cat['is_active'] === 1) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50' : 'bg-primary/15 dark:bg-primary/25 text-primary hover:bg-primary/25 dark:hover:bg-primary/35'; ?> transition">
+                                            <?php echo ((int)$cat['is_active'] === 1) ? 'Deaktivēt' : 'Aktivizēt'; ?>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+
+                        <?php if (empty($lookup_categories)): ?>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Kategoriju saraksts vēl ir tukšs.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 border border-gray-200 dark:border-zinc-700">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Psihologu specializācijas</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">Šīs opcijas redzamas psihologa reģistrācijā.</p>
+
+                    <form method="POST" class="flex gap-2 mb-5">
+                        <input type="hidden" name="action" value="add_specialization">
+                        <input type="text" name="name" required maxlength="120" class="input-control" placeholder="Jauna specializācija">
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap">
+                            <i class="fas fa-plus mr-1"></i>Pievienot
+                        </button>
+                    </form>
+
+                    <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                        <?php foreach ($lookup_specs as $spec): ?>
+                            <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-zinc-700 rounded-lg">
+                                <div>
+                                    <p class="font-semibold text-gray-900 dark:text-white"><?php echo htmlspecialchars($spec['name']); ?></p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-1 text-xs rounded-full <?php echo ((int)$spec['is_active'] === 1) ? 'bg-primary/15 text-primary' : 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-300'; ?>">
+                                        <?php echo ((int)$spec['is_active'] === 1) ? 'Aktīvs' : 'Neaktīvs'; ?>
+                                    </span>
+                                    <form method="POST" class="inline">
+                                        <input type="hidden" name="action" value="toggle_lookup_status">
+                                        <input type="hidden" name="lookup_type" value="specialization">
+                                        <input type="hidden" name="lookup_id" value="<?php echo (int)$spec['id']; ?>">
+                                        <input type="hidden" name="new_status" value="<?php echo ((int)$spec['is_active'] === 1) ? '0' : '1'; ?>">
+                                        <button type="submit" class="px-3 py-1 text-xs rounded-lg <?php echo ((int)$spec['is_active'] === 1) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50' : 'bg-primary/15 dark:bg-primary/25 text-primary hover:bg-primary/25 dark:hover:bg-primary/35'; ?> transition">
+                                            <?php echo ((int)$spec['is_active'] === 1) ? 'Deaktivēt' : 'Aktivizēt'; ?>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+
+                        <?php if (empty($lookup_specs)): ?>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Specializāciju saraksts vēl ir tukšs.</p>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -419,7 +600,7 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                 </button>
             </div>
             <div class="bg-gray-50 dark:bg-zinc-900/40 p-4">
-                <iframe id="testPreviewFrame" title="Testa priekšskatījums" class="w-full h-[70vh] rounded-lg border border-gray-200 dark:border-zinc-700 bg-white"></iframe>
+                <iframe id="testPreviewFrame" title="Testa priekšskatījums" sandbox="allow-same-origin" class="w-full h-[70vh] rounded-lg border border-gray-200 dark:border-zinc-700 bg-white"></iframe>
             </div>
             <div class="bg-gray-50 dark:bg-zinc-700/50 px-6 py-3 flex justify-end">
                 <button type="button" id="closeTestPreviewBottom" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold">
@@ -433,7 +614,7 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
 <!-- Psychologist Approval Modal -->
 <div id="psychModal" class="hidden fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('psychModal').classList.add('hidden')"></div>
+        <div id="psychModalBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
         <div class="inline-block align-bottom bg-white dark:bg-zinc-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
             <div class="bg-white dark:bg-zinc-800 px-6 pt-5 pb-4">
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4" id="psychModalName"></h3>
@@ -452,18 +633,18 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                 <form method="POST" class="inline m-0">
                     <input type="hidden" name="action" value="approve_psych">
                     <input type="hidden" name="account_id" id="psychModalApproveId">
-                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-semibold">
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold">
                         <i class="fas fa-check mr-2"></i>Apstiprināt profilu
                     </button>
                 </form>
                 <form method="POST" class="inline m-0">
                     <input type="hidden" name="action" value="reject_psych">
                     <input type="hidden" name="account_id" id="psychModalRejectId">
-                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-semibold" onclick="return confirm('Vai tiešām noraidi šo profilu?');">
+                    <button type="submit" class="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition font-semibold" onclick="return confirm('Vai tiešām noraidi šo profilu?');">
                         <i class="fas fa-times mr-2"></i>Noraidīt profilu
                     </button>
                 </form>
-                <button type="button" class="mr-auto px-4 py-2 bg-gray-300 dark:bg-zinc-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-500 transition font-semibold" onclick="document.getElementById('psychModal').classList.add('hidden')">
+                <button id="closePsychModalBtn" type="button" class="mr-auto px-4 py-2 bg-gray-300 dark:bg-zinc-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-500 transition font-semibold">
                     Atcelt
                 </button>
             </div>
@@ -474,7 +655,7 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
 <!-- Article Reading Modal -->
 <div id="articleModal" class="hidden fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('articleModal').classList.add('hidden')"></div>
+        <div id="articleModalBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
         <div class="inline-block align-bottom bg-white dark:bg-zinc-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
             <div class="bg-white dark:bg-zinc-800 px-6 pt-5 pb-4">
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2" id="articleModalTitle"></h3>
@@ -485,7 +666,7 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                 <form method="POST" class="inline m-0">
                     <input type="hidden" name="action" value="approve_article">
                     <input type="hidden" name="article_id" id="articleModalApproveId">
-                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-semibold">
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold">
                         <i class="fas fa-check mr-2"></i>Publicēt
                     </button>
                 </form>
@@ -493,89 +674,16 @@ $stats['published_tests'] = $result->fetch_assoc()['count'];
                     <input type="hidden" name="action" value="delete_article">
                     <input type="hidden" name="article_id" id="articleModalRejectId">
                     <input type="hidden" name="account_id" id="articleModalAccId">
-                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-semibold" onclick="return confirm('Vai tiešām dzēst šo rakstu?');">
+                    <button type="submit" class="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition font-semibold" onclick="return confirm('Vai tiešām dzēst šo rakstu?');">
                         <i class="fas fa-trash mr-2"></i>Dzēst
                     </button>
                 </form>
-                <button type="button" class="mr-auto px-4 py-2 bg-gray-300 dark:bg-zinc-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-500 transition font-semibold" onclick="document.getElementById('articleModal').classList.add('hidden')">Atcelt</button>
+                <button id="closeArticleModalBtn" type="button" class="mr-auto px-4 py-2 bg-gray-300 dark:bg-zinc-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-500 transition font-semibold">Atcelt</button>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const testPreviewModal = document.getElementById('testPreviewModal');
-    const testPreviewFrame = document.getElementById('testPreviewFrame');
-    const closeTestPreviewTop = document.getElementById('closeTestPreviewTop');
-    const closeTestPreviewBottom = document.getElementById('closeTestPreviewBottom');
-    const testPreviewBackdrop = document.getElementById('testPreviewBackdrop');
+<script src="admin_dashboard.js"></script>
 
-    const closeTestPreviewModal = () => {
-        testPreviewModal.classList.add('hidden');
-        testPreviewFrame.src = '';
-    };
-
-    document.querySelectorAll('.view-test-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            testPreviewFrame.src = btn.dataset.testUrl;
-            testPreviewModal.classList.remove('hidden');
-        });
-    });
-
-    closeTestPreviewTop.addEventListener('click', closeTestPreviewModal);
-    closeTestPreviewBottom.addEventListener('click', closeTestPreviewModal);
-    testPreviewBackdrop.addEventListener('click', closeTestPreviewModal);
-
-    // Tab navigation
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('bg-white', 'dark:bg-zinc-700', 'text-gray-900', 'dark:text-white', 'shadow-sm'));
-            tabBtns.forEach(b => b.classList.add('text-gray-600', 'dark:text-gray-400'));
-            tabBtns.forEach(b => b.classList.remove('text-gray-900', 'dark:text-white'));
-            btn.classList.add('bg-white', 'dark:bg-zinc-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
-            btn.classList.remove('text-gray-600', 'dark:text-gray-400');
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(btn.dataset.tab).classList.remove('hidden');
-        });
-    });
-
-    // Psychologists modal mapping
-    document.querySelectorAll('.view-psych-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('psychModalName').textContent = btn.dataset.name;
-            document.getElementById('psychModalSpec').textContent = btn.dataset.spec;
-            document.getElementById('psychModalExp').textContent = btn.dataset.exp;
-            document.getElementById('psychModalEmail').textContent = btn.dataset.email;
-            document.getElementById('psychModalPhone').textContent = btn.dataset.phone;
-            document.getElementById('psychModalDesc').textContent = btn.dataset.desc || 'Nav apraksta sniegts.';
-            document.getElementById('psychModalApproveId').value = btn.dataset.id;
-            document.getElementById('psychModalRejectId').value = btn.dataset.id;
-            
-            let certContainer = document.getElementById('psychModalCertContainer');
-            if(btn.dataset.cert) {
-                certContainer.innerHTML = `<a href="${btn.dataset.cert}" target="_blank" class="text-blue-500 hover:underline"><i class="fas fa-file-pdf mr-2"></i>Apskatīt failu</a>`;
-            } else {
-                certContainer.innerHTML = `<span class="text-red-500">Fails nav pievienots!</span>`;
-            }
-            document.getElementById('psychModal').classList.remove('hidden');
-        });
-    });
-
-    // Articles modal mapping
-    document.querySelectorAll('.view-article-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('articleModalTitle').textContent = btn.dataset.title;
-            document.getElementById('articleModalAuthor').textContent = "Autors: " + btn.dataset.author;
-            document.getElementById('articleModalContent').textContent = btn.dataset.content;
-            document.getElementById('articleModalApproveId').value = btn.dataset.id;
-            document.getElementById('articleModalRejectId').value = btn.dataset.id;
-            document.getElementById('articleModalAccId').value = btn.dataset.acc;
-            document.getElementById('articleModal').classList.remove('hidden');
-        });
-    });
-});
-</script>
-
-<?php require 'footer.php'; ?>
+<?php require '../footer.php'; ?>

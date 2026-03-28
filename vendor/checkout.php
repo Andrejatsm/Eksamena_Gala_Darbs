@@ -3,7 +3,7 @@
 session_start();
 
 require __DIR__ . '/vendor/autoload.php'; // Stripe
-require __DIR__ . '/database/db.php'; // Datubāzes pieslēgums
+require __DIR__ . '/db.php'; // Datubāzes pieslēgums
 
 // Tavi Stripe atslēgas iestatījumi
 \Stripe\Stripe::setApiKey('sk_test_51S7XQt3b1XY7a31CCbstqHPSNYoEFGXr5zcqQaaB5t25CYs3mFuYzOl1GB9jQ0Hzh7MJC8Gc1XneHycmqUYbqn5O00hVcvezVP');
@@ -17,29 +17,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $psihologs_vards = $_POST['psihologs_vards'];
-    $cena_h = 50.00; // Fiksēta sesijas cena
+    $cena_h = 50.00; // Fixed session price 
     $psychologist_account_id = isset($_POST['psychologist_account_id']) ? (int)$_POST['psychologist_account_id'] : 0;
     $slot_id = isset($_POST['slot_id']) ? (int)$_POST['slot_id'] : 0;
 
     // 2. Iegūstam slot details un validējam
     if ($slot_id > 0) {
-        $stmt = $conn->prepare("\n            SELECT starts_at, ends_at, consultation_type\n            FROM availability_slots\n            WHERE id = ? AND psychologist_account_id = ?\n        ");
+        $stmt = $conn->prepare("
+            SELECT starts_at, ends_at 
+            FROM availability_slots 
+            WHERE id = ? AND psychologist_account_id = ?
+        ");
         $stmt->bind_param("ii", $slot_id, $psychologist_account_id);
         $stmt->execute();
         $result = $stmt->get_result();
         if ($slot = $result->fetch_assoc()) {
             $_SESSION['booking_slot_id'] = $slot_id;
             $_SESSION['booking_scheduled_at'] = $slot['starts_at'];
-            $_SESSION['booking_consultation_type'] = $slot['consultation_type'] ?? 'online';
         } else {
             http_response_code(400);
-            echo json_encode(['error' => 'Nederīgs laika slots']);
+            echo json_encode(['error' => 'Invalid slot']);
             exit();
         }
         $stmt->close();
     }
 
-    // Saglabājam psihologa informāciju sesijā
+    // Store psychologist info in session
     if ($psychologist_account_id > 0) {
         $_SESSION['last_paid_psychologist_account_id'] = $psychologist_account_id;
     } else {
@@ -56,22 +59,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // 3. Stripe Apmaksas loģika
     $cena_centos = intval((float)$cena_h * 100); // Pārvēršam uz centiem
 
-    // Veidojam pāradresācijas URL pēc aktuālā hosta un instalācijas ceļa.
-    // Izmantojam SCRIPT_NAME, lai izvairītos no fragmentiem un query virknes ietekmes.
+    // Build redirect URLs based on current host and install path.
+    // Use SCRIPT_NAME to avoid any URL fragments or query strings.
     $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
     $baseUrl = $scheme . '://' . $host . $basePath;
 
-    // Nodrošinām tikai slīpsvītras uz priekšu (Stripe neatbalsta backslash URL).
+    // Ensure we're always using forward slashes (Stripe rejects backslashes).
     $success_url = str_replace('\\', '/', $baseUrl . '/success.php');
     $cancel_url = str_replace('\\', '/', $baseUrl . '/dashboard.php');
 
-    // Validējam URL pirms sūtīšanas uz Stripe.
+    // Validate URL strings before sending to Stripe (Stripe rejects invalid URLs)
     if (!filter_var($success_url, FILTER_VALIDATE_URL) || !filter_var($cancel_url, FILTER_VALIDATE_URL)) {
         http_response_code(400);
         echo json_encode([
-            'error' => 'Nederīgs URL',
+            'error' => 'Not a valid URL',
             'success_url' => $success_url,
             'cancel_url' => $cancel_url,
         ]);
@@ -98,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         header("HTTP/1.1 303 See Other");
         header("Location: " . $checkout_session->url);
-
+        
     } catch (Exception $e) { // Izmantojam Exception, lai noķertu Stripe kļūdas
         http_response_code(500);
         echo json_encode([

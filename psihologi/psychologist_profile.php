@@ -1,21 +1,38 @@
 <?php
 session_start();
 $pageTitle = "Psihologa profils";
-require 'db.php';
+require '../database/db.php';
+
+function normalize_psychologist_image_path(string $path): string {
+    $normalized = trim($path);
+    if ($normalized === '') {
+        return '';
+    }
+    if (str_starts_with($normalized, '../') || str_starts_with($normalized, 'http://') || str_starts_with($normalized, 'https://') || str_starts_with($normalized, 'uploads/')) {
+        return $normalized;
+    }
+    if (str_starts_with($normalized, 'assets/')) {
+        return '../' . $normalized;
+    }
+    if (str_starts_with($normalized, 'Images/')) {
+        return '../assets/' . $normalized;
+    }
+    return $normalized;
+}
 
 // Check if user is logged in
 if (!isset($_SESSION['account_id'])) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 
-require 'header.php';
+require '../header.php';
 
 // Get psychologist ID from URL
 $psychologist_id = intval($_GET['id'] ?? 0);
 
 if ($psychologist_id === 0) {
-    header("Location: dashboard.php");
+    header("Location: ../dashboard.php");
     exit();
 }
 
@@ -31,9 +48,10 @@ $stmt->bind_param("i", $psychologist_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $psychologist = $result->fetch_assoc();
+$psychologist['image_path'] = normalize_psychologist_image_path((string)($psychologist['image_path'] ?? ''));
 
 if (!$psychologist) {
-    header("Location: dashboard.php");
+    header("Location: ../dashboard.php");
     exit();
 }
 
@@ -51,7 +69,7 @@ $articles = $articles_result->fetch_all(MYSQLI_ASSOC);
 
 // Fetch availability slots
 $stmt = $conn->prepare("
-    SELECT id, starts_at, ends_at, note
+    SELECT id, starts_at, ends_at, consultation_type, note
     FROM availability_slots
     WHERE psychologist_account_id = ? AND starts_at > NOW()
     ORDER BY starts_at ASC
@@ -67,7 +85,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <!-- Back button -->
-        <a href="dashboard.php" class="inline-flex items-center text-primary hover:text-primaryHover mb-8 font-semibold">
+        <a href="../dashboard.php" class="inline-flex items-center text-primary hover:text-primaryHover mb-8 font-semibold">
             <i class="fas fa-arrow-left mr-2"></i> Atpakaļ uz speciālistiem
         </a>
 
@@ -76,7 +94,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Profile Info -->
                 <div>
-                        <?php if (!empty($psychologist['image_path'])): ?>
+                            <?php if (!empty($psychologist['image_path'])): ?>
                         <img src="<?php echo htmlspecialchars($psychologist['image_path']); ?>"
                              alt="<?php echo htmlspecialchars($psychologist['full_name']); ?>"
                              class="w-32 h-32 rounded-full object-cover mx-auto mb-4 shadow-lg border-4 border-primary/30">
@@ -162,12 +180,16 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                                     <?php echo date('H:i', strtotime($slot['starts_at'])); ?> - <?php echo date('H:i', strtotime($slot['ends_at'])); ?>
                                 </span>
                             </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                <i class="fas fa-video mr-1"></i><?php echo ($slot['consultation_type'] ?? 'online') === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?>
+                            </p>
                             <?php if ($slot['note']): ?>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><?php echo htmlspecialchars($slot['note']); ?></p>
                             <?php endif; ?>
                         </div>
-                        <button onclick="selectSlot(<?php echo $slot['id']; ?>, '<?php echo date('d.m.Y H:i', strtotime($slot['starts_at'])); ?>')" 
-                                class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap ml-4">
+                        <button type="button" class="slot-select-btn px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap ml-4"
+                            data-slot-id="<?php echo (int)$slot['id']; ?>"
+                            data-slot-time="<?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($slot['starts_at']))); ?>">
                             Izvēlēties
                         </button>
                     </div>
@@ -208,7 +230,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
 
-                <button id="paymentBtn" onclick="openPayment(<?php echo $psychologist_id; ?>)" 
+                <button id="paymentBtn" type="button" data-psychologist-id="<?php echo (int)$psychologist_id; ?>"
                         class="w-full px-6 py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
                     Turpināt uz maksājumu
                 </button>
@@ -222,49 +244,6 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
     </div>
 </div>
 
-<script>
-let selectedSlotId = null;
+<script src="psychologist_profile.js"></script>
 
-function selectSlot(slotId, slotTime) {
-    selectedSlotId = slotId;
-    document.getElementById('selectedTime').textContent = slotTime;
-    document.getElementById('bookingSummary').classList.remove('hidden');
-    document.getElementById('paymentBtn').disabled = false;
-    
-    // Scroll to top of booking summary
-    document.querySelector('.sticky').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function openPayment(psychologistId) {
-    if (!selectedSlotId) {
-        alert('Lūdzu izvēlieties laiku');
-        return;
-    }
-
-    // Create a form to submit to checkout.php
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'checkout.php';
-
-    // Add required fields
-    const fields = {
-        'psychologist_account_id': psychologistId,
-        'psihologs_vards': document.querySelector('[data-psychologist-name]').textContent.trim(),
-        'cena': 50,
-        'slot_id': selectedSlotId
-    };
-
-    for (const [name, value] of Object.entries(fields)) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value;
-        form.appendChild(input);
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-}
-</script>
-
-<?php require 'footer.php'; ?>
+<?php require '../footer.php'; ?>

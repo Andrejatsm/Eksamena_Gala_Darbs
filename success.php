@@ -1,6 +1,6 @@
 <?php 
 session_start();
-require __DIR__ . '/db.php';
+require __DIR__ . '/database/db.php';
 
 // Pārbaudām, vai esam ielogojušies
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
@@ -30,14 +30,27 @@ $stmt_email->close();
 // Vienkāršota pārbaude: pēdējo 5 min laikā
 $check = null;
 $scheduled_at = isset($_SESSION['booking_scheduled_at']) ? $_SESSION['booking_scheduled_at'] : null;
+$consultation_type = isset($_SESSION['booking_consultation_type']) && in_array($_SESSION['booking_consultation_type'], ['online', 'in_person'], true)
+    ? $_SESSION['booking_consultation_type']
+    : 'online';
 
 if ($psihologs_id > 0) {
+    $checkSql = "SELECT id FROM appointments WHERE user_account_id = ? AND psychologist_account_id = ?";
+    $checkTypes = "ii";
+    $checkParams = [$user_id, $psihologs_id];
+
     if ($scheduled_at) {
-        $stmt_check = $conn->prepare("SELECT id FROM appointments WHERE user_account_id = ? AND psychologist_account_id = ? AND scheduled_at = ? AND created_at > NOW() - INTERVAL 5 MINUTE");
-        $stmt_check->bind_param("iis", $user_id, $psihologs_id, $scheduled_at);
+        $checkSql .= " AND scheduled_at = ?";
+        $checkTypes .= "s";
+        $checkParams[] = $scheduled_at;
+    }
+    $checkSql .= " AND created_at > NOW() - INTERVAL 5 MINUTE";
+
+    $stmt_check = $conn->prepare($checkSql);
+    if ($checkTypes === "iis") {
+        $stmt_check->bind_param($checkTypes, $checkParams[0], $checkParams[1], $checkParams[2]);
     } else {
-        $stmt_check = $conn->prepare("SELECT id FROM appointments WHERE user_account_id = ? AND psychologist_account_id = ? AND created_at > NOW() - INTERVAL 5 MINUTE");
-        $stmt_check->bind_param("ii", $user_id, $psihologs_id);
+        $stmt_check->bind_param($checkTypes, $checkParams[0], $checkParams[1]);
     }
     $stmt_check->execute();
     $check = $stmt_check->get_result();
@@ -46,11 +59,11 @@ if ($psihologs_id > 0) {
 
 if ($check && $check->num_rows == 0) {
     if ($scheduled_at) {
-        $stmt = $conn->prepare("INSERT INTO appointments (user_account_id, psychologist_account_id, scheduled_at, user_name_snapshot, user_email_snapshot, status) VALUES (?, ?, ?, ?, ?, 'approved')");
-        $stmt->bind_param("iisss", $user_id, $psihologs_id, $scheduled_at, $user_name, $user_email);
+        $stmt = $conn->prepare("INSERT INTO appointments (user_account_id, psychologist_account_id, scheduled_at, consultation_type, user_name_snapshot, user_email_snapshot, status) VALUES (?, ?, ?, ?, ?, ?, 'approved')");
+        $stmt->bind_param("iissss", $user_id, $psihologs_id, $scheduled_at, $consultation_type, $user_name, $user_email);
     } else {
-        $stmt = $conn->prepare("INSERT INTO appointments (user_account_id, psychologist_account_id, user_name_snapshot, user_email_snapshot, status) VALUES (?, ?, ?, ?, 'pending')");
-        $stmt->bind_param("iiss", $user_id, $psihologs_id, $user_name, $user_email);
+        $stmt = $conn->prepare("INSERT INTO appointments (user_account_id, psychologist_account_id, consultation_type, user_name_snapshot, user_email_snapshot, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+        $stmt->bind_param("iisss", $user_id, $psihologs_id, $consultation_type, $user_name, $user_email);
     }
     $stmt->execute();
     $stmt->close();
@@ -80,6 +93,7 @@ require __DIR__ . '/header.php';
             <h4 class="font-bold text-blue-900 dark:text-blue-100 mb-2">Jūsu konsultācija ir apstiprināta:</h4>
             <p class="text-blue-800 dark:text-blue-200">
                 <strong>Laiks:</strong> <?php echo date('d.m.Y H:i', strtotime($scheduled_at)); ?><br>
+                <strong>Veids:</strong> <?php echo $consultation_type === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?><br>
                 <strong>Ilgums:</strong> 1 stunda
             </p>
         </div>

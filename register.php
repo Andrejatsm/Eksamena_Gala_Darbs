@@ -1,6 +1,6 @@
 <?php
-session_start(); // Ja nav jau startēta db.php
-require 'db.php';
+session_start();
+require 'database/db.php';
 
 function sanitize_next(string $next): string {
     $next = trim($next);
@@ -15,14 +15,27 @@ function sanitize_next(string $next): string {
 
 $next = sanitize_next($_GET['next'] ?? $_POST['next'] ?? '');
 
+$specialization_options = [];
+$specResult = $conn->query("SELECT name FROM psychologist_specializations WHERE is_active = 1 ORDER BY sort_order ASC, name ASC");
+if ($specResult) {
+    while ($specRow = $specResult->fetch_assoc()) {
+        $specialization_options[] = $specRow['name'];
+    }
+}
+
 
 if (isset($_SESSION['account_id'])) {
-    header("Location: dashboard.php");
+    $redirect = match ($_SESSION['role'] ?? 'user') {
+        'admin' => 'admin/admin_dashboard.php',
+        'psychologist' => 'psihologi/specialist_dashboard.php',
+        default => 'dashboard.php',
+    };
+    header("Location: " . $redirect);
     exit();
 }
 
 $error = "";
-$role = 'user'; // default
+$role = 'user';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $role = $_POST['role'] ?? 'user';
     $vards = trim($_POST['vards']);
@@ -32,10 +45,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $lietotajvards = trim($_POST['lietotajvards']);
     $rawPassword = $_POST['parole'];
 
-    // Additional for psychologist
+    // Papildu lauki psihologam
     $specialization = trim($_POST['specialization'] ?? '');
     $experience_years = min(50, max(0, (int)($_POST['experience_years'] ?? 0)));
     $description = trim($_POST['description'] ?? '');
+
+    if ($role === 'psychologist') {
+        if ($specialization === '') {
+            $error = "Lūdzu izvēlieties specializāciju.";
+        } else {
+            $specCheck = $conn->prepare("SELECT id FROM psychologist_specializations WHERE name = ? AND is_active = 1 LIMIT 1");
+            $specCheck->bind_param("s", $specialization);
+            $specCheck->execute();
+            $specExists = $specCheck->get_result()->num_rows > 0;
+            $specCheck->close();
+
+            if (!$specExists) {
+                $error = "Lūdzu izvēlieties derīgu specializāciju no saraksta.";
+            }
+        }
+    }
 
     // Paroles validācija: vismaz 1 lielais, 1 mazais, 1 simbols
     $hasUpper = preg_match('/[A-ZĀČĒĢĪĶĻŅŠŪŽ]/u', $rawPassword);
@@ -75,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (empty($error)) {
-        // Pārbaude, vai lietotājvārds vai e-pasts jau eksistē
+        // Pārbaudām, vai lietotājvārds vai e-pasts jau eksistē
         $check = $conn->prepare("SELECT id FROM accounts WHERE username = ? OR email = ?");
         $check->bind_param("ss", $lietotajvards, $epasts);
         $check->execute();
@@ -134,7 +163,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// 2. TAGAD HEADER
 require 'header.php';
 ?>
 
@@ -160,16 +188,16 @@ require 'header.php';
             <input type="hidden" name="next" value="<?php echo htmlspecialchars($next); ?>">
             <?php endif; ?>
             <div class="space-y-4">
-                <!-- Role Selection -->
+                <!-- Lomas izvēle -->
                 <div>
                     <label class="field-label mb-2">Reģistrēties kā</label>
                     <div class="space-y-2">
                         <label class="flex items-center">
-                            <input type="radio" name="role" value="user" checked class="text-primary focus:ring-primary">
+                            <input type="radio" name="role" value="user" <?php echo $role === 'user' ? 'checked' : ''; ?> class="text-primary focus:ring-primary">
                             <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Lietotājs (meklēt speciālistus)</span>
                         </label>
                         <label class="flex items-center">
-                            <input type="radio" name="role" value="psychologist" class="text-primary focus:ring-primary">
+                            <input type="radio" name="role" value="psychologist" <?php echo $role === 'psychologist' ? 'checked' : ''; ?> class="text-primary focus:ring-primary">
                             <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Psihologs (piedāvāt pakalpojumus)</span>
                         </label>
                     </div>
@@ -207,11 +235,16 @@ require 'header.php';
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Vismaz 1 lielais burts, 1 simbols.</p>
                 </div>
 
-                <!-- Psychologist specific fields -->
-                <div id="psychologist-fields" class="hidden space-y-4">
+                <!-- Psihologa specifiskie lauki -->
+                <div id="psychologist-fields" class="<?php echo $role === 'psychologist' ? '' : 'hidden '; ?>space-y-4">
                     <div>
                         <label class="field-label">Specializācija</label>
-                        <input type="text" name="specialization" class="input-control" placeholder="piem. ģimenes terapija">
+                        <select name="specialization" class="select-control">
+                            <option value="">Izvēlieties specializāciju</option>
+                            <?php foreach ($specialization_options as $spec): ?>
+                                <option value="<?php echo htmlspecialchars($spec); ?>" <?php echo (($specialization ?? '') === $spec) ? 'selected' : ''; ?>><?php echo htmlspecialchars($spec); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div>
                         <label class="field-label">Pieredze (gadi)</label>
@@ -235,23 +268,6 @@ require 'header.php';
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const roleRadios = document.querySelectorAll('input[name="role"]');
-    const psychologistFields = document.getElementById('psychologist-fields');
-
-    function toggleFields() {
-        const selectedRole = document.querySelector('input[name="role"]:checked').value;
-        if (selectedRole === 'psychologist') {
-            psychologistFields.classList.remove('hidden');
-        } else {
-            psychologistFields.classList.add('hidden');
-        }
-    }
-
-    roleRadios.forEach(radio => radio.addEventListener('change', toggleFields));
-    toggleFields(); // Initial check
-});
-</script>
+<script src="assets/js/register.js"></script>
 
 <?php require 'footer.php'; ?>

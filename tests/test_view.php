@@ -1,7 +1,7 @@
 <?php
 session_start();
 $pageTitle = "Tests";
-require 'db.php';
+require '../database/db.php';
 
 if (empty($_GET['test_id'])) {
     header("Location: tests.php");
@@ -9,7 +9,10 @@ if (empty($_GET['test_id'])) {
 }
 
 $test_id = (int)$_GET['test_id'];
+$is_logged_in = isset($_SESSION['account_id'], $_SESSION['role']);
 $is_user_logged_in = isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user';
+$is_admin_or_psych_logged_in = $is_logged_in && in_array($_SESSION['role'], ['admin', 'psychologist'], true);
+$logged_in_role_label = ($_SESSION['role'] ?? '') === 'admin' ? 'administrators' : 'psihologs';
 $account_id = $is_user_logged_in ? (int)$_SESSION['account_id'] : 0;
 
 // Get test
@@ -88,19 +91,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_test'])) {
     }
 }
 
-require 'header.php';
+require '../header.php';
 ?>
 
 <div class="page-shell-narrow page-surface">
     <div class="page-heading">
-        <a href="<?php echo $is_user_logged_in ? 'tests.php' : 'index.php#self-tests'; ?>" class="text-primary hover:text-primaryHover text-sm font-medium flex items-center gap-1 mb-4">
+        <a href="<?php echo $is_logged_in ? 'tests.php' : '../index.php#self-tests'; ?>" class="text-primary hover:text-primaryHover text-sm font-medium flex items-center gap-1 mb-4">
             <i class="fas fa-arrow-left"></i> Atpakaļ uz testiem
         </a>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($test['title']); ?></h1>
         <p class="text-gray-500 dark:text-gray-400 mt-2"><?php echo htmlspecialchars($test['description']); ?></p>
     </div>
 
-    <?php if (!$is_user_logged_in): ?>
+    <?php if ($is_admin_or_psych_logged_in): ?>
+    <div class="alert-warning mb-6">
+        <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
+            <i class="fas fa-info-circle mr-2"></i>Tu esi ielogojies kā <?php echo htmlspecialchars($logged_in_role_label); ?>. Testu vari pildīt, bet rezultāts netiks saglabāts.
+        </p>
+    </div>
+    <?php elseif (!$is_user_logged_in): ?>
     <div class="alert-warning mb-6">
         <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
             <i class="fas fa-info-circle mr-2"></i>Viesu režīms: testu vari pildīt bez ielogošanās, bet rezultāts tiks atvērts pēc ielogošanās/reģistrācijas.
@@ -129,11 +138,11 @@ require 'header.php';
             <button type="submit" name="submit_test" class="button-primary flex-1">
                 Iesniedz atbildes
             </button>
-            <a href="<?php echo $is_user_logged_in ? 'tests.php' : 'index.php#self-tests'; ?>" class="button-secondary flex-1">
+            <a href="<?php echo $is_logged_in ? 'tests.php' : '../index.php#self-tests'; ?>" class="button-secondary flex-1">
                 Atcelt
             </a>
         </div>
     </form>
 </div>
 
-<?php require 'footer.php'; ?>
+<?php require '../footer.php'; ?>

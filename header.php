@@ -3,10 +3,14 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+$scriptDir = trim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+$depth = $scriptDir === '' ? 0 : substr_count($scriptDir, '/') + 1;
+$pathPrefix = str_repeat('../', $depth);
+
 // Nosakām, kurš ir ielogojies (vienota autorizācija: account_id + role)
 $user_name = '';
 $user_role = '';
-$dashboard_link = 'login.php';
+$dashboard_link = $pathPrefix . 'login.php';
 $is_logged_in = false;
 
 if (isset($_SESSION['account_id'], $_SESSION['role'])) {
@@ -15,13 +19,13 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     $role = $_SESSION['role'];
     if ($role === 'admin') {
         $user_role = 'Administrators';
-        $dashboard_link = 'admin_dashboard.php';
+        $dashboard_link = $pathPrefix . 'admin/admin_dashboard.php';
     } elseif ($role === 'psychologist') {
         $user_role = 'Psihologs';
-        $dashboard_link = 'specialist_dashboard.php';
+        $dashboard_link = $pathPrefix . 'psihologi/specialist_dashboard.php';
     } else {
         $user_role = 'Lietotājs';
-        $dashboard_link = 'dashboard.php';
+        $dashboard_link = $pathPrefix . 'dashboard.php';
     }
 }
 ?>
@@ -62,10 +66,10 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <?php $cssVersion = '20260327b'; ?>
-    <link rel="stylesheet" href="style.css?v=<?php echo $cssVersion; ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($pathPrefix); ?>assets/css/style.css?v=<?php echo $cssVersion; ?>">
     <?php if (!empty($pageStyles) && is_array($pageStyles)): ?>
         <?php foreach ($pageStyles as $pageStyle): ?>
-    <link rel="stylesheet" href="<?php echo htmlspecialchars($pageStyle); ?>?v=<?php echo $cssVersion; ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($pathPrefix . 'assets/css/' . basename((string)$pageStyle)); ?>?v=<?php echo $cssVersion; ?>">
         <?php endforeach; ?>
     <?php endif; ?>
 </head>
@@ -75,7 +79,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="index.php" class="text-2xl font-bold text-primary tracking-wide hover:opacity-80 transition">Saprasts</a>
+                    <a href="<?php echo htmlspecialchars($pathPrefix); ?>index.php" class="text-2xl font-bold text-primary tracking-wide hover:opacity-80 transition">Saprasts</a>
                 </div>
 
                 <div class="hidden md:flex space-x-6 items-center">
@@ -117,7 +121,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                     
                                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
                                     <li>
-                                        <a href="user_profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>user_profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
                                             <i class="fas fa-user-circle w-5 text-center mr-2"></i> Mans profils
                                         </a>
                                     </li>
@@ -126,26 +130,19 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
                                     <!-- User-only features -->
                                     <li>
-                                        <a href="tests.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>tests/tests.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
                                             <i class="fas fa-clipboard-list w-5 text-center mr-2"></i> Pašnovērtējuma testi
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="appointments.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>appointments.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
                                             <i class="fas fa-calendar-check w-5 text-center mr-2"></i> Mani pieraksti
-                                        </a>
-                                    </li>
-                                    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                                    <!-- Admin-only features -->
-                                    <li>
-                                        <a href="admin_dashboard.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-cogs w-5 text-center mr-2"></i> Pārvaldība
                                         </a>
                                     </li>
                                     <?php endif; ?>
                                     
                                     <li class="border-t border-gray-100 dark:border-zinc-700">
-                                        <a href="logout.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-red-400 transition">
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>logout.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-red-400 transition">
                                             <i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> Iziet
                                         </a>
                                     </li>
@@ -154,7 +151,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                         </div>
 
                     <?php else: ?>
-                        <a href="login.php" class="text-gray-700 dark:text-gray-300 hover:text-primary transition font-medium">Ielogoties</a>
+                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>login.php" class="text-gray-700 dark:text-gray-300 hover:text-primary transition font-medium">Ielogoties</a>
                     <?php endif; ?>
                 </div>
 
@@ -186,24 +183,22 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                     <a href="<?php echo $dashboard_link; ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Panelis</a>
                     
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
-                    <a href="user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mans profils</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mans profils</a>
                     <?php endif; ?>
                     
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
-                    <a href="tests.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pašnovērtējuma testi</a>
-                    <a href="appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani pieraksti</a>
-                    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <a href="admin_dashboard.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pārvaldība</a>
-                    <?php endif; ?>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>tests/tests.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pašnovērtējuma testi</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani pieraksti</a>
+                      <?php endif; ?>
                     
-                    <a href="logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10">Iziet</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10">Iziet</a>
                  <?php else: ?>
-                    <a href="login.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ielogoties</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>login.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ielogoties</a>
                  <?php endif; ?>
 
                  <div class="pt-4 border-t border-gray-200 dark:border-zinc-700 mt-2">
                     <div class="flex items-center justify-between px-3 py-2">
-                        <span class="text-gray-700 dark:text-gray-300 font-medium">Dark Mode</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium">Tumšais režīms</span>
                         <label for="theme-toggle-mobile" class="inline-flex relative items-center cursor-pointer">
                             <input type="checkbox" id="theme-toggle-mobile" class="sr-only peer">
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
@@ -214,22 +209,4 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
         </div>
     </nav>
 
-    <script>
-        // Dropdown Logic
-        const userMenuBtn = document.getElementById('user-menu-button');
-        const userDropdown = document.getElementById('user-dropdown');
-
-        if (userMenuBtn && userDropdown) {
-            userMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Novērš klikšķa nodošanu tālāk
-                userDropdown.classList.toggle('hidden');
-            });
-
-            // Aizvērt, ja klikšķina citur
-            document.addEventListener('click', (e) => {
-                if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                    userDropdown.classList.add('hidden');
-                }
-            });
-        }
-    </script>
+    <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/header_menu.js"></script>

@@ -1,0 +1,92 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = ""; 
+$dbname = "saprasts";
+
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+
+if ($conn->connect_error) {
+    die("Savienojuma kļūda: " . $conn->connect_error);
+}
+
+$conn->set_charset("utf8mb4");
+
+$availabilityTypeColumn = $conn->query("SHOW COLUMNS FROM availability_slots LIKE 'consultation_type'");
+if ($availabilityTypeColumn && $availabilityTypeColumn->num_rows === 0) {
+    $conn->query(
+        "ALTER TABLE availability_slots
+         ADD COLUMN consultation_type ENUM('in_person','online') NOT NULL DEFAULT 'online' AFTER ends_at"
+    );
+}
+if ($availabilityTypeColumn instanceof mysqli_result) {
+    $availabilityTypeColumn->free();
+}
+
+// Ensure lookup tables exist so forms can use DB-driven dropdowns.
+$conn->query(
+    "CREATE TABLE IF NOT EXISTS article_categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(120) NOT NULL UNIQUE,
+        is_active TINYINT(1) NOT NULL DEFAULT 1,
+        sort_order INT NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+);
+
+$conn->query(
+    "CREATE TABLE IF NOT EXISTS psychologist_specializations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(120) NOT NULL UNIQUE,
+        is_active TINYINT(1) NOT NULL DEFAULT 1,
+        sort_order INT NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+);
+
+$categorySeed = [
+    ["Stresa vadīšana", 10],
+    ["Trauksme", 20],
+    ["Depresija", 30],
+    ["Attiecības", 40],
+    ["Pašvērtējums", 50],
+    ["Miegs un izdegšana", 60],
+    ["Bērnu un pusaudžu psiholoģija", 70],
+    ["Darbs un karjera", 80],
+];
+
+$specSeed = [
+    ["Depresija un trauksme", 10],
+    ["Attiecību terapija", 20],
+    ["Ģimenes terapija", 30],
+    ["Bērnu un pusaudžu psiholoģija", 40],
+    ["Trauma un PTSS", 50],
+    ["Atkarību terapija", 60],
+    ["Kognitīvi biheiviorālā terapija", 70],
+    ["Stresa vadība un izdegšana", 80],
+];
+
+$catStmt = $conn->prepare(
+    "INSERT INTO article_categories (name, sort_order) VALUES (?, ?) ON DUPLICATE KEY UPDATE sort_order = VALUES(sort_order)"
+);
+if ($catStmt) {
+    foreach ($categorySeed as [$name, $sort]) {
+        $catStmt->bind_param("si", $name, $sort);
+        $catStmt->execute();
+    }
+    $catStmt->close();
+}
+
+$specStmt = $conn->prepare(
+    "INSERT INTO psychologist_specializations (name, sort_order) VALUES (?, ?) ON DUPLICATE KEY UPDATE sort_order = VALUES(sort_order)"
+);
+if ($specStmt) {
+    foreach ($specSeed as [$name, $sort]) {
+        $specStmt->bind_param("si", $name, $sort);
+        $specStmt->execute();
+    }
+    $specStmt->close();
+}
+?>

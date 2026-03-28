@@ -1,7 +1,7 @@
 <?php
 session_start();
 $pageTitle = "Mani pieraksti";
-require 'db.php';
+require 'database/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
     header("Location: login.php");
@@ -12,20 +12,31 @@ require 'header.php';
 
 $account_id = (int)$_SESSION['account_id'];
 $message = "";
+$status_classes = [
+    'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+    'approved' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    'rescheduled' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+];
+$status_labels = [
+    'pending' => 'Gaida apstiprinājumu',
+    'approved' => 'Apstiprināts',
+    'cancelled' => 'Atcelts',
+    'rescheduled' => 'Pārcelts',
+];
 
-// Handle reschedule/cancel
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+// Apstrādājam pieraksta atcelšanu vai pārcelšanu
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_POST['action'])) {
     $appointment_id = (int)$_POST['appointment_id'];
     
-    if(isset($_POST['action'])) {
-        if($_POST['action'] === 'cancel') {
+    if ($_POST['action'] === 'cancel') {
             $status = 'cancelled';
             $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ? AND user_account_id = ?");
             $stmt->bind_param("sii", $status, $appointment_id, $account_id);
             $stmt->execute();
             $stmt->close();
             $message = "Pieraksts atcelts.";
-        } elseif($_POST['action'] === 'reschedule') {
+    } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_time'])) {
             $new_time = $_POST['new_time'];
             $status = 'rescheduled';
             $stmt = $conn->prepare("UPDATE appointments SET scheduled_at = ?, status = ? WHERE id = ? AND user_account_id = ?");
@@ -33,11 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->execute();
             $stmt->close();
             $message = "Pieraksts pārcelts uz " . date('d.m.Y H:i', strtotime($new_time)) . ".";
-        }
     }
 }
 
-// Get appointments
+// Iegūstam pierakstus
 $sql = "SELECT a.id, a.scheduled_at, a.consultation_type, a.status, p.full_name FROM appointments a 
         JOIN psychologist_profiles p ON a.psychologist_account_id = p.account_id 
         WHERE a.user_account_id = ? 
@@ -75,30 +85,16 @@ $stmt->close();
                             <i class="fas fa-calendar"></i> <?php echo date('d.m.Y H:i', strtotime($appt['scheduled_at'])); ?>
                         </p>
                         <p class="text-sm text-gray-600 dark:text-gray-400">
-                            <i class="fas fa-video"></i> <?php echo $appt['consultation_type'] === 'online' ? 'Tiešsaiste' : 'Klātienē'; ?>
+                            <i class="fas fa-video"></i> <?php echo $appt['consultation_type'] === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?>
                         </p>
-                        <span class="inline-block mt-2 px-2 py-1 text-xs rounded-full <?php 
-                            echo match($appt['status']) {
-                                'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-                                'approved' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-                                'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-                                'rescheduled' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-                                default => 'bg-gray-100 text-gray-800'
-                            };
-                        ?>">
-                            <?php echo match($appt['status']) {
-                                'pending' => 'Gaida apstiprinājumu',
-                                'approved' => 'Apstiprināts',
-                                'cancelled' => 'Atcelts',
-                                'rescheduled' => 'Pārcelts',
-                                default => ucfirst($appt['status'])
-                            }; ?>
+                        <span class="inline-block mt-2 px-2 py-1 text-xs rounded-full <?php echo $status_classes[$appt['status']] ?? 'bg-gray-100 text-gray-800'; ?>">
+                            <?php echo $status_labels[$appt['status']] ?? ucfirst((string)$appt['status']); ?>
                         </span>
                     </div>
                     
                     <?php if($appt['status'] === 'pending' || $appt['status'] === 'approved'): ?>
                         <div class="flex gap-2">
-                            <button type="button" onclick="openRescheduleModal(<?php echo $appt['id']; ?>)" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-2 rounded-lg transition text-sm">
+                            <button type="button" class="open-reschedule-btn text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-2 rounded-lg transition text-sm" data-appointment-id="<?php echo (int)$appt['id']; ?>">
                                 <i class="fas fa-calendar-alt"></i> Pārcelt
                             </button>
                             <form method="POST" class="inline">
@@ -124,13 +120,13 @@ $stmt->close();
     <?php endif; ?>
 </div>
 
-<!-- Reschedule Modal -->
+<!-- Pieraksta pārcelšanas modālis -->
 <div id="rescheduleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-6 border w-full max-w-md shadow-lg rounded-2xl bg-white dark:bg-zinc-800">
         <div>
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg leading-6 font-bold text-gray-900 dark:text-white">Pārcelt pierakstu</h3>
-                <button onclick="closeRescheduleModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                <button id="closeRescheduleModalBtn" type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
                     <i class="fas fa-times fa-lg"></i>
                 </button>
             </div>
@@ -151,22 +147,6 @@ $stmt->close();
     </div>
 </div>
 
-<script>
-function openRescheduleModal(appointmentId) {
-    document.getElementById('modal_appointment_id').value = appointmentId;
-    document.getElementById('rescheduleModal').classList.remove('hidden');
-}
-
-function closeRescheduleModal() {
-    document.getElementById('rescheduleModal').classList.add('hidden');
-}
-
-window.addEventListener('click', function(event) {
-    const modal = document.getElementById('rescheduleModal');
-    if (event.target == modal) {
-        closeRescheduleModal();
-    }
-});
-</script>
+<script src="assets/js/appointments.js"></script>
 
 <?php require 'footer.php'; ?>

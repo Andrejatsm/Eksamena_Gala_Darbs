@@ -1,10 +1,10 @@
 <?php
 session_start();
-require 'db.php';
+require '../database/db.php';
 
 // Pārbaude vai ir psihologs
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'psychologist') {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -29,7 +29,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $pageTitle = "Speciālista Panelis";
-require 'header.php';
+require '../header.php';
 ?>
 
 <div class="min-h-screen page-surface dark:bg-zinc-900">
@@ -43,10 +43,10 @@ require 'header.php';
                     <p class="text-xl text-gray-600 dark:text-gray-400 mt-2">Pārvaldiet savu praksi un klientus efektīvi</p>
                 </div>
                 <div class="flex gap-3">
-                    <a href="articles.php" class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primaryHover transition shadow-lg">
+                    <a href="../articles.php" class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primaryHover transition shadow-lg">
                         <i class="fas fa-plus mr-2"></i>Rakstīt rakstu
                     </a>
-                    <a href="availability.php" class="px-6 py-3 bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition">
+                    <a href="../availability.php" class="px-6 py-3 bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition">
                         <i class="fas fa-calendar-plus mr-2"></i>Pievienot laiku
                     </a>
                 </div>
@@ -56,7 +56,7 @@ require 'header.php';
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             <?php
-            // Get statistics
+            // Iegūstam statistiku
             $stats = [
                 'total_appointments' => 0,
                 'pending_appointments' => 0,
@@ -64,29 +64,22 @@ require 'header.php';
                 'total_articles' => 0
             ];
 
-            // Total appointments
-            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM appointments WHERE psychologist_account_id = ?");
-            $stmt->bind_param("i", $psihologs_id);
-            $stmt->execute();
-            $stats['total_appointments'] = $stmt->get_result()->fetch_assoc()['count'];
+            $countForPsychologist = function (string $query) use ($conn, $psihologs_id): int {
+                $stmt = $conn->prepare($query);
+                if (!$stmt) {
+                    return 0;
+                }
+                $stmt->bind_param("i", $psihologs_id);
+                $stmt->execute();
+                $row = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+                return isset($row['count']) ? (int)$row['count'] : 0;
+            };
 
-            // Pending appointments
-            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM appointments WHERE psychologist_account_id = ? AND status = 'pending'");
-            $stmt->bind_param("i", $psihologs_id);
-            $stmt->execute();
-            $stats['pending_appointments'] = $stmt->get_result()->fetch_assoc()['count'];
-
-            // Approved appointments
-            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM appointments WHERE psychologist_account_id = ? AND status = 'approved'");
-            $stmt->bind_param("i", $psihologs_id);
-            $stmt->execute();
-            $stats['approved_appointments'] = $stmt->get_result()->fetch_assoc()['count'];
-
-            // Total articles
-            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM articles WHERE psychologist_account_id = ?");
-            $stmt->bind_param("i", $psihologs_id);
-            $stmt->execute();
-            $stats['total_articles'] = $stmt->get_result()->fetch_assoc()['count'];
+            $stats['total_appointments'] = $countForPsychologist("SELECT COUNT(*) AS count FROM appointments WHERE psychologist_account_id = ?");
+            $stats['pending_appointments'] = $countForPsychologist("SELECT COUNT(*) AS count FROM appointments WHERE psychologist_account_id = ? AND status = 'pending'");
+            $stats['approved_appointments'] = $countForPsychologist("SELECT COUNT(*) AS count FROM appointments WHERE psychologist_account_id = ? AND status = 'approved'");
+            $stats['total_articles'] = $countForPsychologist("SELECT COUNT(*) AS count FROM articles WHERE psychologist_account_id = ?");
             ?>
 
             <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
@@ -95,7 +88,7 @@ require 'header.php';
                         <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Kopā pieraksti</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['total_appointments']; ?></p>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
                         <i class="fas fa-calendar-check text-primary text-xl"></i>
                     </div>
                 </div>
@@ -107,7 +100,7 @@ require 'header.php';
                         <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Gaida apstiprinājumu</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['pending_appointments']; ?></p>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
                         <i class="fas fa-clock text-primary text-xl"></i>
                     </div>
                 </div>
@@ -119,7 +112,7 @@ require 'header.php';
                         <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Apstiprināti</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['approved_appointments']; ?></p>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
                         <i class="fas fa-check-circle text-primary text-xl"></i>
                     </div>
                 </div>
@@ -131,7 +124,7 @@ require 'header.php';
                         <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Raksti</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['total_articles']; ?></p>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
                         <i class="fas fa-file-alt text-primary text-xl"></i>
                     </div>
                 </div>
@@ -202,13 +195,13 @@ require 'header.php';
                                                 <div class="flex justify-end gap-2">
                                                     <form method="POST" class="inline">
                                                         <input type="hidden" name="appoint_id" value="<?php echo $row['id']; ?>">
-                                                        <button type="submit" name="action" value="accept" class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition text-sm font-medium" title="Apstiprināt">
+                                                        <button type="submit" name="action" value="accept" class="px-3 py-1 bg-primary/15 dark:bg-primary/25 text-primary rounded-lg hover:bg-primary/25 dark:hover:bg-primary/35 transition text-sm font-medium" title="Apstiprināt">
                                                             <i class="fas fa-check"></i>
                                                         </button>
                                                     </form>
                                                     <form method="POST" class="inline">
                                                         <input type="hidden" name="appoint_id" value="<?php echo $row['id']; ?>">
-                                                        <button type="submit" name="action" value="reject" class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition text-sm font-medium" title="Noraidīt">
+                                                        <button type="submit" name="action" value="reject" class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition text-sm font-medium" title="Noraidīt">
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </form>
@@ -239,4 +232,4 @@ require 'header.php';
     </div>
 </div>
 
-<?php require 'footer.php'; ?>
+<?php require '../footer.php'; ?>

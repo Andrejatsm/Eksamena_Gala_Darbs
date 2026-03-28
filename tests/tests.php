@@ -1,14 +1,17 @@
 <?php
 session_start();
 $pageTitle = "Pašnovērtējuma testi";
-require 'db.php';
+require '../database/db.php';
 
-require 'header.php';
+require '../header.php';
 
 $account_id = isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user'
     ? (int)$_SESSION['account_id']
     : 0;
 $show_attempts = $account_id > 0;
+$is_admin_or_psych_logged_in = isset($_SESSION['account_id'], $_SESSION['role'])
+    && in_array($_SESSION['role'], ['admin', 'psychologist'], true);
+$logged_in_role_label = ($_SESSION['role'] ?? '') === 'admin' ? 'administrators' : 'psihologs';
 
 // Get all published tests
 $sql = "SELECT id, title, description FROM tests WHERE status = 'published' ORDER BY created_at DESC";
@@ -41,7 +44,11 @@ if ($show_attempts) {
         <p class="page-subtitle">Aizpildiet testus, lai labāk izprastu savu emocionālo stāvokli.</p>
     </div>
 
-    <?php if (!$show_attempts): ?>
+    <?php if ($is_admin_or_psych_logged_in): ?>
+    <div class="alert-warning">
+        Tu esi ielogojies kā <?php echo htmlspecialchars($logged_in_role_label); ?>. Testu vari pildīt, bet šī konta rezultāti netiks saglabāti.
+    </div>
+    <?php elseif (!$show_attempts): ?>
     <div class="alert-info">
         Testus vari pildīt bez ielogošanās. Lai saglabātu un apskatītu rezultātus, pēc testa beigām vajadzēs ielogoties vai reģistrēties.
     </div>
@@ -78,4 +85,4 @@ if ($show_attempts) {
     <?php endif; ?>
 </div>
 
-<?php require 'footer.php'; ?>
+<?php require '../footer.php'; ?>

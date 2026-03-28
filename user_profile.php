@@ -1,7 +1,7 @@
 <?php
 session_start();
 $pageTitle = "Mana profila informācija";
-require 'db.php';
+require 'database/db.php';
 
 if (!isset($_SESSION['account_id'])) {
     header("Location: login.php");
@@ -70,7 +70,7 @@ $result = $stmt->get_result();
 $current = $result->fetch_assoc();
 $stmt->close();
 
-// Get profile info
+// Iegūstam profila informāciju
 if ($role === 'user') {
     $stmt = $conn->prepare("SELECT first_name, last_name FROM user_profiles WHERE account_id = ?");
 } else {

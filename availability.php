@@ -1,7 +1,7 @@
 <?php
 session_start();
 $pageTitle = "Pieejamība";
-require 'db.php';
+require 'database/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'psychologist') {
     header("Location: login.php");
@@ -14,19 +14,25 @@ $account_id = (int)$_SESSION['account_id'];
 $message = "";
 $error = "";
 
-// Handle adding availability
+// Apstrādājam jauna pieejamības slota pievienošanu
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_availability'])) {
     $starts_at = $_POST['starts_at'] ?? '';
     $ends_at = $_POST['ends_at'] ?? '';
+    $consultation_type = $_POST['consultation_type'] ?? 'online';
     $note = trim($_POST['note'] ?? '');
+    $allowed_types = ['in_person', 'online'];
+
+    if (!in_array($consultation_type, $allowed_types, true)) {
+        $consultation_type = 'online';
+    }
 
     if(empty($starts_at) || empty($ends_at)) {
         $error = "Sākuma un beigu laiki ir obligāti.";
     } else if(strtotime($ends_at) <= strtotime($starts_at)) {
         $error = "Beigu laikam jābūt vēlākiem nekā sākuma laikam.";
     } else {
-        $stmt = $conn->prepare("INSERT INTO availability_slots (psychologist_account_id, starts_at, ends_at, note) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("isss", $account_id, $starts_at, $ends_at, $note);
+        $stmt = $conn->prepare("INSERT INTO availability_slots (psychologist_account_id, starts_at, ends_at, consultation_type, note) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("issss", $account_id, $starts_at, $ends_at, $consultation_type, $note);
         if($stmt->execute()) {
             $message = "Pieejamības slots pievienots!";
         } else {
@@ -36,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_availability'])) {
     }
 }
 
-// Handle deleting availability
+// Apstrādājam pieejamības slota dzēšanu
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_slot'])) {
     $slot_id = (int)$_POST['slot_id'];
     $stmt = $conn->prepare("DELETE FROM availability_slots WHERE id = ? AND psychologist_account_id = ?");
@@ -46,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_slot'])) {
     $message = "Slots dzēsts.";
 }
 
-// Get availability slots
-$sql = "SELECT id, starts_at, ends_at, note FROM availability_slots WHERE psychologist_account_id = ? ORDER BY starts_at DESC";
+// Iegūstam pieejamības slotus
+$sql = "SELECT id, starts_at, ends_at, consultation_type, note FROM availability_slots WHERE psychologist_account_id = ? ORDER BY starts_at DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $account_id);
 $stmt->execute();
@@ -78,7 +84,7 @@ $stmt->close();
     <?php endif; ?>
 
     <div class="layout-sidebar-3">
-        <!-- Add form -->
+        <!-- Slota pievienošanas forma -->
         <div class="form-card">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Pievienot laika slotu</h2>
             <form method="POST" class="stack-md">
@@ -93,6 +99,11 @@ $stmt->close();
                 </div>
 
                 <div>
+                    <label class="field-label">Konsultācijas veids</label>
+                    <select name="consultation_type" class="input-control mb-2">
+                        <option value="online">Tiešsaistē</option>
+                        <option value="in_person">Klātienē</option>
+                    </select>
                     <label class="field-label">Piezīme (neobligāta)</label>
                     <input type="text" name="note" placeholder="Piem. tikai tiešsaistē" class="input-control">
                 </div>
@@ -103,7 +114,7 @@ $stmt->close();
             </form>
         </div>
 
-        <!-- Slots list -->
+        <!-- Esošo slotu saraksts -->
         <div class="lg:col-span-2 space-y-4">
             <?php foreach($slots as $slot): ?>
                 <div class="list-card p-4">
@@ -113,6 +124,9 @@ $stmt->close();
                                 <i class="fas fa-calendar-alt text-primary"></i> 
                                 <?php echo date('d.m.Y H:i', strtotime($slot['starts_at'])); ?> - 
                                 <?php echo date('H:i', strtotime($slot['ends_at'])); ?>
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                <i class="fas fa-video mr-1"></i><?php echo ($slot['consultation_type'] ?? 'online') === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?>
                             </p>
                             <?php if($slot['note']): ?>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><?php echo htmlspecialchars($slot['note']); ?></p>

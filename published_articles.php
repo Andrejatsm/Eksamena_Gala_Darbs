@@ -2,7 +2,7 @@
 session_start();
 $pageTitle = 'Publicētie raksti';
 $pageStyles = ['content.css'];
-require 'db.php';
+require 'database/db.php';
 require 'header.php';
 
 $article_id = (int)($_GET['id'] ?? 0);

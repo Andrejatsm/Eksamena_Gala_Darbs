@@ -1,3 +1,11 @@
+<?php
+if (!isset($pathPrefix)) {
+    $scriptDir = trim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+    $depth = $scriptDir === '' ? 0 : substr_count($scriptDir, '/') + 1;
+    $pathPrefix = str_repeat('../', $depth);
+}
+?>
+
 <footer class="mt-auto bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 py-8 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -9,8 +17,8 @@
                 </div>
 
                 <div class="flex items-center space-x-6 text-sm font-medium">
-                    <a href="privacy.php" class="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors">Privātuma politika</a>
-                    <button onclick="document.getElementById('contactModal').classList.remove('hidden')" class="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors focus:outline-none">Sazināties</button>
+                    <a href="<?php echo htmlspecialchars($pathPrefix); ?>privacy.php" class="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors">Privātuma politika</a>
+                    <button id="openContactModalBtn" type="button" class="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors focus:outline-none">Sazināties</button>
                 </div>
                 
             </div>
@@ -47,7 +55,7 @@
 
     <div id="contactModal" class="hidden fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true" onclick="document.getElementById('contactModal').classList.add('hidden')"></div>
+            <div id="contactModalBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div class="inline-block align-middle bg-white dark:bg-zinc-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full border border-gray-200 dark:border-zinc-700">
                 <div class="bg-white dark:bg-zinc-800 px-6 pt-5 pb-4">
@@ -65,157 +73,16 @@
                 </div>
                 <div class="bg-gray-50 dark:bg-zinc-700/30 px-6 py-3 sm:flex sm:flex-row-reverse gap-2">
                     <button type="button" id="sendContactBtn" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-semibold text-white hover:bg-primaryHover focus:outline-none sm:w-auto sm:text-sm transition">Nosūtīt</button>
-                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-zinc-500 shadow-sm px-4 py-2 bg-white dark:bg-zinc-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm transition" onclick="document.getElementById('contactModal').classList.add('hidden')">Atcelt</button>
+                    <button id="closeContactModalBtn" type="button" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-zinc-500 shadow-sm px-4 py-2 bg-white dark:bg-zinc-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm transition">Atcelt</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
     <script>
-        // Mobile menu toggle logic
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
-        
-        if(btn){
-            btn.addEventListener('click', () => {
-                menu.classList.toggle('hidden');
-            });
-        }
-
-        // Contact form logic
-        const sendContactBtn = document.getElementById('sendContactBtn');
-        if(sendContactBtn){
-            sendContactBtn.addEventListener('click', () => {
-                const email = document.getElementById('contactEmail').value.trim();
-                const message = document.getElementById('contactMessage').value.trim();
-                
-                if(!email || !message){
-                    alert('Lūdzu, aizpildiet visus laukus.');
-                    return;
-                }
-
-                // Send to server (for now, just alert)
-                fetch('contact_handler.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, message })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    alert(data.message);
-                    document.getElementById('contactModal').classList.add('hidden');
-                    document.getElementById('contactEmail').value = '';
-                    document.getElementById('contactMessage').value = '';
-                })
-                .catch(err => {
-                    alert('Kļūda sūtot ziņu.');
-                });
-            });
-        }
-
-        // AI Chat funkcionalitāte
-        const chatToggleBtn = document.getElementById('chat-toggle-btn');
-        const chatContainer = document.getElementById('chat-container');
-        const chatCloseBtn = document.getElementById('chat-close-btn');
-        const chatInput = document.getElementById('chat-input');
-        const chatSendBtn = document.getElementById('chat-send-btn');
-        const chatMessages = document.getElementById('chat-messages');
-
-        // Atvērt/Aizvērt čatu
-        if(chatToggleBtn && chatContainer && chatCloseBtn) {
-            chatToggleBtn.addEventListener('click', () => {
-                chatContainer.classList.remove('hidden');
-                chatToggleBtn.classList.add('hidden');
-                setTimeout(() => chatInput.focus(), 100);
-            });
-            chatCloseBtn.addEventListener('click', () => {
-                chatContainer.classList.add('hidden');
-                chatToggleBtn.classList.remove('hidden');
-            });
-        }
-
-        // Palīgfunkcija ziņas pievienošanai UI
-        function escapeHtml(text) {
-            return text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function formatChatMessage(text) {
-            let html = escapeHtml(text);
-
-            // Normalize known wrong route names from model outputs
-            html = html.replace(/\btest\.php\b/gi, 'tests.php');
-            html = html.replace(/\barticle\.php\b/gi, 'published_articles.php');
-            html = html.replace(/\barticles\.php\b/gi, 'published_articles.php');
-            html = html.replace(/\bprofile\.php\b/gi, 'user_profile.php');
-
-            // Add links for common action words if model did not include URLs
-            html = html.replace(/\bReģistrēties\b/g, '<a class="ai-link" href="register.php">Reģistrēties</a>');
-            html = html.replace(/\bIelogoties\b/g, '<a class="ai-link" href="login.php">Ielogoties</a>');
-            html = html.replace(/\bPašnovērtējuma testi\b/g, '<a class="ai-link" href="tests.php">Pašnovērtējuma testi</a>');
-
-            html = html.replace(/\[([^\]]+)\]\(([^)]+\.php(?:\?[^)\s]+)?)\)/g, '<a class="ai-link" href="$2">$1</a>');
-            html = html.replace(/(^|\s)([a-z0-9_\-/]+\.php(?:\?[a-z0-9_\-=&%]+)?)(?=$|\s|[.,!?:;])/gi, '$1<a class="ai-link" href="$2">$2</a>');
-
-            return html.replace(/\n/g, '<br>');
-        }
-
-        function appendMessage(text, isUser = false) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = isUser ? 'flex justify-end mt-2' : 'flex justify-start mt-2';
-            
-            const innerDiv = document.createElement('div');
-            innerDiv.className = isUser 
-                ? 'chat-message bg-primary text-white rounded-2xl rounded-tr-sm py-3 px-4 max-w-[85%] text-sm shadow-sm'
-                : 'chat-message bg-white dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-sm py-3 px-4 max-w-[85%] text-sm shadow-sm border border-gray-100 dark:border-zinc-600';
-            
-            innerDiv.innerHTML = formatChatMessage(text);
-            msgDiv.appendChild(innerDiv);
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Sūtīt ziņu uz backend
-        async function sendChatMessage() {
-            const message = chatInput.value.trim();
-            if (!message) return;
-
-            appendMessage(message, true);
-            chatInput.value = '';
-            chatInput.disabled = true;
-            chatSendBtn.disabled = true;
-
-            const loadingId = 'loading-' + Date.now();
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = loadingId;
-            loadingDiv.className = 'flex justify-start mt-2';
-            loadingDiv.innerHTML = `<div class="bg-white dark:bg-zinc-700 text-gray-500 rounded-2xl rounded-tl-sm py-3 px-4 max-w-[85%] text-sm shadow-sm border border-gray-100 dark:border-zinc-600"><i class="fas fa-circle-notch fa-spin"></i> Domā...</div>`;
-            chatMessages.appendChild(loadingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                const res = await fetch('ai_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
-                const data = await res.json();
-                document.getElementById(loadingId).remove();
-                appendMessage(data.error ? "Kļūda: " + data.error : data.reply);
-            } catch (err) {
-                document.getElementById(loadingId).remove();
-                appendMessage("Pievienojuma kļūda serverim.");
-            }
-            chatInput.disabled = false;
-            chatSendBtn.disabled = false;
-            chatInput.focus();
-        }
-
-        if(chatSendBtn && chatInput) {
-            chatSendBtn.addEventListener('click', sendChatMessage);
-            chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
-        }
+        window.APP_PATH_PREFIX = <?php echo json_encode($pathPrefix); ?>;
     </script>
+    <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/script.js"></script>
+    <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/footer_ui.js"></script>
 </body>
 </html>

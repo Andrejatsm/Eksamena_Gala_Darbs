@@ -1,14 +1,14 @@
 <?php
 session_start();
 $pageTitle = "Testa rezultāti";
-require 'db.php';
+require '../database/db.php';
 
 // Guest flow: result is temporarily stored in session until user logs in
 if (isset($_GET['guest']) && isset($_SESSION['guest_test_result'])) {
     $guest_result = $_SESSION['guest_test_result'];
 
     if (!isset($_SESSION['account_id'])) {
-        require 'header.php';
+        require '../header.php';
         ?>
         <div class="page-shell-narrow page-surface">
             <div class="result-card text-center">
@@ -28,17 +28,17 @@ if (isset($_GET['guest']) && isset($_SESSION['guest_test_result'])) {
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="login.php?next=test_results.php%3Fguest%3D1" class="flex-1 bg-primary hover:bg-primaryHover text-white px-6 py-3 rounded-lg transition font-medium">
+                    <a href="../login.php?next=tests/test_results.php%3Fguest%3D1" class="flex-1 bg-primary hover:bg-primaryHover text-white px-6 py-3 rounded-lg transition font-medium">
                         Ielogoties un redzēt rezultātu
                     </a>
-                    <a href="register.php?next=test_results.php%3Fguest%3D1" class="flex-1 border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 px-6 py-3 rounded-lg transition font-medium">
+                    <a href="../register.php?next=tests/test_results.php%3Fguest%3D1" class="flex-1 border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 px-6 py-3 rounded-lg transition font-medium">
                         Reģistrēties
                     </a>
                 </div>
             </div>
         </div>
         <?php
-        require 'footer.php';
+        require '../footer.php';
         exit();
     }
 
@@ -60,7 +60,7 @@ if (isset($_GET['guest']) && isset($_SESSION['guest_test_result'])) {
     }
 
     unset($_SESSION['guest_test_result']);
-    header("Location: " . (($_SESSION['role'] ?? '') === 'admin' ? 'admin_dashboard.php' : 'specialist_dashboard.php'));
+    header("Location: " . (($_SESSION['role'] ?? '') === 'admin' ? '../admin/admin_dashboard.php' : '../psihologi/specialist_dashboard.php'));
     exit();
 }
 
@@ -69,7 +69,7 @@ if (!isset($_SESSION['account_id']) || empty($_GET['attempt_id'])) {
     exit();
 }
 
-require 'header.php';
+require '../header.php';
 
 $attempt_id = (int)$_GET['attempt_id'];
 $account_id = (int)$_SESSION['account_id'];
@@ -109,7 +109,7 @@ if (!$attempt) {
         </div>
 
         <div class="flex gap-4">
-            <a href="dashboard.php" class="button-primary flex-1">
+            <a href="../dashboard.php" class="button-primary flex-1">
                 Atrast speciālistu
             </a>
             <a href="tests.php" class="button-secondary flex-1">
@@ -119,4 +119,4 @@ if (!$attempt) {
     </div>
 </div>
 
-<?php require 'footer.php'; ?>
+<?php require '../footer.php'; ?>

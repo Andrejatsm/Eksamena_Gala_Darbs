@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db.php';
+require 'database/db.php';
 
 function sanitize_next(string $next): string {
     $next = trim($next);
@@ -13,6 +13,29 @@ function sanitize_next(string $next): string {
     return $next;
 }
 
+function get_display_name(mysqli $conn, int $accountId, string $role, string $fallback): string {
+    $queries = [
+        'psychologist' => "SELECT full_name AS name FROM psychologist_profiles WHERE account_id = ?",
+        'user' => "SELECT first_name AS name FROM user_profiles WHERE account_id = ?",
+    ];
+
+    if (!isset($queries[$role])) {
+        return $fallback;
+    }
+
+    $stmt = $conn->prepare($queries[$role]);
+    if (!$stmt) {
+        return $fallback;
+    }
+
+    $stmt->bind_param("i", $accountId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    return !empty($row['name']) ? (string)$row['name'] : $fallback;
+}
+
 $next = sanitize_next($_GET['next'] ?? $_POST['next'] ?? '');
 
 // Ja jau ielogojies -> ej uz atbilstošo paneli
@@ -21,9 +44,9 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     if ($role === 'user' && $next !== '') {
         header("Location: " . $next);
     } elseif ($role === 'admin') {
-        header("Location: admin_dashboard.php");
+        header("Location: admin/admin_dashboard.php");
     } elseif ($role === 'psychologist') {
-        header("Location: specialist_dashboard.php");
+        header("Location: psihologi/specialist_dashboard.php");
     } else {
         header("Location: dashboard.php");
     }
@@ -58,31 +81,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['account_id'] = $accountId;
             $_SESSION['role'] = $role;
 
-            // Display name
-            $displayName = $lietotajvards;
-            if ($role === 'psychologist') {
-                $s2 = $conn->prepare("SELECT full_name FROM psychologist_profiles WHERE account_id = ?");
-                $s2->bind_param("i", $accountId);
-                $s2->execute();
-                $r2 = $s2->get_result();
-                if ($p = $r2->fetch_assoc()) $displayName = $p['full_name'];
-                $s2->close();
-            } elseif ($role === 'user') {
-                $s2 = $conn->prepare("SELECT first_name FROM user_profiles WHERE account_id = ?");
-                $s2->bind_param("i", $accountId);
-                $s2->execute();
-                $r2 = $s2->get_result();
-                if ($p = $r2->fetch_assoc()) $displayName = $p['first_name'];
-                $s2->close();
-            }
-            $_SESSION['display_name'] = $displayName;
+            $_SESSION['display_name'] = get_display_name($conn, $accountId, $role, $lietotajvards);
 
             if ($role === 'user' && $next !== '') {
                 header("Location: " . $next);
             } elseif ($role === 'admin') {
-                header("Location: admin_dashboard.php");
+                header("Location: admin/admin_dashboard.php");
             } elseif ($role === 'psychologist') {
-                header("Location: specialist_dashboard.php");
+                header("Location: psihologi/specialist_dashboard.php");
             } else {
                 header("Location: dashboard.php");
             }
