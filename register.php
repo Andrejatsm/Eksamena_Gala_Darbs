@@ -77,6 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $certificate_path = null;
+    $profile_image_path = null;
     if ($role === 'psychologist' && empty($error)) {
         if (isset($_FILES['certificate']) && $_FILES['certificate']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = 'uploads/certificates/';
@@ -100,6 +101,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         } else {
             $error = "Sertifikāta augšupielāde ir obligāta psihologiem.";
+        }
+    }
+
+    if ($role === 'psychologist' && empty($error) && isset($_FILES['profile_image']) && (int)($_FILES['profile_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        if ((int)$_FILES['profile_image']['error'] !== UPLOAD_ERR_OK) {
+            $error = "Kļūda augšupielādējot profila attēlu.";
+        } else {
+            $imageUploadDir = 'uploads/profile_images/';
+            if (!is_dir($imageUploadDir)) {
+                mkdir($imageUploadDir, 0777, true);
+            }
+
+            $originalName = (string)($_FILES['profile_image']['name'] ?? '');
+            $safeName = preg_replace('/[^A-Za-z0-9_\.-]/', '_', basename($originalName));
+            $safeName = $safeName ?: 'profile_image';
+            $imageFileName = time() . '_' . $safeName;
+            $imageTargetPath = $imageUploadDir . $imageFileName;
+            $imageExt = strtolower((string)pathinfo($imageTargetPath, PATHINFO_EXTENSION));
+            $allowedImageTypes = ['jpg', 'jpeg', 'png', 'webp'];
+
+            if (!in_array($imageExt, $allowedImageTypes, true)) {
+                $error = "Atļautie profila attēla formāti ir: JPG, JPEG, PNG, WEBP.";
+            } elseif (!move_uploaded_file($_FILES['profile_image']['tmp_name'], $imageTargetPath)) {
+                $error = "Kļūda saglabājot profila attēlu.";
+            } else {
+                $profile_image_path = $imageTargetPath;
+            }
         }
     }
 
@@ -131,8 +159,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 } else {
                     $full_name = $vards . ' ' . $uzvards;
                     $session_price = 50.00;
-                    $stmt2 = $conn->prepare("INSERT INTO psychologist_profiles (account_id, full_name, specialization, experience_years, description, hourly_rate, certificate_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    $stmt2->bind_param("issisds", $accountId, $full_name, $specialization, $experience_years, $description, $session_price, $certificate_path);
+                    $stmt2 = $conn->prepare("INSERT INTO psychologist_profiles (account_id, full_name, specialization, experience_years, description, hourly_rate, certificate_path, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt2->bind_param("issisdss", $accountId, $full_name, $specialization, $experience_years, $description, $session_price, $certificate_path, $profile_image_path);
                 }
                 if (!$stmt2->execute()) {
                     throw new Exception($conn->error);
@@ -257,6 +285,10 @@ require 'header.php';
                     <div>
                         <label class="field-label">Sertifikāts (obligāts: PDF, JPG, PNG)</label>
                         <input type="file" name="certificate" accept=".pdf,.jpg,.jpeg,.png" class="input-control">
+                    </div>
+                    <div>
+                        <label class="field-label">Profila attēls (neobligāts: JPG, PNG, WEBP)</label>
+                        <input type="file" name="profile_image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="input-control">
                     </div>
                 </div>
             </div>

@@ -118,6 +118,14 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                             <i class="fas fa-columns w-5 text-center mr-2"></i> Panelis
                                         </a>
                                     </li>
+
+                                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                    <li>
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>admin/messages.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                            <i class="fas fa-inbox w-5 text-center mr-2"></i> Ziņojumi
+                                        </a>
+                                    </li>
+                                    <?php endif; ?>
                                     
                                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
                                     <li>
@@ -181,6 +189,10 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                         </div>
                     </div>
                     <a href="<?php echo $dashboard_link; ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Panelis</a>
+
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>admin/messages.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ziņojumi</a>
+                    <?php endif; ?>
                     
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
                           <a href="<?php echo htmlspecialchars($pathPrefix); ?>user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mans profils</a>
@@ -210,3 +222,30 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     </nav>
 
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/header_menu.js"></script>
+    <script>
+        // Global workaround: after a form submit, replace current history entry so refresh does not re-send POST body.
+        (function () {
+            if (!window.history || typeof window.history.replaceState !== 'function') {
+                return;
+            }
+
+            document.addEventListener('submit', function () {
+                try {
+                    sessionStorage.setItem('saprasts_post_submitted', '1');
+                } catch (e) {
+                    // Ignore storage access issues.
+                }
+            }, true);
+
+            window.addEventListener('load', function () {
+                try {
+                    if (sessionStorage.getItem('saprasts_post_submitted') === '1') {
+                        window.history.replaceState({}, document.title, window.location.href);
+                        sessionStorage.removeItem('saprasts_post_submitted');
+                    }
+                } catch (e) {
+                    // Ignore storage access issues.
+                }
+            });
+        })();
+    </script>

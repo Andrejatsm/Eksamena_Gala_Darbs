@@ -8,8 +8,11 @@ function normalize_psychologist_image_path(string $path): string {
     if ($normalized === '') {
         return '';
     }
-    if (str_starts_with($normalized, '../') || str_starts_with($normalized, 'http://') || str_starts_with($normalized, 'https://') || str_starts_with($normalized, 'uploads/')) {
+    if (str_starts_with($normalized, '../') || str_starts_with($normalized, 'http://') || str_starts_with($normalized, 'https://') || str_starts_with($normalized, '/')) {
         return $normalized;
+    }
+    if (str_starts_with($normalized, 'uploads/')) {
+        return '../' . $normalized;
     }
     if (str_starts_with($normalized, 'assets/')) {
         return '../' . $normalized;

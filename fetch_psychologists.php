@@ -3,9 +3,10 @@ require 'database/db.php';
 
 $search = trim($_GET['search'] ?? '');
 $page = max(1, (int)($_GET['page'] ?? 1));
-$limit = 10;
+$limit = 9;
 $offset = ($page - 1) * $limit;
 
+// Vienādojam attēlu ceļus no dažādiem datu avotiem, lai frontend vienmēr saņemtu izmantojamu src vērtību.
 function normalize_psychologist_image_path(string $path): string {
     $normalized = trim($path);
     if ($normalized === '') {
@@ -20,6 +21,7 @@ function normalize_psychologist_image_path(string $path): string {
     return $normalized;
 }
 
+// Filtru veidojam pa daļām, lai vienu un to pašu WHERE nosacījumu var izmantot gan skaitīšanai, gan pašam sarakstam.
 $whereSQL = "WHERE a.role = 'psychologist' AND a.status = 'active' AND p.approved_at IS NOT NULL";
 $searchLike = '%' . $search . '%';
 $types = '';
@@ -34,6 +36,7 @@ $total_sql = "SELECT COUNT(*) AS count
               FROM psychologist_profiles p
               INNER JOIN accounts a ON a.id = p.account_id
               $whereSQL";
+// Vispirms nosakām kopējo rezultātu skaitu, lai frontend var uzzīmēt pareizu lapošanu.
 $total_stmt = $conn->prepare($total_sql);
 if ($types !== '') {
     $total_stmt->bind_param($types, ...$params);
@@ -62,6 +65,7 @@ $sql = "SELECT
         $whereSQL
         ORDER BY p.full_name ASC
         LIMIT ? OFFSET ?";
+// Tajā pašā filtrā ielādējam tikai vienas lapas rezultātus, nevis visu sarakstu uzreiz.
 $stmt = $conn->prepare($sql);
 $pageTypes = $types . 'ii';
 $pageParams = [...$params, $limit, $offset];
@@ -85,6 +89,7 @@ if (empty($psihologi)) {
         $fullName = trim((string)$psi['full_name']);
         $nameParts = preg_split('/\s+/', $fullName) ?: [];
         $initials = '';
+        // Ja profilam nav attēla, veidojam vienkāršu fallback ar iniciāļiem, lai kartīte nepaliek tukša.
         foreach (array_slice($nameParts, 0, 2) as $part) {
             $initials .= mb_strtoupper(mb_substr($part, 0, 1));
         }
@@ -118,7 +123,7 @@ if (empty($psihologi)) {
                 <div class="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-700 flex justify-between items-center">
                     <div>
                         <span class="text-xs text-gray-400 uppercase">Sesijas cena</span>
-                        <div class="text-lg font-bold text-gray-900 dark:text-white"><?php echo number_format((float)$psi['hourly_rate'], 0); ?> € / sesija</div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-white">50 € / sesija</div>
                     </div>
                     
                     <div class="text-primary group-hover:text-primaryHover transition">
@@ -131,5 +136,6 @@ if (empty($psihologi)) {
     }
 }
 
+// Šis neredzamais bloks nodod lapošanas datus JavaScript kodam bez papildu JSON endpointa.
 echo '<div id="pagination-data" class="u-hidden" data-total-pages="' . $total_pages . '" data-current-page="' . $page . '"></div>';
 ?>

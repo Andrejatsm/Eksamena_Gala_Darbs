@@ -16,12 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
 
-    $psihologs_vards = $_POST['psihologs_vards'];
+    $psihologs_vards = trim((string)($_POST['psihologs_vards'] ?? ''));
     $cena_h = 50.00; // Fiksēta sesijas cena
     $psychologist_account_id = isset($_POST['psychologist_account_id']) ? (int)$_POST['psychologist_account_id'] : 0;
     $slot_id = isset($_POST['slot_id']) ? (int)$_POST['slot_id'] : 0;
 
-    // 2. Iegūstam slot details un validējam
+    // Pārbaudām, vai lietotājs maksā tieši par esošu un konkrētam psihologam piederošu slotu.
     if ($slot_id > 0) {
         $stmt = $conn->prepare("\n            SELECT starts_at, ends_at, consultation_type\n            FROM availability_slots\n            WHERE id = ? AND psychologist_account_id = ?\n        ");
         $stmt->bind_param("ii", $slot_id, $psychologist_account_id);
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->close();
     }
 
-    // Saglabājam psihologa informāciju sesijā
+    // Normalizējam psihologa ID arī tad, ja frontend to nav nodevis tieši.
     if ($psychologist_account_id > 0) {
         $_SESSION['last_paid_psychologist_account_id'] = $psychologist_account_id;
     } else {
@@ -51,24 +51,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['last_paid_psychologist_account_id'] = (int)$row['account_id'];
         }
         $stmt->close();
+        $psychologist_account_id = isset($_SESSION['last_paid_psychologist_account_id'])
+            ? (int)$_SESSION['last_paid_psychologist_account_id']
+            : 0;
     }
 
-    // 3. Stripe Apmaksas loģika
-    $cena_centos = intval((float)$cena_h * 100); // Pārvēršam uz centiem
+    if ($psychologist_account_id <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Neizdevās noteikt psihologu šim maksājumam.']);
+        exit();
+    }
 
-    // Veidojam pāradresācijas URL pēc aktuālā hosta un instalācijas ceļa.
-    // Izmantojam SCRIPT_NAME, lai izvairītos no fragmentiem un query virknes ietekmes.
+    // Stripe summu pieņem mazākajās naudas vienībās, tāpēc 50.00 EUR pārvēršam par 5000 centiem.
+    $cena_centos = intval((float)$cena_h * 100);
+
+    // URL veidojam dinamiski no pašreizējās instalācijas vietas, lai checkout strādā arī pēc mapju pārvietošanas.
     $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
     $baseUrl = $scheme . '://' . $host . $basePath;
 
     // Nodrošinām tikai slīpsvītras uz priekšu (Stripe neatbalsta backslash URL).
-    $success_url = str_replace('\\', '/', $baseUrl . '/success.php');
+    $success_base_url = str_replace('\\', '/', $baseUrl . '/success.php');
+    $success_url = $success_base_url . '?session_id={CHECKOUT_SESSION_ID}';
     $cancel_url = str_replace('\\', '/', $baseUrl . '/dashboard.php');
 
-    // Validējam URL pirms sūtīšanas uz Stripe.
-    if (!filter_var($success_url, FILTER_VALIDATE_URL) || !filter_var($cancel_url, FILTER_VALIDATE_URL)) {
+    // Pirms sūtām uz Stripe, pārliecināmies, ka pāradresācijas adreses tiešām ir derīgi URL.
+    if (!filter_var($success_base_url, FILTER_VALIDATE_URL) || !filter_var($cancel_url, FILTER_VALIDATE_URL)) {
         http_response_code(400);
         echo json_encode([
             'error' => 'Nederīgs URL',
@@ -79,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     try {
+        // Stripe izveido vienreizēju checkout sesiju un atgriež adresi, uz kuru lietotāju pārsūtām apmaksai.
         $checkout_session = \Stripe\Checkout\Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [[
@@ -92,9 +102,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
+            'client_reference_id' => (string)((int)$_SESSION['account_id']),
+            'metadata' => [
+                'user_account_id' => (string)((int)$_SESSION['account_id']),
+                'psychologist_account_id' => (string)$psychologist_account_id,
+                'slot_id' => (string)$slot_id,
+                'consultation_type' => (string)($_SESSION['booking_consultation_type'] ?? 'online'),
+                'scheduled_at' => (string)($_SESSION['booking_scheduled_at'] ?? ''),
+            ],
             'success_url' => $success_url,
             'cancel_url' => $cancel_url,
         ]);
+
+        // Saglabājam checkout sesijas ID kā papildu server-side verifikācijas enkuru success lapai.
+        $_SESSION['last_checkout_session_id'] = (string)($checkout_session->id ?? '');
 
         header("HTTP/1.1 303 See Other");
         header("Location: " . $checkout_session->url);

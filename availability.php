@@ -8,19 +8,36 @@ if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 
     exit();
 }
 
-require 'header.php';
-
 $account_id = (int)$_SESSION['account_id'];
-$message = "";
-$error = "";
+$message = (string)($_SESSION['availability_flash_success'] ?? '');
+$error = (string)($_SESSION['availability_flash_error'] ?? '');
+unset($_SESSION['availability_flash_success'], $_SESSION['availability_flash_error']);
 
-// Apstrādājam jauna pieejamības slota pievienošanu
+$starts_date = date('Y-m-d');
+$starts_time = date('09:00');
+$ends_time = date('10:00');
+$consultation_type = 'online';
+$note = '';
+
+// Psihologs šeit definē savus rezervējamos laikus, kurus vēlāk redz klienta profilā un checkout plūsmā.
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_availability'])) {
-    $starts_at = $_POST['starts_at'] ?? '';
-    $ends_at = $_POST['ends_at'] ?? '';
+    $starts_date = trim((string)($_POST['starts_date'] ?? ''));
+    $starts_time = trim((string)($_POST['starts_time'] ?? ''));
+    $ends_time = trim((string)($_POST['ends_time'] ?? ''));
+    $starts_at_legacy = trim((string)($_POST['starts_at'] ?? ''));
+    $ends_at_legacy = trim((string)($_POST['ends_at'] ?? ''));
     $consultation_type = $_POST['consultation_type'] ?? 'online';
     $note = trim($_POST['note'] ?? '');
     $allowed_types = ['in_person', 'online'];
+
+    if ($starts_date !== '' && $starts_time !== '' && $ends_time !== '') {
+        $starts_at = $starts_date . ' ' . $starts_time . ':00';
+        $ends_at = $starts_date . ' ' . $ends_time . ':00';
+    } else {
+        // Backward compatibility if older form payload is still posted.
+        $starts_at = $starts_at_legacy;
+        $ends_at = $ends_at_legacy;
+    }
 
     if (!in_array($consultation_type, $allowed_types, true)) {
         $consultation_type = 'online';
@@ -28,18 +45,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_availability'])) {
 
     if(empty($starts_at) || empty($ends_at)) {
         $error = "Sākuma un beigu laiki ir obligāti.";
+    } else if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $starts_time) || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $ends_time)) {
+        $error = "Laiku norādiet 24 stundu formātā HH:MM.";
     } else if(strtotime($ends_at) <= strtotime($starts_at)) {
         $error = "Beigu laikam jābūt vēlākiem nekā sākuma laikam.";
     } else {
+        // Glabājam arī konsultācijas tipu un piezīmi, lai katrs slots būtu saprotams jau pirms rezervācijas.
         $stmt = $conn->prepare("INSERT INTO availability_slots (psychologist_account_id, starts_at, ends_at, consultation_type, note) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("issss", $account_id, $starts_at, $ends_at, $consultation_type, $note);
         if($stmt->execute()) {
-            $message = "Pieejamības slots pievienots!";
+            $_SESSION['availability_flash_success'] = "Pieejamības slots pievienots!";
+            header('Location: availability.php');
+            exit();
         } else {
             $error = "Kļūda pievienojot slotu.";
         }
         $stmt->close();
     }
+
 }
 
 // Apstrādājam pieejamības slota dzēšanu
@@ -49,10 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_slot'])) {
     $stmt->bind_param("ii", $slot_id, $account_id);
     $stmt->execute();
     $stmt->close();
-    $message = "Slots dzēsts.";
+    $_SESSION['availability_flash_success'] = "Slots dzēsts.";
+    header('Location: availability.php');
+    exit();
 }
 
-// Iegūstam pieejamības slotus
+// Esošos slotus ielādējam vienā vietā, lai var gan attēlot sarakstu, gan uzreiz dzēst nevajadzīgos laikus.
 $sql = "SELECT id, starts_at, ends_at, consultation_type, note FROM availability_slots WHERE psychologist_account_id = ? ORDER BY starts_at DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $account_id);
@@ -63,6 +88,8 @@ while($row = $result->fetch_assoc()) {
     $slots[] = $row;
 }
 $stmt->close();
+
+require 'header.php';
 ?>
 
 <div class="page-shell page-surface">
@@ -86,30 +113,36 @@ $stmt->close();
     <div class="layout-sidebar-3">
         <!-- Slota pievienošanas forma -->
         <div class="form-card">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Pievienot laika slotu</h2>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Pievienot pierakstus pēc laikiem</h2>
             <form method="POST" class="stack-md">
                 <div>
+                    <label class="field-label">Sākuma datums</label>
+                    <input type="date" name="starts_date" id="starts_date" required class="input-control" value="<?php echo htmlspecialchars($starts_date); ?>" lang="lv">
+                </div>
+
+                <div>
                     <label class="field-label">Sākuma laiks</label>
-                    <input type="datetime-local" name="starts_at" required class="input-control">
+                    <input type="text" name="starts_time" id="starts_time" required class="input-control" value="<?php echo htmlspecialchars($starts_time); ?>" placeholder="14:30" inputmode="numeric" pattern="(?:[01]\d|2[0-3]):[0-5]\d">
                 </div>
 
                 <div>
                     <label class="field-label">Beigu laiks</label>
-                    <input type="datetime-local" name="ends_at" required class="input-control">
+                    <input type="text" name="ends_time" id="ends_time" required class="input-control" value="<?php echo htmlspecialchars($ends_time); ?>" placeholder="15:30" inputmode="numeric" pattern="(?:[01]\d|2[0-3]):[0-5]\d">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Beigu datumam automātiski izmanto to pašu datumu, kas ir sākuma laikam.</p>
                 </div>
 
                 <div>
                     <label class="field-label">Konsultācijas veids</label>
                     <select name="consultation_type" class="input-control mb-2">
-                        <option value="online">Tiešsaistē</option>
-                        <option value="in_person">Klātienē</option>
+                        <option value="online" <?php echo $consultation_type === 'online' ? 'selected' : ''; ?>>Tiešsaistē</option>
+                        <option value="in_person" <?php echo $consultation_type === 'in_person' ? 'selected' : ''; ?>>Klātienē</option>
                     </select>
                     <label class="field-label">Piezīme (neobligāta)</label>
-                    <input type="text" name="note" placeholder="Piem. tikai tiešsaistē" class="input-control">
+                    <input type="text" name="note" placeholder="Piem. tikai tiešsaistē" class="input-control" value="<?php echo htmlspecialchars($note); ?>">
                 </div>
 
                 <button type="submit" name="add_availability" class="button-primary w-full">
-                    Pievienot slotu
+                    Pievienot laiku
                 </button>
             </form>
         </div>
@@ -150,5 +183,48 @@ $stmt->close();
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const startsTimeInput = document.getElementById('starts_time');
+    const endsTimeInput = document.getElementById('ends_time');
+
+    if (!startsTimeInput || !endsTimeInput) {
+        return;
+    }
+
+    const toMinutes = (value) => {
+        const parts = String(value || '').split(':');
+        if (parts.length < 2) return null;
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+        return h * 60 + m;
+    };
+
+    const toTime = (minutes) => {
+        const normalized = ((minutes % 1440) + 1440) % 1440;
+        const h = String(Math.floor(normalized / 60)).padStart(2, '0');
+        const m = String(normalized % 60).padStart(2, '0');
+        return `${h}:${m}`;
+    };
+
+    const syncEndAfterStart = () => {
+        const start = toMinutes(startsTimeInput.value);
+        if (start === null) return;
+
+        const end = toMinutes(endsTimeInput.value);
+        if (end === null || end <= start) {
+            endsTimeInput.value = toTime(start + 60);
+        }
+
+        endsTimeInput.min = startsTimeInput.value;
+    };
+
+    startsTimeInput.addEventListener('change', syncEndAfterStart);
+    startsTimeInput.addEventListener('input', syncEndAfterStart);
+    syncEndAfterStart();
+});
+</script>
 
 <?php require 'footer.php'; ?>

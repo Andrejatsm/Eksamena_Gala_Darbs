@@ -9,10 +9,22 @@ if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 
 }
 
 $pageTitle = "Admin panelis";
-require '../header.php';
 
 $success_msg = '';
 $error_msg = '';
+
+if (isset($_SESSION['admin_flash']) && is_array($_SESSION['admin_flash'])) {
+    $flashType = (string)($_SESSION['admin_flash']['type'] ?? 'success');
+    $flashMessage = (string)($_SESSION['admin_flash']['message'] ?? '');
+    if ($flashMessage !== '') {
+        if ($flashType === 'error') {
+            $error_msg = $flashMessage;
+        } else {
+            $success_msg = $flashMessage;
+        }
+    }
+    unset($_SESSION['admin_flash']);
+}
 
 $countQuery = static function (mysqli $conn, string $query): int {
     $result = $conn->query($query);
@@ -23,10 +35,54 @@ $countQuery = static function (mysqli $conn, string $query): int {
     return (int)($row['count'] ?? 0);
 };
 
+$fetchPaginatedData = static function (
+    mysqli $conn,
+    string $countSql,
+    string $dataSql,
+    string $types,
+    array $params,
+    int $page,
+    int $perPage
+): array {
+    $countStmt = $conn->prepare($countSql);
+    if ($types !== '' && !empty($params)) {
+        $countStmt->bind_param($types, ...$params);
+    }
+    $countStmt->execute();
+    $countResult = $countStmt->get_result();
+    $total = (int)(($countResult->fetch_assoc()['count'] ?? 0));
+    $countStmt->close();
+
+    $totalPages = $total > 0 ? (int)ceil($total / $perPage) : 1;
+    $page = max(1, min($page, $totalPages));
+    $offset = ($page - 1) * $perPage;
+
+    $dataStmt = $conn->prepare($dataSql . " LIMIT ? OFFSET ?");
+    $dataTypes = $types . 'ii';
+    $dataParams = [...$params, $perPage, $offset];
+    $dataStmt->bind_param($dataTypes, ...$dataParams);
+    $dataStmt->execute();
+    $dataResult = $dataStmt->get_result();
+
+    $rows = [];
+    while ($row = $dataResult->fetch_assoc()) {
+        $rows[] = $row;
+    }
+    $dataStmt->close();
+
+    return [
+        'rows' => $rows,
+        'page' => $page,
+        'total' => $total,
+        'totalPages' => $totalPages,
+    ];
+};
+
 // Apstrādājam administratora darbības
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
     $account_id = intval($_POST['account_id'] ?? 0);
+    $handledAction = true;
     
     if ($action === 'approve_psych') {
         $conn->begin_transaction();
@@ -53,6 +109,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($stmt->execute()) {
             $success_msg = "Psihologu profils noraidīts.";
         }
+        $stmt->close();
+    } elseif ($action === 'delete_user') {
+        $stmt = $conn->prepare("DELETE FROM accounts WHERE id = ? AND role = 'user'");
+        $stmt->bind_param("i", $account_id);
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            $success_msg = "Lietotāja konts izdzēsts.";
+        } else {
+            $error_msg = "Neizdevās izdzēst lietotāja kontu.";
+        }
+        $stmt->close();
     } elseif ($action === 'delete_article') {
         $article_id = intval($_POST['article_id'] ?? 0);
         $stmt = $conn->prepare("DELETE FROM articles WHERE id = ? AND psychologist_account_id = ?");
@@ -140,6 +206,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt->close();
         }
     }
+
+    $_SESSION['admin_flash'] = [
+        'type' => $error_msg !== '' ? 'error' : 'success',
+        'message' => $error_msg !== '' ? $error_msg : $success_msg,
+    ];
+
+    header('Location: ' . ($_SERVER['PHP_SELF'] ?? 'admin_dashboard.php'));
+    exit();
 }
 
 // Iegūstam statistiku
@@ -175,22 +249,35 @@ if ($lookupSpecRes) {
         $lookup_specs[] = $row;
     }
 }
+
+$chartStats = [
+    'users' => $stats['total_users'],
+    'psychologists' => $stats['total_psychologists'],
+    'pendingPsychologists' => $stats['pending_psychologists'],
+    'appointments' => $stats['total_appointments'],
+    'articles' => $stats['pending_articles'],
+    'tests' => $stats['published_tests'],
+];
+
+require '../header.php';
 ?>
 
 <div class="min-h-screen page-surface dark:bg-zinc-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <?php if ($success_msg): ?>
-        <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400">
+        <div class="js-auto-dismiss-alert mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400" data-timeout="4500">
             <i class="fas fa-check-circle mr-2"></i><?php echo $success_msg; ?>
         </div>
         <?php endif; ?>
 
         <?php if ($error_msg): ?>
-        <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+        <div class="js-auto-dismiss-alert mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400" data-timeout="6000">
             <i class="fas fa-triangle-exclamation mr-2"></i><?php echo $error_msg; ?>
         </div>
         <?php endif; ?>
+
+        <div id="adminActionFeedback" class="hidden mb-6 p-4 rounded-lg border"></div>
 
         <!-- Header -->
         <div class="mb-12">
@@ -202,69 +289,55 @@ if ($lookupSpecRes) {
             </div>
         </div>
 
-        <!-- Statistics Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
-                <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-between">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-12">
+            <div class="xl:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
+                <div class="flex items-start justify-between gap-4 mb-6">
                     <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Lietotāji</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo $stats['total_users']; ?></p>
-                    </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-users text-primary text-xl"></i>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Platformas pārskats</h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Ātrs skats uz lietotāju, psihologu un satura proporcijām.</p>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Psihologi</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo $stats['total_psychologists']; ?></p>
+                <div class="h-80">
+                    <canvas id="adminStatsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Kopsavilkums</h2>
+                <div class="space-y-4 text-sm">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
+                        <span class="text-gray-600 dark:text-gray-400">Aktīvie lietotāji</span>
+                        <strong class="text-gray-900 dark:text-white" data-stat-key="users"><?php echo $stats['total_users']; ?></strong>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-user-md text-primary text-xl"></i>
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
+                        <span class="text-gray-600 dark:text-gray-400">Aktīvie psihologi</span>
+                        <strong class="text-gray-900 dark:text-white" data-stat-key="psychologists"><?php echo $stats['total_psychologists']; ?></strong>
+                    </div>
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
+                        <span class="text-gray-600 dark:text-gray-400">Gaidošie psihologi</span>
+                        <strong class="text-gray-900 dark:text-white" data-stat-key="pendingPsychologists"><?php echo $stats['pending_psychologists']; ?></strong>
+                    </div>
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
+                        <span class="text-gray-600 dark:text-gray-400">Aktīvie pieraksti</span>
+                        <strong class="text-gray-900 dark:text-white" data-stat-key="appointments"><?php echo $stats['total_appointments']; ?></strong>
+                    </div>
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
+                        <span class="text-gray-600 dark:text-gray-400">Gaidošie raksti</span>
+                        <strong class="text-gray-900 dark:text-white" data-stat-key="articles"><?php echo $stats['pending_articles']; ?></strong>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Publicētie testi</span>
+                        <strong class="text-gray-900 dark:text-white" data-stat-key="tests"><?php echo $stats['published_tests']; ?></strong>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Pieraksti</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo $stats['total_appointments']; ?></p>
-                    </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-calendar-check text-primary text-xl"></i>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Gaidošie raksti</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo $stats['pending_articles']; ?></p>
-                    </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-newspaper text-primary text-xl"></i>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Testi</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo $stats['published_tests']; ?></p>
-                    </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-clipboard-list text-primary text-xl"></i>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Gaidošie psihologi</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo $stats['pending_psychologists']; ?></p>
-                    </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-user-clock text-primary text-xl"></i>
-                    </div>
-                </div>
+            </div>
         </div>
 
         <!-- Tabs Navigation -->
         <div class="mb-8">
             <nav class="flex space-x-1 bg-gray-100 dark:bg-zinc-800 p-1 rounded-xl">
                 <button data-tab="psychologists" class="tab-btn flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-sm">
-                    <i class="fas fa-users mr-2"></i>Psihologi
+                    <i class="fas fa-users mr-2"></i>Lietotāji
                 </button>
                 <button data-tab="articles" class="tab-btn flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                     <i class="fas fa-newspaper mr-2"></i>Raksti
@@ -281,101 +354,37 @@ if ($lookupSpecRes) {
         <!-- PSYCHOLOGISTS TAB -->
         <div id="psychologists" class="tab-content">
             <div class="space-y-6">
-                <!-- Pending Psychologists -->
-                <div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 font-bold text-sm mr-3">
-                            <?php echo $stats['pending_psychologists']; ?>
-                        </span>
-                        Gaidošie psihologi
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 gap-6">
-                        <?php
-                        $result = $conn->query("
-                            SELECT a.id, a.username, a.email, a.phone, p.full_name, p.specialization, p.experience_years, p.description, p.certificate_path
-                            FROM psychologist_profiles p
-                            JOIN accounts a ON p.account_id = a.id
-                            WHERE a.status = 'pending'
-                            ORDER BY a.created_at DESC
-                        ");
-                        
-                        if ($result->num_rows === 0) {
-                            echo '<p class="text-gray-600 dark:text-gray-400">Nav psihologu, kas gaidītu apstiprinājumu.</p>';
-                        } else {
-                            while ($psy = $result->fetch_assoc()):
-                        ?>
-                        <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 border border-gray-200 dark:border-zinc-700">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Vārds</p>
-                                    <p class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($psy['full_name']); ?></p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Specializācija</p>
-                                    <p class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($psy['specialization']); ?></p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Pieredze</p>
-                                    <p class="font-bold text-gray-900 dark:text-white"><?php echo $psy['experience_years']; ?> gadi</p>
-                                </div>
-                            </div>
-                            
-                            <p class="text-gray-600 dark:text-gray-400 mb-4"><?php echo htmlspecialchars($psy['description'] ?? 'Nav apraksta'); ?></p>
-                            
-                            <div class="flex gap-2 mt-4">
-                                <button type="button" class="view-psych-btn px-5 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold"
-                                        data-id="<?php echo $psy['id']; ?>"
-                                        data-name="<?php echo htmlspecialchars($psy['full_name']); ?>"
-                                        data-spec="<?php echo htmlspecialchars($psy['specialization']); ?>"
-                                        data-exp="<?php echo $psy['experience_years']; ?>"
-                                        data-desc="<?php echo htmlspecialchars($psy['description'] ?? ''); ?>"
-                                        data-email="<?php echo htmlspecialchars($psy['email']); ?>"
-                                        data-phone="<?php echo htmlspecialchars($psy['phone']); ?>"
-                                        data-cert="<?php echo htmlspecialchars($psy['certificate_path'] ?? ''); ?>">
-                                    <i class="fas fa-search mr-2"></i>Skatīt profilu un lēmumu
-                                </button>
-                            </div>
+                <div class="bg-white dark:bg-zinc-800 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-zinc-700">
+                    <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Kontu pārvaldība</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Vienots saraksts psihologiem un lietotājiem ar filtriem, meklēšanu un darbībām bez lapas pārlādes.</p>
                         </div>
-                        <?php
-                            endwhile;
-                        }
-                        ?>
+                        <div class="flex flex-col lg:flex-row gap-3 w-full xl:w-auto">
+                            <input type="text" id="adminAccountSearch" class="input-control min-w-[260px]" placeholder="Meklēt pēc vārda, e-pasta, specializācijas...">
+                            <select id="adminRoleFilter" class="input-control min-w-[180px]">
+                                <option value="all">Visas lomas</option>
+                                <option value="psychologist">Psihologi</option>
+                                <option value="user">Lietotāji</option>
+                            </select>
+                            <select id="adminStatusFilter" class="input-control min-w-[180px]">
+                                <option value="all">Visi statusi</option>
+                                <option value="pending">Gaida apstiprinājumu</option>
+                                <option value="active">Aktīvi</option>
+                                <option value="rejected">Noraidīti</option>
+                                <option value="disabled">Atspējoti</option>
+                            </select>
+                            <button type="button" id="adminAccountsReset" class="px-4 py-2 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition font-semibold whitespace-nowrap">
+                                Notīrīt
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Approved Psychologists -->
-                <div class="mt-12">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 font-bold text-sm mr-3">
-                            <?php echo $stats['total_psychologists']; ?>
-                        </span>
-                        Apstiprinātie psihologi
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 gap-4">
-                        <?php
-                        $result = $conn->query("
-                            SELECT a.id, a.username, a.email, p.full_name, p.specialization, p.experience_years, p.hourly_rate
-                            FROM psychologist_profiles p
-                            JOIN accounts a ON p.account_id = a.id
-                            WHERE p.approved_at IS NOT NULL AND a.status = 'active'
-                            ORDER BY a.created_at DESC
-                        ");
-                        
-                        while ($psy = $result->fetch_assoc()):
-                        ?>
-                        <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-gray-200 dark:border-zinc-700 flex justify-between items-center">
-                            <div class="flex-1">
-                                <p class="font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($psy['full_name']); ?></p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400"><?php echo htmlspecialchars($psy['specialization']); ?> • <?php echo $psy['experience_years']; ?> g. pieredze</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold text-primary">€50 / sesija</p>
-                                <p class="text-sm text-green-600">✓ Apstiprināts</p>
-                            </div>
-                        </div>
-                        <?php endwhile; ?>
+                <div id="adminAccountsContainer" class="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-6 py-12 text-center text-gray-600 dark:text-gray-400">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
+                        <p>Ielādē kontu sarakstu...</p>
                     </div>
                 </div>
             </div>
@@ -630,20 +639,15 @@ if ($lookupSpecRes) {
                 </div>
             </div>
             <div class="bg-gray-50 dark:bg-zinc-700/50 px-6 py-3 flex flex-row-reverse gap-2">
-                <form method="POST" class="inline m-0">
-                    <input type="hidden" name="action" value="approve_psych">
-                    <input type="hidden" name="account_id" id="psychModalApproveId">
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold">
+                <button type="button" id="psychModalApproveBtn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold">
                         <i class="fas fa-check mr-2"></i>Apstiprināt profilu
-                    </button>
-                </form>
-                <form method="POST" class="inline m-0">
-                    <input type="hidden" name="action" value="reject_psych">
-                    <input type="hidden" name="account_id" id="psychModalRejectId">
-                    <button type="submit" class="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition font-semibold" onclick="return confirm('Vai tiešām noraidi šo profilu?');">
+                </button>
+                <button type="button" id="psychModalRejectBtn" class="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition font-semibold">
                         <i class="fas fa-times mr-2"></i>Noraidīt profilu
-                    </button>
-                </form>
+                </button>
+                <button type="button" id="psychModalDeleteBtn" class="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition font-semibold">
+                    <i class="fas fa-trash mr-2"></i>Dzēst profilu
+                </button>
                 <button id="closePsychModalBtn" type="button" class="mr-auto px-4 py-2 bg-gray-300 dark:bg-zinc-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-500 transition font-semibold">
                     Atcelt
                 </button>
@@ -684,6 +688,14 @@ if ($lookupSpecRes) {
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+window.adminDashboardChartData = <?php echo json_encode($chartStats, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+window.adminAccountsConfig = {
+    listUrl: 'accounts_table.php',
+    actionUrl: 'accounts_action.php'
+};
+</script>
 <script src="admin_dashboard.js"></script>
 
 <?php require '../footer.php'; ?>

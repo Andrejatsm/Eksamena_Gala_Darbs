@@ -89,4 +89,26 @@ if ($specStmt) {
     }
     $specStmt->close();
 }
+
+$contactReadColumn = $conn->query("SHOW COLUMNS FROM contact_messages LIKE 'is_read'");
+if ($contactReadColumn && $contactReadColumn->num_rows === 0) {
+    $conn->query(
+        "ALTER TABLE contact_messages
+         ADD COLUMN is_read TINYINT(1) NOT NULL DEFAULT 0 AFTER message"
+    );
+}
+if ($contactReadColumn instanceof mysqli_result) {
+    $contactReadColumn->free();
+}
+
+$contactReadAtColumn = $conn->query("SHOW COLUMNS FROM contact_messages LIKE 'read_at'");
+if ($contactReadAtColumn && $contactReadAtColumn->num_rows === 0) {
+    $conn->query(
+        "ALTER TABLE contact_messages
+         ADD COLUMN read_at TIMESTAMP NULL DEFAULT NULL AFTER is_read"
+    );
+}
+if ($contactReadAtColumn instanceof mysqli_result) {
+    $contactReadAtColumn->free();
+}
 ?>
