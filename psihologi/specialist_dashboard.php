@@ -15,10 +15,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'], $_POST['appo
     $status = ($_POST['action'] === 'accept') ? 'approved' : 'rejected';
     $appoint_id = (int)$_POST['appoint_id'];
 
+    // Ja noraidām, vispirms iegūstam pieraksta laiku, lai atbrīvotu slotu
+    $apptRow = null;
+    if ($status === 'rejected') {
+        $getStmt = $conn->prepare("SELECT scheduled_at FROM appointments WHERE id = ? AND psychologist_account_id = ?");
+        $getStmt->bind_param("ii", $appoint_id, $psihologs_id);
+        $getStmt->execute();
+        $apptRow = $getStmt->get_result()->fetch_assoc();
+        $getStmt->close();
+    }
+
     $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ? AND psychologist_account_id = ?");
     $stmt->bind_param("sii", $status, $appoint_id, $psihologs_id);
     $stmt->execute();
     $stmt->close();
+
+    // Atbrīvojam slotu, lai citi var pierakstīties
+    if ($status === 'rejected' && $apptRow && !empty($apptRow['scheduled_at'])) {
+        $freeStmt = $conn->prepare("UPDATE availability_slots SET is_booked = 0 WHERE psychologist_account_id = ? AND starts_at = ?");
+        $freeStmt->bind_param("is", $psihologs_id, $apptRow['scheduled_at']);
+        $freeStmt->execute();
+        $freeStmt->close();
+    }
 }
 
 // Iegūstam pieteikumus

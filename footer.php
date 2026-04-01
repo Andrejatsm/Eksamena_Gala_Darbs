@@ -6,7 +6,7 @@ if (!isset($pathPrefix)) {
 }
 ?>
 
-<footer class="mt-auto bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 py-8 transition-colors duration-300">
+<footer class="mt-auto bg-surface dark:bg-zinc-900 border-t border-[#ccecee] dark:border-zinc-800 py-8 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 

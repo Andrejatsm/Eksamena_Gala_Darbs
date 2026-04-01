@@ -1,19 +1,19 @@
 /* Project-wide custom CSS (avoid inline styles in HTML/PHP) */
 
 :root {
-  --color-primary: #356763;
-  --color-primary-hover: #285b57;
-  --color-secondary: #49655a;
-  --color-surface: #ffffff;
-  --color-background: #ffffff;
+  --color-primary: #14967f;
+  --color-primary-hover: #095d7e;
+  --color-secondary: #095d7e;
+  --color-surface: #f1f9ff;
+  --color-background: #f1f9ff;
 }
 
 .primary-gradient {
-  background: linear-gradient(145deg, #356763 0%, #285b57 100%);
+  background: linear-gradient(145deg, #14967f 0%, #095d7e 100%);
 }
 
 .glass-nav {
-  background: rgba(252, 249, 245, 0.8);
+  background: rgba(241, 249, 255, 0.85);
   backdrop-filter: blur(12px);
 }
 
@@ -277,7 +277,7 @@ body {
 .select-control:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(53, 103, 99, 0.18);
+  box-shadow: 0 0 0 3px rgba(20, 150, 127, 0.18);
 }
 
 .input-control-disabled {
@@ -422,7 +422,7 @@ body {
 .ui-btn-primary {
   background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 14px 30px rgba(20, 167, 199, 0.18);
+  box-shadow: 0 14px 30px rgba(20, 150, 127, 0.18);
 }
 .ui-btn-primary:hover {
   background: var(--color-primary-hover);
@@ -449,8 +449,8 @@ body {
   transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
 .ui-input:focus {
-  border-color: rgba(20, 167, 199, 0.60);
-  box-shadow: 0 0 0 4px rgba(20, 167, 199, 0.18);
+  border-color: rgba(9, 93, 126, 0.60);
+  box-shadow: 0 0 0 4px rgba(20, 150, 127, 0.18);
 }
 .dark .ui-input {
   background: rgb(63 63 70); /* zinc-700 */

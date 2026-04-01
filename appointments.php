@@ -30,11 +30,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
     $appointment_id = (int)$_POST['appointment_id'];
     
     if ($_POST['action'] === 'cancel') {
+            // Vispirms iegūstam pieraksta info, lai atbrīvotu slotu
+            $getStmt = $conn->prepare("SELECT scheduled_at, psychologist_account_id FROM appointments WHERE id = ? AND user_account_id = ?");
+            $getStmt->bind_param("ii", $appointment_id, $account_id);
+            $getStmt->execute();
+            $apptRow = $getStmt->get_result()->fetch_assoc();
+            $getStmt->close();
+
             $status = 'cancelled';
             $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ? AND user_account_id = ?");
             $stmt->bind_param("sii", $status, $appointment_id, $account_id);
             $stmt->execute();
             $stmt->close();
+
+            // Atbrīvojam slotu, lai citi lietotāji var pierakstīties
+            if ($apptRow && !empty($apptRow['scheduled_at'])) {
+                $freeStmt = $conn->prepare("UPDATE availability_slots SET is_booked = 0 WHERE psychologist_account_id = ? AND starts_at = ?");
+                $freeStmt->bind_param("is", $apptRow['psychologist_account_id'], $apptRow['scheduled_at']);
+                $freeStmt->execute();
+                $freeStmt->close();
+            }
             $message = "Pieraksts atcelts.";
     } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_time'])) {
             $new_time = $_POST['new_time'];

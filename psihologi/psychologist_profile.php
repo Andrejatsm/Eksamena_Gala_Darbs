@@ -74,7 +74,7 @@ $articles = $articles_result->fetch_all(MYSQLI_ASSOC);
 $stmt = $conn->prepare("
     SELECT id, starts_at, ends_at, consultation_type, note
     FROM availability_slots
-    WHERE psychologist_account_id = ? AND starts_at > NOW()
+    WHERE psychologist_account_id = ? AND starts_at > NOW() AND is_booked = 0
     ORDER BY starts_at ASC
     LIMIT 10
 ");

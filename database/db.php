@@ -9,7 +9,8 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 
 
 if ($conn->connect_error) {
-    die("Savienojuma kļūda: " . $conn->connect_error);
+    error_log("DB savienojuma kļūda: " . $conn->connect_error);
+    die("Sistēmas kļūda. Lūdzu, mēģiniet vēlāk.");
 }
 
 $conn->set_charset("utf8mb4");
@@ -110,5 +111,17 @@ if ($contactReadAtColumn && $contactReadAtColumn->num_rows === 0) {
 }
 if ($contactReadAtColumn instanceof mysqli_result) {
     $contactReadAtColumn->free();
+}
+
+// Pievienojam is_booked lauku availability_slots, lai varētu slēpt apmaksātos slotus no profila.
+$slotBookedColumn = $conn->query("SHOW COLUMNS FROM availability_slots LIKE 'is_booked'");
+if ($slotBookedColumn && $slotBookedColumn->num_rows === 0) {
+    $conn->query(
+        "ALTER TABLE availability_slots
+         ADD COLUMN is_booked TINYINT(1) NOT NULL DEFAULT 0 AFTER note"
+    );
+}
+if ($slotBookedColumn instanceof mysqli_result) {
+    $slotBookedColumn->free();
 }
 ?>
