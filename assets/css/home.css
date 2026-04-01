@@ -5,7 +5,7 @@
 }
 
 .home-section-light {
-  background: #fff;
+  background: #f1f9ff;
   border-top: 1px solid rgba(15, 23, 42, 0.06);
 }
 
@@ -15,7 +15,7 @@
 }
 
 .home-section-articles {
-  background: linear-gradient(135deg, #356763 0%, #427d78 55%, #6da8a1 100%);
+  background: linear-gradient(135deg, #095d7e 0%, #14967f 55%, #ccecee 100%);
 }
 
 .home-shell {
@@ -144,7 +144,7 @@
   margin-bottom: 0.75rem;
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  background: rgba(53, 103, 99, 0.12);
+  background: rgba(20, 150, 127, 0.12);
   color: var(--color-primary);
   font-size: 0.75rem;
   font-weight: 700;

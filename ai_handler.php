@@ -269,7 +269,7 @@ $preferredModeInstruction = $preferredMode === 'answer'
     : 'Servera heuristika norāda, ka lietotāja ziņojums ir pārāk īss, emocionāls vai neskaidrs. Primāri atbildi režīmā [MODE:clarify].';
 
 // Gemini API atslēga no vides mainīgā, ar esošo fallback savietojamībai.
-$apiKey = getenv('GEMINI_API_KEY') ?: 'yourapiKeyHere';
+$apiKey = getenv('GEMINI_API_KEY') ?: 'your_api_key_here';
 
 $pagesText = implode("\n", $relevantPages);
 $authLine = $isLoggedIn ? "Jā" : "Nē";

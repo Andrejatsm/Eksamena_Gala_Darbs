@@ -23,11 +23,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Pārbaudām, vai lietotājs maksā tieši par esošu un konkrētam psihologam piederošu slotu.
     if ($slot_id > 0) {
-        $stmt = $conn->prepare("\n            SELECT starts_at, ends_at, consultation_type\n            FROM availability_slots\n            WHERE id = ? AND psychologist_account_id = ?\n        ");
+        $stmt = $conn->prepare(
+            "SELECT starts_at, ends_at, consultation_type, is_booked
+             FROM availability_slots
+             WHERE id = ? AND psychologist_account_id = ?"
+        );
         $stmt->bind_param("ii", $slot_id, $psychologist_account_id);
         $stmt->execute();
         $result = $stmt->get_result();
         if ($slot = $result->fetch_assoc()) {
+            // Pārbaudām vai slots jau ir rezervēts (cits lietotājs to nopircis)
+            if ((int)$slot['is_booked'] === 1) {
+                http_response_code(409);
+                echo json_encode(['error' => 'Šis laika slots jau ir rezervēts.']);
+                exit();
+            }
+            // Pārbaudām vai šis pats lietotājs jau ir pierakstījies uz šo laiku
+            $dupStmt = $conn->prepare(
+                "SELECT id FROM appointments
+                 WHERE user_account_id = ? AND psychologist_account_id = ? AND scheduled_at = ?
+                 AND status NOT IN ('cancelled') LIMIT 1"
+            );
+            $dupStmt->bind_param("iis", $_SESSION['account_id'], $psychologist_account_id, $slot['starts_at']);
+            $dupStmt->execute();
+            $dupExists = $dupStmt->get_result()->num_rows > 0;
+            $dupStmt->close();
+            if ($dupExists) {
+                http_response_code(409);
+                echo json_encode(['error' => 'Jūs jau esat pierakstīts uz šo laiku.']);
+                exit();
+            }
             $_SESSION['booking_slot_id'] = $slot_id;
             $_SESSION['booking_scheduled_at'] = $slot['starts_at'];
             $_SESSION['booking_consultation_type'] = $slot['consultation_type'] ?? 'online';

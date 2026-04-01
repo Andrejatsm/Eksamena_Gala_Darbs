@@ -176,6 +176,16 @@ if ($payment_verified && $check && $check->num_rows == 0) {
     }
     $appointment_created = $stmt->execute();
     $stmt->close();
+
+    // Atzīmējam slotu kā rezervētu, lai citi lietotāji to vairs neredz profila lapā.
+    $slot_id_from_meta = (int)($metadata['slot_id'] ?? $_SESSION['booking_slot_id'] ?? 0);
+    if ($appointment_created && $slot_id_from_meta > 0) {
+        $markStmt = $conn->prepare("UPDATE availability_slots SET is_booked = 1 WHERE id = ?");
+        $markStmt->bind_param("i", $slot_id_from_meta);
+        $markStmt->execute();
+        $markStmt->close();
+    }
+    unset($_SESSION['booking_slot_id']);
 }
 
 if ($payment_verified && $appointment_created && filter_var($user_email, FILTER_VALIDATE_EMAIL)) {

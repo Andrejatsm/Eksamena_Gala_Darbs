@@ -68,8 +68,8 @@ $qStmt->close();
             margin-top: 8px;
             font-size: 12px;
             font-weight: 700;
-            color: #356763;
-            background: rgba(53, 103, 99, 0.12);
+            color: #14967f;
+            background: rgba(20, 150, 127, 0.12);
             border-radius: 999px;
             padding: 4px 10px;
         }

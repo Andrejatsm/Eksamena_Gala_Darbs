@@ -43,14 +43,16 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#356763',
-                        primaryHover: '#285b57',
-                        secondary: '#49655a',
-                        surface: '#ffffff',
-                        background: '#ffffff',
-                        onSurface: '#32332e',
-                        onSurfaceVariant: '#5f5f5a',
-                        tertiary: '#56625b',
+                        primary: '#14967f',
+                        primaryHover: '#095d7e',
+                        secondary: '#095d7e',
+                        surface: '#f1f9ff',
+                        background: '#f1f9ff',
+                        mint: '#e2fcd6',
+                        accent: '#ccecee',
+                        onSurface: '#0d2d3a',
+                        onSurfaceVariant: '#2d6a7f',
+                        tertiary: '#ccecee',
                         dark: {
                             bg: '#121212',
                             card: '#1e1e1e',
@@ -75,7 +77,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
 </head>
 <body class="bg-surface text-gray-900 dark:bg-zinc-900 dark:text-gray-100 transition-colors duration-300">
 
-    <nav class="sticky top-0 z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800 shadow-sm transition-colors duration-300">
+    <nav class="sticky top-0 z-50 bg-[#f1f9ff]/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-[#ccecee] dark:border-zinc-800 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex-shrink-0 flex items-center">
@@ -107,7 +109,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                 <i class="fas fa-chevron-down text-xs text-gray-500 dark:text-gray-400"></i>
                             </button>
 
-                            <div class="hidden absolute right-0 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-xl dark:bg-zinc-800 dark:divide-zinc-700 w-56 border border-gray-100 dark:border-zinc-700" id="user-dropdown">
+                            <div class="hidden absolute right-0 z-50 my-4 text-base list-none bg-surface divide-y divide-[#ccecee] rounded-lg shadow-xl dark:bg-zinc-800 dark:divide-zinc-700 w-56 border border-[#ccecee] dark:border-zinc-700" id="user-dropdown">
                                 <div class="px-4 py-3">
                                     <span class="block text-sm text-gray-900 dark:text-white font-bold"><?php echo htmlspecialchars($user_name); ?></span>
                                     <span class="block text-xs font-medium text-gray-500 truncate dark:text-gray-400 uppercase tracking-wider mt-1"><?php echo $user_role; ?></span>
@@ -171,7 +173,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
             </div>
         </div>
 
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 shadow-inner">
+        <div id="mobile-menu" class="hidden md:hidden bg-surface dark:bg-zinc-900 border-t border-[#ccecee] dark:border-zinc-800 shadow-inner">
             <div class="px-4 pt-2 pb-4 space-y-1">
                  
                  <?php if ($is_logged_in): ?>

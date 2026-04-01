@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         chartData.articles ?? 0,
                         chartData.tests ?? 0,
                     ],
-                    backgroundColor: ['#356763', '#4f7f7b', '#d97706', '#2563eb', '#ea580c', '#7c3aed'],
+                    backgroundColor: ['#14967f', '#095d7e', '#d97706', '#2563eb', '#ea580c', '#7c3aed'],
                     borderRadius: 10,
                 }],
             },
