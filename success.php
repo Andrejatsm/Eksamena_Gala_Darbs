@@ -197,16 +197,16 @@ require __DIR__ . '/header.php';
 ?>
 
 <div class="auth-shell page-surface">
-    <div class="result-card max-w-md w-full text-center border-2 <?php echo $payment_verified ? 'border-green-100 dark:border-green-900/30' : 'border-red-100 dark:border-red-900/30'; ?>">
+    <div class="result-card max-w-md w-full text-center border-2 <?php echo $payment_verified ? 'border-[#ccecee] dark:border-[#14967f]/30' : 'border-[#ccecee] dark:border-[#095d7e]/30'; ?>">
         
-        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 dark:bg-green-900/50 mb-6">
-            <i class="fas fa-check text-4xl text-green-600 dark:text-green-400"></i>
+        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-[#e2fcd6] dark:bg-[#14967f]/20 mb-6">
+            <i class="fas fa-check text-4xl text-[#14967f] dark:text-[#e2fcd6]"></i>
         </div>
 
         <?php if ($payment_verified): ?>
-        <h1 class="text-3xl font-extrabold text-green-600 dark:text-green-400 mb-2">Paldies!</h1>
+        <h1 class="text-3xl font-extrabold text-[#14967f] dark:text-[#e2fcd6] mb-2">Paldies!</h1>
         <?php else: ?>
-        <h1 class="text-3xl font-extrabold text-red-600 dark:text-red-400 mb-2">Neizdevās apstiprināt maksājumu</h1>
+        <h1 class="text-3xl font-extrabold text-[#095d7e] dark:text-[#ccecee] mb-2">Neizdevās apstiprināt maksājumu</h1>
         <?php endif; ?>
         
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
@@ -214,9 +214,9 @@ require __DIR__ . '/header.php';
         </h3>
         
         <?php if ($scheduled_at): ?>
-        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-            <h4 class="font-bold text-blue-900 dark:text-blue-100 mb-2">Jūsu konsultācija ir apstiprināta:</h4>
-            <p class="text-blue-800 dark:text-blue-200">
+        <div class="bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/40 rounded-lg p-4 mb-6">
+            <h4 class="font-bold text-[#095d7e] dark:text-[#ccecee] mb-2">Jūsu konsultācija ir apstiprināta:</h4>
+            <p class="text-[#095d7e] dark:text-[#ccecee]">
                 <strong>Laiks:</strong> <?php echo date('d.m.Y H:i', strtotime($scheduled_at)); ?><br>
                 <strong>Veids:</strong> <?php echo $consultation_type === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?><br>
                 <strong>Ilgums:</strong> 1 stunda
@@ -229,16 +229,16 @@ require __DIR__ . '/header.php';
             Jūsu pieteikums konsultācijai ir reģistrēts sistēmā.
         </p>
         <?php if ($appointment_created && $email_sent === true): ?>
-        <p class="text-sm text-green-700 dark:text-green-400 mb-6">
+        <p class="text-sm text-[#14967f] dark:text-[#e2fcd6] mb-6">
             Apstiprinājums nosūtīts uz e-pastu: <strong><?php echo htmlspecialchars($user_email); ?></strong>.
         </p>
         <?php elseif ($appointment_created && $email_sent === false): ?>
-        <p class="text-sm text-amber-700 dark:text-amber-400 mb-6">
+        <p class="text-sm text-[#095d7e] dark:text-[#ccecee] mb-6">
             Neizdevās automātiski nosūtīt e-pastu. Lūdzu, pārbaudiet SMTP/PHP mail konfigurāciju.
         </p>
         <?php endif; ?>
         <?php else: ?>
-        <p class="text-red-600 dark:text-red-400 mb-8">
+        <p class="text-[#095d7e] dark:text-[#ccecee] mb-8">
             <?php echo htmlspecialchars($payment_error ?: 'Maksājuma apstiprinājums nav pieejams.'); ?>
         </p>
         <?php endif; ?>

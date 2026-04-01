@@ -199,8 +199,8 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
-                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 text-center">
-                    <p class="text-yellow-800 dark:text-yellow-300 font-semibold">
+                <div class="bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/40 rounded-lg p-6 text-center">
+                    <p class="text-[#095d7e] dark:text-[#ccecee] font-semibold">
                         <i class="fas fa-calendar-times mr-2"></i>Pašlaik nav pieejamu laiku
                     </p>
                 </div>

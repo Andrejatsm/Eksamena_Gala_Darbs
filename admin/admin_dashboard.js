@@ -55,8 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    if (chartCanvas && window.Chart && window.adminDashboardChartData) {
-        const chartData = window.adminDashboardChartData;
+    const _appData = JSON.parse(document.getElementById('admin-dashboard-data')?.textContent || '{}');
+    const adminDashboardChartData = _appData.chartStats ?? {};
+    const adminAccountsConfig = _appData.accountsConfig ?? {};
+
+    if (chartCanvas && window.Chart && adminDashboardChartData && Object.keys(adminDashboardChartData).length) {
+        const chartData = adminDashboardChartData;
         adminChart = new window.Chart(chartCanvas, {
             type: 'bar',
             data: {
@@ -165,11 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadAccounts = async (page = 1) => {
-        if (!accountsContainer || !window.adminAccountsConfig?.listUrl) return;
+        if (!accountsContainer || !adminAccountsConfig?.listUrl) return;
         accountsPage = page;
         renderAccountsLoading();
         try {
-            const response = await fetch(`${window.adminAccountsConfig.listUrl}?${buildAccountsQuery(page)}`, {
+            const response = await fetch(`${adminAccountsConfig.listUrl}?${buildAccountsQuery(page)}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                 },
@@ -186,13 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const runAccountAction = async (action, accountId) => {
-        if (!window.adminAccountsConfig?.actionUrl || !action || !accountId) return;
+        if (!adminAccountsConfig?.actionUrl || !action || !accountId) return;
         const formData = new FormData();
         formData.set('action', action);
         formData.set('account_id', String(accountId));
 
         try {
-            const response = await fetch(window.adminAccountsConfig.actionUrl, {
+            const response = await fetch(adminAccountsConfig.actionUrl, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',

@@ -97,13 +97,13 @@ require __DIR__ . '/../header.php';
         </div>
 
         <?php if ($flashSuccess !== ''): ?>
-        <div class="mb-4 p-4 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+        <div class="mb-4 p-4 rounded-lg border border-[#14967f]/30 bg-[#e2fcd6] dark:bg-[#14967f]/20 text-[#14967f] dark:text-[#e2fcd6]">
             <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($flashSuccess); ?>
         </div>
         <?php endif; ?>
 
         <?php if ($flashError !== ''): ?>
-        <div class="mb-4 p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
+        <div class="mb-4 p-4 rounded-lg border border-[#ccecee] bg-[#f1f9ff] dark:bg-[#095d7e]/20 dark:border-[#095d7e]/40 text-[#095d7e] dark:text-[#ccecee]">
             <i class="fas fa-triangle-exclamation mr-2"></i><?php echo htmlspecialchars($flashError); ?>
         </div>
         <?php endif; ?>
@@ -151,7 +151,7 @@ require __DIR__ . '/../header.php';
                             <td class="px-4 py-4 align-top text-right">
                                 <form method="POST" onsubmit="return confirm('Vai tiešām dzēst šo ziņojumu?');" class="inline">
                                     <input type="hidden" name="delete_message_id" value="<?php echo (int)$msg['id']; ?>">
-                                    <button type="submit" class="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition text-sm font-semibold">
+                                    <button type="submit" class="px-3 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] dark:bg-[#095d7e] dark:hover:bg-[#074e6b] transition text-sm font-semibold">
                                         <i class="fas fa-trash mr-1"></i>Dzēst
                                     </button>
                                 </form>

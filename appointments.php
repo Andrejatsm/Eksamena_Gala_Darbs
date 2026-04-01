@@ -13,10 +13,10 @@ require 'header.php';
 $account_id = (int)$_SESSION['account_id'];
 $message = "";
 $status_classes = [
-    'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-    'approved' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-    'rescheduled' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    'pending' => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
+    'approved' => 'bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6]',
+    'cancelled' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
+    'rescheduled' => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
 ];
 $status_labels = [
     'pending' => 'Gaida apstiprinājumu',
@@ -109,12 +109,12 @@ $stmt->close();
                     
                     <?php if($appt['status'] === 'pending' || $appt['status'] === 'approved'): ?>
                         <div class="flex gap-2">
-                            <button type="button" class="open-reschedule-btn text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-2 rounded-lg transition text-sm" data-appointment-id="<?php echo (int)$appt['id']; ?>">
+                            <button type="button" class="open-reschedule-btn text-[#095d7e] hover:text-[#14967f] dark:text-[#ccecee] hover:bg-[#ccecee]/30 dark:hover:bg-[#095d7e]/20 px-3 py-2 rounded-lg transition text-sm" data-appointment-id="<?php echo (int)$appt['id']; ?>">
                                 <i class="fas fa-calendar-alt"></i> Pārcelt
                             </button>
                             <form method="POST" class="inline">
                                 <input type="hidden" name="appointment_id" value="<?php echo $appt['id']; ?>">
-                                <button type="submit" name="action" value="cancel" onclick="return confirm('Vai tiešām vēlaties atcelt pierakstu?')" class="text-red-600 hover:text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-3 py-2 rounded-lg transition text-sm">
+                                <button type="submit" name="action" value="cancel" onclick="return confirm('Vai tiešām vēlaties atcelt pierakstu?')" class="text-[#095d7e] hover:text-[#14967f] dark:text-[#ccecee] hover:bg-[#ccecee]/30 dark:hover:bg-[#095d7e]/20 px-3 py-2 rounded-lg transition text-sm">
                                     <i class="fas fa-trash"></i> Atcelt
                                 </button>
                             </form>
@@ -136,28 +136,30 @@ $stmt->close();
 </div>
 
 <!-- Pieraksta pārcelšanas modālis -->
-<div id="rescheduleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-6 border w-full max-w-md shadow-lg rounded-2xl bg-white dark:bg-zinc-800">
-        <div>
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg leading-6 font-bold text-gray-900 dark:text-white">Pārcelt pierakstu</h3>
-                <button id="closeRescheduleModalBtn" type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
-                    <i class="fas fa-times fa-lg"></i>
-                </button>
-            </div>
-            <form method="POST">
-                <input type="hidden" name="appointment_id" id="modal_appointment_id">
-                <input type="hidden" name="action" value="reschedule">
-                <div class="mb-4">
-                    <label for="new_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">Jaunais laiks</label>
-                    <input type="datetime-local" name="new_time" id="new_time" required class="mt-1 block w-full px-3 py-2 bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded-lg shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
-                </div>
-                <div class="mt-6">
-                    <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white px-6 py-2.5 rounded-lg transition font-medium">
-                        Apstiprināt jauno laiku
+<div id="rescheduleModal" class="hidden fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8">
+        <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+        <div class="relative bg-surface dark:bg-zinc-800 rounded-2xl border border-[#ccecee] dark:border-zinc-700 shadow-2xl w-full max-w-md">
+            <div class="px-6 pt-6 pb-4">
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Pārcelt pierakstu</h3>
+                    <button id="closeRescheduleModalBtn" type="button" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1">
+                        <i class="fas fa-times fa-lg"></i>
                     </button>
                 </div>
-            </form>
+                <form method="POST">
+                    <input type="hidden" name="appointment_id" id="modal_appointment_id">
+                    <input type="hidden" name="action" value="reschedule">
+                    <div class="mb-4">
+                        <label for="new_time" class="field-label">Jaunais laiks</label>
+                        <input type="datetime-local" name="new_time" id="new_time" required class="input-control mt-1">
+                    </div>
+                    <div class="border-t border-[#ccecee] dark:border-zinc-700 -mx-6 px-6 pt-4 mt-2 flex justify-end gap-2 bg-[#f1f9ff] dark:bg-zinc-700/30 rounded-b-2xl">
+                        <button type="button" id="closeRescheduleModalBtnFooter" onclick="document.getElementById('rescheduleModal').classList.add('hidden')" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
+                        <button type="submit" class="button-primary px-6 py-2">Apstiprināt jauno laiku</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

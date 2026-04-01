@@ -206,7 +206,7 @@ require 'header.php';
         </div>
 
         <?php if(!empty($error)): ?>
-            <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm text-center">
+            <div class="bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/40 text-[#095d7e] dark:text-[#ccecee] px-4 py-3 rounded-lg text-sm text-center">
                 <?php echo $error; ?>
             </div>
         <?php endif; ?>

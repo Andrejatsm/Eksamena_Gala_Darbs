@@ -475,3 +475,23 @@ body {
   background: rgba(39, 39, 42, 0.75);
 }
 
+/* Quill rich-text editor wrapper */
+.quill-editor-wrap .ql-editor {
+  min-height: 12rem;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+.dark .quill-editor-wrap .ql-toolbar.ql-snow {
+  border-color: rgb(82 82 91);
+  background: rgb(63 63 70);
+}
+.dark .quill-editor-wrap .ql-toolbar .ql-stroke { stroke: rgb(212 212 216); }
+.dark .quill-editor-wrap .ql-toolbar .ql-fill { fill: rgb(212 212 216); }
+.dark .quill-editor-wrap .ql-toolbar .ql-picker { color: rgb(212 212 216); }
+.dark .quill-editor-wrap .ql-container.ql-snow { border-color: rgb(82 82 91); }
+.dark .quill-editor-wrap .ql-editor {
+  background: rgb(39 39 42);
+  color: rgb(228 228 231);
+}
+

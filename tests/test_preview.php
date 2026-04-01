@@ -41,71 +41,13 @@ $qStmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Testa priekšskatījums</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-            background: #f8fafc;
-            color: #0f172a;
-        }
-
-        .preview-wrap {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .preview-head {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .status {
-            display: inline-block;
-            margin-top: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #14967f;
-            background: rgba(20, 150, 127, 0.12);
-            border-radius: 999px;
-            padding: 4px 10px;
-        }
-
-        .question {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 14px 16px;
-            margin-bottom: 10px;
-        }
-
-        .q-title {
-            font-weight: 700;
-            margin: 0 0 10px;
-        }
-
-        .scale {
-            margin: 0;
-            padding-left: 18px;
-            color: #334155;
-            line-height: 1.55;
-        }
-
-        .hint {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 12px;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/test_preview.css">
 </head>
 <body>
     <div class="preview-wrap">
         <div class="preview-head">
-            <h2 style="margin:0 0 6px;"><?php echo htmlspecialchars($test['title']); ?></h2>
-            <p style="margin:0;color:#475569;"><?php echo htmlspecialchars($test['description'] ?? 'Nav apraksta.'); ?></p>
+            <h2 class="preview-head-title"><?php echo htmlspecialchars($test['title']); ?></h2>
+            <p class="preview-head-desc"><?php echo htmlspecialchars($test['description'] ?? 'Nav apraksta.'); ?></p>
             <span class="status"><?php echo htmlspecialchars($test['status'] ?? 'draft'); ?></span>
             <p class="hint">Priekšskatījums ir tikai lasāms režīms bez navigācijas un bez sesijas darbībām.</p>
         </div>
