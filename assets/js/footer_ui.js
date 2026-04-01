@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const appPathPrefix = typeof window.APP_PATH_PREFIX === 'string' ? window.APP_PATH_PREFIX : '';
+    const appPathPrefix = document.body.dataset.pathPrefix ?? '';
 
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');

@@ -4,7 +4,7 @@ require '../database/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     http_response_code(403);
-    echo '<div class="px-6 py-8 text-center text-red-600 dark:text-red-400">Piekļuve liegta.</div>';
+    echo '<div class="px-6 py-8 text-center text-[#095d7e] dark:text-[#ccecee]">Piekļave liegta.</div>';
     exit();
 }
 
@@ -140,8 +140,8 @@ $makePageButton = static function (int $targetPage, string $label, bool $isActiv
             <?php
                 $roleLabel = ($row['role'] ?? '') === 'psychologist' ? 'Psihologs' : 'Lietotājs';
                 $roleBadge = ($row['role'] ?? '') === 'psychologist'
-                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                    : 'bg-primary/15 dark:bg-primary/25 text-primary';
+                    ? 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]'
+                    : 'bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6]';
                 $statusLabel = match ($row['status'] ?? '') {
                     'active' => 'Aktīvs',
                     'pending' => 'Gaida apstiprinājumu',
@@ -150,9 +150,9 @@ $makePageButton = static function (int $targetPage, string $label, bool $isActiv
                     default => (string)($row['status'] ?? 'Nezināms'),
                 };
                 $statusBadge = match ($row['status'] ?? '') {
-                    'active' => 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-                    'pending' => 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300',
-                    'rejected' => 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+                    'active' => 'bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6]',
+                    'pending' => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
+                    'rejected' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
                     'disabled' => 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-300',
                     default => 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-300',
                 };
@@ -200,18 +200,18 @@ $makePageButton = static function (int $targetPage, string $label, bool $isActiv
                             <i class="fas fa-eye mr-2"></i>Skatīt
                         </button>
                         <?php if (($row['status'] ?? '') === 'pending'): ?>
-                        <button type="button" data-account-action="approve_psych" data-account-id="<?php echo (int)$row['id']; ?>" class="px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition text-sm font-semibold">
+                        <button type="button" data-account-action="approve_psych" data-account-id="<?php echo (int)$row['id']; ?>" class="px-3 py-2 bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6] rounded-lg hover:bg-[#ccecee] dark:hover:bg-[#14967f]/30 transition text-sm font-semibold">
                             <i class="fas fa-check mr-2"></i>Apstiprināt
                         </button>
-                        <button type="button" data-account-action="reject_psych" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām noraidīt šo psihologa profilu?" class="px-3 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition text-sm font-semibold">
+                        <button type="button" data-account-action="reject_psych" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām noraidīt šo psihologa profilu?" class="px-3 py-2 bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee] rounded-lg hover:bg-[#b8dde0] dark:hover:bg-[#095d7e]/30 transition text-sm font-semibold">
                             <i class="fas fa-times mr-2"></i>Noraidīt
                         </button>
                         <?php endif; ?>
-                        <button type="button" data-account-action="delete_psych" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām dzēst šo psihologa kontu?" class="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition text-sm font-semibold">
+                        <button type="button" data-account-action="delete_psych" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām dzēst šo psihologa kontu?" class="px-3 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] dark:bg-[#095d7e] dark:hover:bg-[#074e6b] transition text-sm font-semibold">
                             <i class="fas fa-trash mr-2"></i>Dzēst
                         </button>
                         <?php else: ?>
-                        <button type="button" data-account-action="delete_user" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām dzēst šo lietotāja kontu?" class="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition text-sm font-semibold">
+                        <button type="button" data-account-action="delete_user" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām dzēst šo lietotāja kontu?" class="px-3 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] dark:bg-[#095d7e] dark:hover:bg-[#074e6b] transition text-sm font-semibold">
                             <i class="fas fa-trash mr-2"></i>Dzēst
                         </button>
                         <?php endif; ?>

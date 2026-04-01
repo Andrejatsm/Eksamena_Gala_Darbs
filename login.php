@@ -115,13 +115,13 @@ require 'header.php';
         </div>
 
         <?php if(!empty($error)): ?>
-            <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm text-center">
+            <div class="bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/40 text-[#095d7e] dark:text-[#ccecee] px-4 py-3 rounded-lg text-sm text-center">
                 <?php echo $error; ?>
             </div>
         <?php endif; ?>
 
         <?php if(isset($_GET['success'])): ?>
-            <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg text-sm text-center">
+            <div class="bg-[#e2fcd6] dark:bg-[#14967f]/20 border border-[#14967f]/30 text-[#14967f] dark:text-[#e2fcd6] px-4 py-3 rounded-lg text-sm text-center">
                 Reģistrācija veiksmīga! Lūdzu, ielogojieties.
             </div>
         <?php endif; ?>

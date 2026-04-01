@@ -104,14 +104,14 @@ require '../header.php';
     </div>
 
     <?php if ($is_admin_or_psych_logged_in): ?>
-    <div class="alert-warning mb-6">
-        <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
+    <div class="alert-info mb-6">
+        <p class="text-sm font-semibold text-[#095d7e] dark:text-[#ccecee]">
             <i class="fas fa-info-circle mr-2"></i>Tu esi ielogojies kā <?php echo htmlspecialchars($logged_in_role_label); ?>. Testu vari pildīt, bet rezultāts netiks saglabāts.
         </p>
     </div>
     <?php elseif (!$is_user_logged_in): ?>
-    <div class="alert-warning mb-6">
-        <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
+    <div class="alert-info mb-6">
+        <p class="text-sm font-semibold text-[#095d7e] dark:text-[#ccecee]">
             <i class="fas fa-info-circle mr-2"></i>Viesu režīms: testu vari pildīt bez ielogošanās, bet rezultāts tiks atvērts pēc ielogošanās/reģistrācijas.
         </p>
     </div>

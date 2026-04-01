@@ -1,6 +1,7 @@
 <?php
 session_start();
 $pageTitle = "Mani raksti";
+$pageHead = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css">';
 require 'database/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'psychologist') {

@@ -49,6 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_availability'])) {
         $error = "Laiku norādiet 24 stundu formātā HH:MM.";
     } else if(strtotime($ends_at) <= strtotime($starts_at)) {
         $error = "Beigu laikam jābūt vēlākiem nekā sākuma laikam.";
+    } else if (round((strtotime($ends_at) - strtotime($starts_at)) / 60) > 240) {
+        $error = "Slota ilgums nevar pārsniegt 4 stundas.";
+    } else if ($starts_date !== '' && $starts_date < date('Y-m-d')) {
+        $error = "Nevar pievienot slotu pagātnes datumā.";
     } else {
         // Glabājam arī konsultācijas tipu un piezīmi, lai katrs slots būtu saprotams jau pirms rezervācijas.
         $stmt = $conn->prepare("INSERT INTO availability_slots (psychologist_account_id, starts_at, ends_at, consultation_type, note) VALUES (?, ?, ?, ?, ?)");
@@ -78,9 +82,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_slot'])) {
 }
 
 // Esošos slotus ielādējam vienā vietā, lai var gan attēlot sarakstu, gan uzreiz dzēst nevajadzīgos laikus.
-$sql = "SELECT id, starts_at, ends_at, consultation_type, note FROM availability_slots WHERE psychologist_account_id = ? ORDER BY starts_at DESC";
+$page = max(1, (int)($_GET['page'] ?? 1));
+$per_page = 8;
+$offset = ($page - 1) * $per_page;
+
+$count_stmt = $conn->prepare("SELECT COUNT(*) FROM availability_slots WHERE psychologist_account_id = ?");
+$count_stmt->bind_param("i", $account_id);
+$count_stmt->execute();
+$total_slots = (int)$count_stmt->get_result()->fetch_row()[0];
+$count_stmt->close();
+$total_pages = (int)ceil($total_slots / $per_page);
+
+$sql = "SELECT id, starts_at, ends_at, consultation_type, note FROM availability_slots WHERE psychologist_account_id = ? ORDER BY starts_at DESC LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $account_id);
+$stmt->bind_param("iii", $account_id, $per_page, $offset);
 $stmt->execute();
 $result = $stmt->get_result();
 $slots = [];
@@ -117,7 +132,7 @@ require 'header.php';
             <form method="POST" class="stack-md">
                 <div>
                     <label class="field-label">Sākuma datums</label>
-                    <input type="date" name="starts_date" id="starts_date" required class="input-control" value="<?php echo htmlspecialchars($starts_date); ?>" lang="lv">
+                    <input type="date" name="starts_date" id="starts_date" required class="input-control" value="<?php echo htmlspecialchars($starts_date); ?>" min="<?php echo date('Y-m-d'); ?>" lang="lv">
                 </div>
 
                 <div>
@@ -180,51 +195,21 @@ require 'header.php';
                     <p class="text-gray-500 dark:text-gray-400">Jūs vēl neesat pievienojis nekādus laika slotus.</p>
                 </div>
             <?php endif; ?>
+            <?php if ($total_pages > 1): ?>
+            <div class="flex justify-center items-center gap-2 pt-4">
+                <?php if ($page > 1): ?>
+                    <a href="?page=<?php echo $page - 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+                <?php endif; ?>
+                <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
+                <?php if ($page < $total_pages): ?>
+                    <a href="?page=<?php echo $page + 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const startsTimeInput = document.getElementById('starts_time');
-    const endsTimeInput = document.getElementById('ends_time');
-
-    if (!startsTimeInput || !endsTimeInput) {
-        return;
-    }
-
-    const toMinutes = (value) => {
-        const parts = String(value || '').split(':');
-        if (parts.length < 2) return null;
-        const h = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10);
-        if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
-        return h * 60 + m;
-    };
-
-    const toTime = (minutes) => {
-        const normalized = ((minutes % 1440) + 1440) % 1440;
-        const h = String(Math.floor(normalized / 60)).padStart(2, '0');
-        const m = String(normalized % 60).padStart(2, '0');
-        return `${h}:${m}`;
-    };
-
-    const syncEndAfterStart = () => {
-        const start = toMinutes(startsTimeInput.value);
-        if (start === null) return;
-
-        const end = toMinutes(endsTimeInput.value);
-        if (end === null || end <= start) {
-            endsTimeInput.value = toTime(start + 60);
-        }
-
-        endsTimeInput.min = startsTimeInput.value;
-    };
-
-    startsTimeInput.addEventListener('change', syncEndAfterStart);
-    startsTimeInput.addEventListener('input', syncEndAfterStart);
-    syncEndAfterStart();
-});
-</script>
+<script src="assets/js/availability.js"></script>
 
 <?php require 'footer.php'; ?>

@@ -30,3 +30,28 @@
     padding-top: 3rem;
   }
 }
+
+/* Styles for HTML content rendered from Quill editor */
+.article-body h1, .article-body h2, .article-body h3 {
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: rgb(17 24 39);
+}
+.dark .article-body h1, .dark .article-body h2, .dark .article-body h3 { color: rgb(255 255 255); }
+.article-body h1 { font-size: 1.875rem; }
+.article-body h2 { font-size: 1.5rem; }
+.article-body h3 { font-size: 1.25rem; }
+.article-body p { margin-bottom: 1rem; }
+.article-body ul, .article-body ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+.article-body li { margin-bottom: 0.25rem; }
+.article-body blockquote {
+  border-left: 4px solid #14967f;
+  padding-left: 1rem;
+  color: #64748b;
+  font-style: italic;
+  margin: 1rem 0;
+}
+.article-body a { color: #14967f; text-decoration: underline; }
+.article-body strong { font-weight: 700; }
+.article-body em { font-style: italic; }

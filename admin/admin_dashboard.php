@@ -266,13 +266,13 @@ require '../header.php';
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <?php if ($success_msg): ?>
-        <div class="js-auto-dismiss-alert mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400" data-timeout="4500">
+        <div class="js-auto-dismiss-alert mb-6 p-4 bg-[#e2fcd6] dark:bg-[#14967f]/20 border border-[#14967f]/30 dark:border-[#14967f]/30 rounded-lg text-[#14967f] dark:text-[#e2fcd6]" data-timeout="4500">
             <i class="fas fa-check-circle mr-2"></i><?php echo $success_msg; ?>
         </div>
         <?php endif; ?>
 
         <?php if ($error_msg): ?>
-        <div class="js-auto-dismiss-alert mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400" data-timeout="6000">
+        <div class="js-auto-dismiss-alert mb-6 p-4 bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/30 rounded-lg text-[#095d7e] dark:text-[#ccecee]" data-timeout="6000">
             <i class="fas fa-triangle-exclamation mr-2"></i><?php echo $error_msg; ?>
         </div>
         <?php endif; ?>
@@ -459,9 +459,9 @@ require '../header.php';
                     
                     while ($test = $result->fetch_assoc()):
                         $status_color = match($test['status']) {
-                            'published' => 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400',
-                            'pending_review' => 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-400',
-                            'archived' => 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-400',
+                            'published' => 'bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6]',
+                            'pending_review' => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
+                            'archived' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
                             'draft' => 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400',
                             default => 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
                         };
@@ -496,7 +496,7 @@ require '../header.php';
                             <form method="POST" class="inline m-0">
                                 <input type="hidden" name="action" value="decline_test">
                                 <input type="hidden" name="test_id" value="<?php echo (int)$test['id']; ?>">
-                                <button type="submit" class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition text-sm font-medium" title="Noraidīt testu" onclick="return confirm('Vai tiešām noraidīt šo testu?');">
+                                <button type="submit" class="px-3 py-1 bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee] rounded-lg hover:bg-[#b8dde0] dark:hover:bg-[#095d7e]/30 transition text-sm font-medium" title="Noraidīt testu" onclick="return confirm('Vai tiešām noraidīt šo testu?');">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </form>
@@ -537,7 +537,7 @@ require '../header.php';
                                         <input type="hidden" name="lookup_type" value="article_category">
                                         <input type="hidden" name="lookup_id" value="<?php echo (int)$cat['id']; ?>">
                                         <input type="hidden" name="new_status" value="<?php echo ((int)$cat['is_active'] === 1) ? '0' : '1'; ?>">
-                                        <button type="submit" class="px-3 py-1 text-xs rounded-lg <?php echo ((int)$cat['is_active'] === 1) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50' : 'bg-primary/15 dark:bg-primary/25 text-primary hover:bg-primary/25 dark:hover:bg-primary/35'; ?> transition">
+                                        <button type="submit" class="px-3 py-1 text-xs rounded-lg <?php echo ((int)$cat['is_active'] === 1) ? 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] hover:bg-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee] dark:hover:bg-[#095d7e]/20' : 'bg-[#e2fcd6] text-[#14967f] hover:bg-[#ccecee] dark:bg-[#14967f]/20 dark:text-[#e2fcd6] dark:hover:bg-[#14967f]/30'; ?> transition">
                                             <?php echo ((int)$cat['is_active'] === 1) ? 'Deaktivēt' : 'Aktivizēt'; ?>
                                         </button>
                                     </form>
@@ -578,7 +578,7 @@ require '../header.php';
                                         <input type="hidden" name="lookup_type" value="specialization">
                                         <input type="hidden" name="lookup_id" value="<?php echo (int)$spec['id']; ?>">
                                         <input type="hidden" name="new_status" value="<?php echo ((int)$spec['is_active'] === 1) ? '0' : '1'; ?>">
-                                        <button type="submit" class="px-3 py-1 text-xs rounded-lg <?php echo ((int)$spec['is_active'] === 1) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50' : 'bg-primary/15 dark:bg-primary/25 text-primary hover:bg-primary/25 dark:hover:bg-primary/35'; ?> transition">
+                                        <button type="submit" class="px-3 py-1 text-xs rounded-lg <?php echo ((int)$spec['is_active'] === 1) ? 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] hover:bg-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee] dark:hover:bg-[#095d7e]/20' : 'bg-[#e2fcd6] text-[#14967f] hover:bg-[#ccecee] dark:bg-[#14967f]/20 dark:text-[#e2fcd6] dark:hover:bg-[#14967f]/30'; ?> transition">
                                             <?php echo ((int)$spec['is_active'] === 1) ? 'Deaktivēt' : 'Aktivizēt'; ?>
                                         </button>
                                     </form>
@@ -599,20 +599,20 @@ require '../header.php';
 
 <!-- Test Preview Modal -->
 <div id="testPreviewModal" class="hidden fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="test-preview-title" role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-        <div id="testPreviewBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <div class="inline-block align-bottom bg-white dark:bg-zinc-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl w-full">
-            <div class="bg-white dark:bg-zinc-800 px-6 pt-5 pb-4 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                <h3 id="test-preview-title" class="text-xl font-bold text-gray-900 dark:text-white">Testa priekšskatījums</h3>
-                <button type="button" id="closeTestPreviewTop" class="px-3 py-2 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition">
-                    <i class="fas fa-times"></i>
+    <div class="flex items-center justify-center min-h-screen px-4 py-8">
+        <div id="testPreviewBackdrop" class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+        <div class="relative bg-surface dark:bg-zinc-800 rounded-2xl border border-[#ccecee] dark:border-zinc-700 shadow-2xl w-full sm:max-w-5xl">
+            <div class="px-6 pt-6 pb-4 border-b border-[#ccecee] dark:border-zinc-700 flex items-center justify-between">
+                <h3 id="test-preview-title" class="text-xl font-bold text-gray-900 dark:text-white">Testa priešskatiķjums</h3>
+                <button type="button" id="closeTestPreviewTop" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1">
+                    <i class="fas fa-times fa-lg"></i>
                 </button>
             </div>
-            <div class="bg-gray-50 dark:bg-zinc-900/40 p-4">
-                <iframe id="testPreviewFrame" title="Testa priekšskatījums" sandbox="allow-same-origin" class="w-full h-[70vh] rounded-lg border border-gray-200 dark:border-zinc-700 bg-white"></iframe>
+            <div class="p-4 bg-[#f1f9ff] dark:bg-zinc-900/40">
+                <iframe id="testPreviewFrame" title="Testa priešskatiķjums" sandbox="allow-same-origin" class="w-full h-[70vh] rounded-xl border border-[#ccecee] dark:border-zinc-700 bg-surface"></iframe>
             </div>
-            <div class="bg-gray-50 dark:bg-zinc-700/50 px-6 py-3 flex justify-end">
-                <button type="button" id="closeTestPreviewBottom" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold">
+            <div class="bg-[#f1f9ff] dark:bg-zinc-700/30 border-t border-[#ccecee] dark:border-zinc-700 px-6 py-4 flex justify-end rounded-b-2xl">
+                <button type="button" id="closeTestPreviewBottom" class="button-primary px-6 py-2">
                     Aizvērt
                 </button>
             </div>
@@ -621,56 +621,68 @@ require '../header.php';
 </div>
 
 <!-- Psychologist Approval Modal -->
-<div id="psychModal" class="hidden fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-        <div id="psychModalBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <div class="inline-block align-bottom bg-white dark:bg-zinc-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
-            <div class="bg-white dark:bg-zinc-800 px-6 pt-5 pb-4">
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4" id="psychModalName"></h3>
+<div id="psychModal" class="hidden fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="psych-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8">
+        <div id="psychModalBackdrop" class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+        <div class="relative bg-surface dark:bg-zinc-800 rounded-2xl border border-[#ccecee] dark:border-zinc-700 shadow-2xl w-full sm:max-w-2xl">
+            <div class="px-6 pt-6 pb-4">
+                <div class="flex justify-between items-start mb-5">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="psychModalName"></h3>
+                    <button type="button" id="closePsychModalTopBtn" onclick="document.getElementById('psychModal').classList.add('hidden')" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1 ml-4 flex-shrink-0">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
                 <div class="space-y-3 text-sm text-gray-700 dark:text-gray-300">
                     <p><strong>Specializācija:</strong> <span id="psychModalSpec"></span></p>
                     <p><strong>Pieredze:</strong> <span id="psychModalExp"></span> gadi</p>
                     <p><strong>E-pasts:</strong> <span id="psychModalEmail"></span></p>
                     <p><strong>Telefons:</strong> <span id="psychModalPhone"></span></p>
                     <p><strong>Apraksts:</strong></p>
-                    <p class="bg-gray-50 dark:bg-zinc-700 p-3 rounded-lg" id="psychModalDesc"></p>
+                    <p class="bg-[#f1f9ff] dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 p-3 rounded-xl" id="psychModalDesc"></p>
                     <p class="mt-4"><strong>Sertifikāts:</strong></p>
                     <div id="psychModalCertContainer" class="mt-2"></div>
                 </div>
             </div>
-            <div class="bg-gray-50 dark:bg-zinc-700/50 px-6 py-3 flex flex-row-reverse gap-2">
-                <button type="button" id="psychModalApproveBtn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold">
-                        <i class="fas fa-check mr-2"></i>Apstiprināt profilu
-                </button>
-                <button type="button" id="psychModalRejectBtn" class="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition font-semibold">
-                        <i class="fas fa-times mr-2"></i>Noraidīt profilu
-                </button>
-                <button type="button" id="psychModalDeleteBtn" class="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition font-semibold">
-                    <i class="fas fa-trash mr-2"></i>Dzēst profilu
-                </button>
-                <button id="closePsychModalBtn" type="button" class="mr-auto px-4 py-2 bg-gray-300 dark:bg-zinc-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-500 transition font-semibold">
+            <div class="bg-[#f1f9ff] dark:bg-zinc-700/30 border-t border-[#ccecee] dark:border-zinc-700 px-6 py-4 flex flex-wrap items-center gap-2 rounded-b-2xl">
+                <button id="closePsychModalBtn" type="button" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold whitespace-nowrap">
                     Atcelt
                 </button>
+                <div class="flex flex-wrap gap-2 ml-auto">
+                    <button type="button" id="psychModalDeleteBtn" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold whitespace-nowrap">
+                        <i class="fas fa-trash mr-1"></i>Dzēst
+                    </button>
+                    <button type="button" id="psychModalRejectBtn" class="px-4 py-2 bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee] rounded-lg hover:bg-[#b8dde0] dark:hover:bg-[#095d7e]/30 transition font-semibold whitespace-nowrap">
+                        <i class="fas fa-times mr-1"></i>Noraidīt
+                    </button>
+                    <button type="button" id="psychModalApproveBtn" class="button-primary px-5 py-2 whitespace-nowrap">
+                        <i class="fas fa-check mr-1"></i>Apstiprināt
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Article Reading Modal -->
-<div id="articleModal" class="hidden fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-        <div id="articleModalBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <div class="inline-block align-bottom bg-white dark:bg-zinc-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
-            <div class="bg-white dark:bg-zinc-800 px-6 pt-5 pb-4">
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2" id="articleModalTitle"></h3>
-                <p class="text-sm text-primary font-semibold mb-6" id="articleModalAuthor"></p>
-                <div class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-zinc-700 p-4 rounded-lg whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto" id="articleModalContent"></div>
+<div id="articleModal" class="hidden fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="article-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8">
+        <div id="articleModalBackdrop" class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+        <div class="relative bg-surface dark:bg-zinc-800 rounded-2xl border border-[#ccecee] dark:border-zinc-700 shadow-2xl w-full sm:max-w-3xl">
+            <div class="px-6 pt-6 pb-4">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="articleModalTitle"></h3>
+                    <button type="button" id="closeArticleModalTopBtn" onclick="document.getElementById('articleModal').classList.add('hidden')" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1 ml-4 flex-shrink-0">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <p class="text-sm text-primary font-semibold mb-5" id="articleModalAuthor"></p>
+                <div class="text-sm text-gray-700 dark:text-gray-300 bg-[#f1f9ff] dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 p-4 rounded-xl whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto" id="articleModalContent"></div>
             </div>
-            <div class="bg-gray-50 dark:bg-zinc-700/50 px-6 py-3 flex flex-row-reverse gap-2">
+            <div class="bg-[#f1f9ff] dark:bg-zinc-700/30 border-t border-[#ccecee] dark:border-zinc-700 px-6 py-4 flex flex-row-reverse gap-2 rounded-b-2xl">
                 <form method="POST" class="inline m-0">
                     <input type="hidden" name="action" value="approve_article">
                     <input type="hidden" name="article_id" id="articleModalApproveId">
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold">
+                    <button type="submit" class="button-primary px-5 py-2">
                         <i class="fas fa-check mr-2"></i>Publicēt
                     </button>
                 </form>
@@ -678,24 +690,18 @@ require '../header.php';
                     <input type="hidden" name="action" value="delete_article">
                     <input type="hidden" name="article_id" id="articleModalRejectId">
                     <input type="hidden" name="account_id" id="articleModalAccId">
-                    <button type="submit" class="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition font-semibold" onclick="return confirm('Vai tiešām dzēst šo rakstu?');">
+                    <button type="submit" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold" onclick="return confirm('Vai tie&#353;&#257;m dz&#275;st &#353;o rakstu?');">
                         <i class="fas fa-trash mr-2"></i>Dzēst
                     </button>
                 </form>
-                <button id="closeArticleModalBtn" type="button" class="mr-auto px-4 py-2 bg-gray-300 dark:bg-zinc-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-500 transition font-semibold">Atcelt</button>
+                <button id="closeArticleModalBtn" type="button" class="mr-auto px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-window.adminDashboardChartData = <?php echo json_encode($chartStats, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
-window.adminAccountsConfig = {
-    listUrl: 'accounts_table.php',
-    actionUrl: 'accounts_action.php'
-};
-</script>
+<script type="application/json" id="admin-dashboard-data"><?php echo json_encode(['chartStats' => $chartStats, 'accountsConfig' => ['listUrl' => 'accounts_table.php', 'actionUrl' => 'accounts_action.php']], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?></script>
 <script src="admin_dashboard.js"></script>
 
 <?php require '../footer.php'; ?>

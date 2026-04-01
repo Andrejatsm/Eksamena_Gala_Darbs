@@ -13,8 +13,8 @@ if (isset($_GET['guest']) && isset($_SESSION['guest_test_result'])) {
         <div class="page-shell-narrow page-surface">
             <div class="result-card text-center">
                 <div class="mb-6">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full mb-4">
-                        <i class="fas fa-lock text-3xl text-yellow-600 dark:text-yellow-400"></i>
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-[#ccecee] dark:bg-[#095d7e]/20 rounded-full mb-4">
+                        <i class="fas fa-lock text-3xl text-[#095d7e] dark:text-[#ccecee]"></i>
                     </div>
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Tests pabeigts!</h1>
                     <p class="text-gray-600 dark:text-gray-400 mt-2">Lai redzētu rezultātu testam <strong><?php echo htmlspecialchars($guest_result['test_title']); ?></strong>, ielogojies vai izveido profilu.</p>
@@ -91,8 +91,8 @@ if (!$attempt) {
 <div class="page-shell-narrow page-surface">
     <div class="result-card text-center">
         <div class="mb-6">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-4">
-                <i class="fas fa-check text-3xl text-green-600 dark:text-green-400"></i>
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-[#e2fcd6] dark:bg-[#14967f]/20 rounded-full mb-4">
+                <i class="fas fa-check text-3xl text-[#14967f] dark:text-[#e2fcd6]"></i>
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Tests pabeigts!</h1>
         </div>

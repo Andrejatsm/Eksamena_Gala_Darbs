@@ -35,34 +35,9 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle ?? 'Saprasts - Psihologu pieteikumi'; ?></title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#14967f',
-                        primaryHover: '#095d7e',
-                        secondary: '#095d7e',
-                        surface: '#f1f9ff',
-                        background: '#f1f9ff',
-                        mint: '#e2fcd6',
-                        accent: '#ccecee',
-                        onSurface: '#0d2d3a',
-                        onSurfaceVariant: '#2d6a7f',
-                        tertiary: '#ccecee',
-                        dark: {
-                            bg: '#121212',
-                            card: '#1e1e1e',
-                            text: '#e0e0e0'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/tailwind_config.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -74,8 +49,11 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     <link rel="stylesheet" href="<?php echo htmlspecialchars($pathPrefix . 'assets/css/' . basename((string)$pageStyle)); ?>?v=<?php echo $cssVersion; ?>">
         <?php endforeach; ?>
     <?php endif; ?>
+    <?php if (!empty($pageHead)): ?>
+    <?php echo $pageHead; ?>
+    <?php endif; ?>
 </head>
-<body class="bg-surface text-gray-900 dark:bg-zinc-900 dark:text-gray-100 transition-colors duration-300">
+<body class="bg-surface text-gray-900 dark:bg-zinc-900 dark:text-gray-100 transition-colors duration-300" data-path-prefix="<?php echo htmlspecialchars($pathPrefix, ENT_QUOTES, 'UTF-8'); ?>">
 
     <nav class="sticky top-0 z-50 bg-[#f1f9ff]/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-[#ccecee] dark:border-zinc-800 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -152,7 +130,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                     <?php endif; ?>
                                     
                                     <li class="border-t border-gray-100 dark:border-zinc-700">
-                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>logout.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-red-400 transition">
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>logout.php" class="block px-4 py-2 text-sm text-[#095d7e] hover:bg-[#f1f9ff] dark:hover:bg-zinc-700 dark:text-[#ccecee] transition">
                                             <i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> Iziet
                                         </a>
                                     </li>
@@ -205,7 +183,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                           <a href="<?php echo htmlspecialchars($pathPrefix); ?>appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani pieraksti</a>
                       <?php endif; ?>
                     
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10">Iziet</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-[#095d7e] dark:text-[#ccecee] hover:bg-[#f1f9ff] dark:hover:bg-zinc-800">Iziet</a>
                  <?php else: ?>
                           <a href="<?php echo htmlspecialchars($pathPrefix); ?>login.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ielogoties</a>
                  <?php endif; ?>
@@ -224,30 +202,3 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     </nav>
 
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/header_menu.js"></script>
-    <script>
-        // Global workaround: after a form submit, replace current history entry so refresh does not re-send POST body.
-        (function () {
-            if (!window.history || typeof window.history.replaceState !== 'function') {
-                return;
-            }
-
-            document.addEventListener('submit', function () {
-                try {
-                    sessionStorage.setItem('saprasts_post_submitted', '1');
-                } catch (e) {
-                    // Ignore storage access issues.
-                }
-            }, true);
-
-            window.addEventListener('load', function () {
-                try {
-                    if (sessionStorage.getItem('saprasts_post_submitted') === '1') {
-                        window.history.replaceState({}, document.title, window.location.href);
-                        sessionStorage.removeItem('saprasts_post_submitted');
-                    }
-                } catch (e) {
-                    // Ignore storage access issues.
-                }
-            });
-        })();
-    </script>

@@ -17,3 +17,29 @@
         }
     });
 })();
+
+// Prevent "resend form data" prompt on page refresh after POST submission.
+(function () {
+    if (!window.history || typeof window.history.replaceState !== 'function') {
+        return;
+    }
+
+    document.addEventListener('submit', function () {
+        try {
+            sessionStorage.setItem('saprasts_post_submitted', '1');
+        } catch (e) {
+            // Ignore storage access issues.
+        }
+    }, true);
+
+    window.addEventListener('load', function () {
+        try {
+            if (sessionStorage.getItem('saprasts_post_submitted') === '1') {
+                window.history.replaceState({}, document.title, window.location.href);
+                sessionStorage.removeItem('saprasts_post_submitted');
+            }
+        } catch (e) {
+            // Ignore storage access issues.
+        }
+    });
+})();

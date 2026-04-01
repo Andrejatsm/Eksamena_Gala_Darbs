@@ -191,10 +191,10 @@ require '../header.php';
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <?php
                                             $statusColor = match($row['status']) {
-                                                'approved' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-                                                'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-                                                'cancelled' => 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
-                                                default => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+                                                'approved' => 'bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6]',
+                                                'rejected' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
+                                                'cancelled' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
+                                                default => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
                                             };
                                             $statusLabel = match($row['status']) {
                                                 'pending' => 'Gaida',
@@ -219,7 +219,7 @@ require '../header.php';
                                                     </form>
                                                     <form method="POST" class="inline">
                                                         <input type="hidden" name="appoint_id" value="<?php echo $row['id']; ?>">
-                                                        <button type="submit" name="action" value="reject" class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition text-sm font-medium" title="Noraidīt">
+                                                        <button type="submit" name="action" value="reject" class="px-3 py-1 bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee] rounded-lg hover:bg-[#b8dde0] dark:hover:bg-[#095d7e]/30 transition text-sm font-medium" title="Noraidīt">
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </form>

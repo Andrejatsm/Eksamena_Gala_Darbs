@@ -60,8 +60,8 @@ if ($article_id === 0) {
         <?php if (!empty($article['category'])): ?>
         <p class="text-sm text-primary font-semibold mb-4"><?php echo htmlspecialchars($article['category']); ?></p>
         <?php endif; ?>
-        <div class="text-gray-700 dark:text-gray-300 leading-8 whitespace-pre-wrap">
-            <?php echo nl2br(htmlspecialchars($article['content'])); ?>
+        <div class="text-gray-700 dark:text-gray-300 leading-relaxed article-body">
+            <?php echo $article['content']; ?>
         </div>
     </article>
     <?php else: ?>
@@ -83,7 +83,7 @@ if ($article_id === 0) {
                 <?php echo date('d.m.Y', strtotime($article['created_at'])); ?>
             </p>
             <p class="text-gray-600 dark:text-gray-400 mb-5 flex-grow">
-                <?php echo htmlspecialchars(mb_substr($article['content'], 0, 220)); ?>...
+                <?php echo htmlspecialchars(strip_tags(mb_substr($article['content'], 0, 220))); ?>...
             </p>
             <a href="published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary">Lasīt pilno rakstu</a>
         </article>

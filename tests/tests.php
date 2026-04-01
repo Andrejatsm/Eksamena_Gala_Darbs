@@ -62,10 +62,10 @@ if ($show_attempts) {
                 
                 <?php if(isset($attempts[$test['id']])): ?>
                     <div class="alert-info mb-4 p-3">
-                        <p class="text-sm font-medium text-blue-900 dark:text-blue-300">
+                        <p class="text-sm font-medium text-[#095d7e] dark:text-[#ccecee]">
                             <i class="fas fa-check-circle"></i> Jūs jau esat pabeidzis šo testu
                         </p>
-                        <p class="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                        <p class="text-xs text-[#14967f] dark:text-[#e2fcd6] mt-1">
                             Pēdējais rezultāts: <?php echo $attempts[$test['id']][0]['total_score']; ?> punkti
                         </p>
                     </div>

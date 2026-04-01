@@ -54,34 +54,30 @@ if (!isset($pathPrefix)) {
     </div>
 
     <div id="contactModal" class="hidden fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
-            <div id="contactModalBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-middle bg-white dark:bg-zinc-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full border border-gray-200 dark:border-zinc-700">
-                <div class="bg-white dark:bg-zinc-800 px-6 pt-5 pb-4">
-                    <h3 class="text-xl leading-6 font-bold text-gray-900 dark:text-white mb-4" id="modal-title">Sazināties ar mums</h3>
+        <div class="flex items-center justify-center min-h-screen px-4 py-8">
+            <div id="contactModalBackdrop" class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+            <div class="relative bg-surface dark:bg-zinc-800 rounded-2xl border border-[#ccecee] dark:border-zinc-700 shadow-2xl w-full sm:max-w-lg">
+                <div class="px-6 pt-6 pb-4">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-5" id="modal-title">Saziņāties ar mums</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jūsu E-pasts</label>
-                            <input type="email" id="contactEmail" class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-2.5 border transition">
+                            <label class="field-label">Jūsu E-pasts</label>
+                            <input type="email" id="contactEmail" class="input-control">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ziņojums</label>
-                            <textarea id="contactMessage" rows="3" class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-2.5 border transition"></textarea>
+                            <label class="field-label">Ziņojums</label>
+                            <textarea id="contactMessage" rows="3" class="textarea-control"></textarea>
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-zinc-700/30 px-6 py-3 sm:flex sm:flex-row-reverse gap-2">
-                    <button type="button" id="sendContactBtn" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-semibold text-white hover:bg-primaryHover focus:outline-none sm:w-auto sm:text-sm transition">Nosūtīt</button>
-                    <button id="closeContactModalBtn" type="button" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-zinc-500 shadow-sm px-4 py-2 bg-white dark:bg-zinc-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm transition">Atcelt</button>
+                <div class="bg-[#f1f9ff] dark:bg-zinc-700/30 border-t border-[#ccecee] dark:border-zinc-700 px-6 py-4 flex flex-row-reverse gap-2 rounded-b-2xl">
+                    <button type="button" id="sendContactBtn" class="button-primary px-6 py-2">Nosūtīt</button>
+                    <button id="closeContactModalBtn" type="button" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        window.APP_PATH_PREFIX = <?php echo json_encode($pathPrefix); ?>;
-    </script>
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/script.js"></script>
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/footer_ui.js"></script>
 </body>

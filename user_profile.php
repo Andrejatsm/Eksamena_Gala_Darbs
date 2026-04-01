@@ -25,7 +25,33 @@ if ($role === 'psychologist') {
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') === 'delete_account') {
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $stmt = $conn->prepare("SELECT password_hash FROM accounts WHERE id = ?");
+    $stmt->bind_param("i", $account_id);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$row || !password_verify($confirm_password, $row['password_hash'])) {
+        $error = "Nepareiza parole. Konts netika dzēsts.";
+    } else {
+        if ($role === 'psychologist') {
+            $d = $conn->prepare("DELETE FROM psychologist_profiles WHERE account_id = ?");
+            $d->bind_param("i", $account_id); $d->execute(); $d->close();
+        } else {
+            $d = $conn->prepare("DELETE FROM user_profiles WHERE account_id = ?");
+            $d->bind_param("i", $account_id); $d->execute(); $d->close();
+        }
+        $d = $conn->prepare("DELETE FROM accounts WHERE id = ?");
+        $d->bind_param("i", $account_id); $d->execute(); $d->close();
+        session_destroy();
+        header("Location: index.php");
+        exit();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') !== 'delete_account') {
     $new_email = trim($_POST['email'] ?? '');
     $new_phone = trim($_POST['phone'] ?? '');
     $new_password = $_POST['new_password'] ?? '';
@@ -256,6 +282,40 @@ $stmt->close();
             </a>
         </div>
     </form>
+
+    <!-- Konta dzēšana -->
+    <div class="form-card mt-6 border border-[#ccecee] dark:border-zinc-700">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Dzēst kontu</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">Dzēšot kontu, visi jūsu dati tiks neatgriezeniski izdzēsti. Šo darbību nevar atsaukt.</p>
+        <button type="button" id="openDeleteAccountModalBtn" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold">
+            <i class="fas fa-trash mr-2"></i>Dzēst manu kontu
+        </button>
+    </div>
 </div>
+
+<!-- Konta dzēšanas apstiprinājuma modālis -->
+<div id="deleteAccountModal" class="hidden fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8">
+        <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm"></div>
+        <div class="relative bg-surface dark:bg-zinc-800 rounded-2xl border border-[#ccecee] dark:border-zinc-700 shadow-2xl w-full max-w-md">
+            <div class="px-6 pt-6 pb-4">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Dzēst kontu?</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">Šī darbība ir neatgriezeniska. Visi jūsu dati, pieraksti un profila informācija tiks izdzēsti.</p>
+                <form method="POST">
+                    <input type="hidden" name="action" value="delete_account">
+                    <label class="field-label">Ievadiet savu paroli, lai apstiprinātu</label>
+                    <input type="password" name="confirm_password" required class="input-control mb-5" placeholder="Jūsu parole">
+                    <div class="border-t border-[#ccecee] dark:border-zinc-700 -mx-6 px-6 pt-4 mt-2 flex justify-end gap-2 bg-[#f1f9ff] dark:bg-zinc-700/30 rounded-b-2xl">
+                        <button type="button" onclick="document.getElementById('deleteAccountModal').classList.add('hidden')" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
+                        <button type="submit" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold">
+                            <i class="fas fa-trash mr-2"></i>Jā, dzēst kontu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="assets/js/user_profile.js"></script>
 
 <?php require 'footer.php'; ?>
