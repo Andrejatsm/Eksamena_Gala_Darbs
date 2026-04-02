@@ -2,11 +2,11 @@
 session_start();
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
-require 'header.php';
+require '../includes/header.php';
 ?>
 
 <div class="flex-grow ui-container py-10">
@@ -31,8 +31,8 @@ require 'header.php';
     </div>
 </div>
 
-<script src="psihologi/dashboard_psychologists.js?v=<?php echo filemtime(__DIR__ . '/psihologi/dashboard_psychologists.js'); ?>"></script>
+<script src="../specialist/dashboard_psychologists.js?v=<?php echo filemtime(__DIR__ . '/../specialist/dashboard_psychologists.js'); ?>"></script>
 
 <?php 
-require 'footer.php'; 
+require '../includes/footer.php'; 
 ?>

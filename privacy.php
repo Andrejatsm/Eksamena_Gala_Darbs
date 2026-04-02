@@ -1,6 +1,6 @@
 <?php 
 $pageTitle = "Privātuma Politika";
-require 'header.php'; 
+require 'includes/header.php'; 
 ?>
 
 <div class="flex-grow ui-container py-12">
@@ -65,4 +65,4 @@ require 'header.php';
     </div>
 </div>
 
-<?php require 'footer.php'; ?>
+<?php require 'includes/footer.php'; ?>

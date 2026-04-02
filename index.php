@@ -1,10 +1,10 @@
 ﻿<?php
 $pageTitle = "Saprasts - Sākums";
 $pageStyles = ['home.css'];
-require 'database/db.php';
-require 'header.php';
+require 'includes/db.php';
+require 'includes/header.php';
 
-$btn_link = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'dashboard.php' : 'login.php';
+$btn_link = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'pages/dashboard.php' : 'auth/login.php';
 $btn_text = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'Doties uz sistēmu' : 'Atrodi savu psihologu';
 
 $tests = [];
@@ -157,7 +157,7 @@ if ($articles_result) {
             <div class="home-section-head home-section-head-dark">
                 <h2 class="text-4xl font-bold text-white mb-3">Psihologu raksti un resursi</h2>
                 <p class="text-lg text-white/90 max-w-3xl">Ieskaties mūsu speciālistu publicētajos rakstos par labsajūtu, attiecībām un ikdienas mentālo veselību.</p>
-                <a href="published_articles.php" class="home-link-light">Skatīt visus rakstus</a>
+                <a href="pages/published_articles.php" class="home-link-light">Skatīt visus rakstus</a>
             </div>
 
             <div class="home-card-grid">
@@ -179,7 +179,7 @@ if ($articles_result) {
                     <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
                         <?php echo htmlspecialchars(mb_substr($article['content'], 0, 170)); ?>...
                     </p>
-                    <a href="published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary home-card-action mt-6">Lasīt rakstu</a>
+                    <a href="pages/published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary home-card-action mt-6">Lasīt rakstu</a>
                 </article>
                 <?php endforeach; ?>
 
@@ -194,4 +194,4 @@ if ($articles_result) {
 
 </main>
 
-<?php require 'footer.php'; ?>
+<?php require 'includes/footer.php'; ?>

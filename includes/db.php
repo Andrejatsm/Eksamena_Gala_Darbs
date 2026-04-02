@@ -124,4 +124,42 @@ if ($slotBookedColumn && $slotBookedColumn->num_rows === 0) {
 if ($slotBookedColumn instanceof mysqli_result) {
     $slotBookedColumn->free();
 }
+
+// Chat messages table for user <-> psychologist communication
+$conn->query(
+    "CREATE TABLE IF NOT EXISTS chat_messages (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        appointment_id INT UNSIGNED NOT NULL,
+        sender_account_id INT UNSIGNED NOT NULL,
+        message TEXT NOT NULL,
+        is_read TINYINT(1) NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_chat_appointment (appointment_id),
+        KEY idx_chat_sender (sender_account_id),
+        KEY idx_chat_created (created_at),
+        CONSTRAINT fk_chat_appointment
+            FOREIGN KEY (appointment_id) REFERENCES appointments(id)
+            ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT fk_chat_sender
+            FOREIGN KEY (sender_account_id) REFERENCES accounts(id)
+            ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+);
+
+// Video call room tokens for appointment-based Jitsi calls
+$conn->query(
+    "CREATE TABLE IF NOT EXISTS video_rooms (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        appointment_id INT UNSIGNED NOT NULL,
+        room_token VARCHAR(64) NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_video_appointment (appointment_id),
+        UNIQUE KEY uq_video_token (room_token),
+        CONSTRAINT fk_video_appointment
+            FOREIGN KEY (appointment_id) REFERENCES appointments(id)
+            ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+);
 ?>

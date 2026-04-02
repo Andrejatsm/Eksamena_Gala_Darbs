@@ -1,9 +1,9 @@
 <?php
 session_start();
-require __DIR__ . '/../database/db.php';
+require __DIR__ . '/../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../login.php');
+    header('Location: ../auth/login.php');
     exit();
 }
 
@@ -86,7 +86,7 @@ while ($row = $result->fetch_assoc()) {
 $listStmt->close();
 
 $pageTitle = 'Admina ziņojumi';
-require __DIR__ . '/../header.php';
+require __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="min-h-screen page-surface dark:bg-zinc-900">
@@ -196,4 +196,4 @@ require __DIR__ . '/../header.php';
 </div>
 
 <script src="messages.js"></script>
-<?php require __DIR__ . '/../footer.php'; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>

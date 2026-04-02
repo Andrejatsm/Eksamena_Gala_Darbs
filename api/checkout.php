@@ -2,8 +2,8 @@
 // 1. Sākam sesiju, lai varētu nodot informāciju uz success.php
 session_start();
 
-require __DIR__ . '/vendor/autoload.php'; // Stripe
-require __DIR__ . '/database/db.php'; // Datubāzes pieslēgums
+require __DIR__ . '/../vendor/autoload.php'; // Stripe
+require __DIR__ . '/../includes/db.php'; // Datubāzes pieslēgums
 
 // Tavi Stripe atslēgas iestatījumi
 \Stripe\Stripe::setApiKey('sk_test_51S7XQt3b1XY7a31CCbstqHPSNYoEFGXr5zcqQaaB5t25CYs3mFuYzOl1GB9jQ0Hzh7MJC8Gc1XneHycmqUYbqn5O00hVcvezVP');
@@ -12,7 +12,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
-        header("Location: login.php");
+        header("Location: ../auth/login.php");
         exit();
     }
 
@@ -95,11 +95,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
     $baseUrl = $scheme . '://' . $host . $basePath;
+    $rootUrl = $scheme . '://' . $host . rtrim(dirname($basePath), '/\\');
 
     // Nodrošinām tikai slīpsvītras uz priekšu (Stripe neatbalsta backslash URL).
     $success_base_url = str_replace('\\', '/', $baseUrl . '/success.php');
     $success_url = $success_base_url . '?session_id={CHECKOUT_SESSION_ID}';
-    $cancel_url = str_replace('\\', '/', $baseUrl . '/dashboard.php');
+    $cancel_url = str_replace('\\', '/', $rootUrl . '/pages/dashboard.php');
 
     // Pirms sūtām uz Stripe, pārliecināmies, ka pāradresācijas adreses tiešām ir derīgi URL.
     if (!filter_var($success_base_url, FILTER_VALIDATE_URL) || !filter_var($cancel_url, FILTER_VALIDATE_URL)) {

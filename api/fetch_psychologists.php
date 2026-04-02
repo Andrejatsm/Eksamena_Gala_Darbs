@@ -1,10 +1,12 @@
 <?php
-require 'database/db.php';
+require '../includes/db.php';
 
 $search = trim($_GET['search'] ?? '');
 $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 9;
 $offset = ($page - 1) * $limit;
+$basePath = rtrim($_GET['base'] ?? '', '/');  // path prefix for links (e.g. '..')
+if ($basePath !== '') $basePath .= '/';
 
 // Vienādojam attēlu ceļus no dažādiem datu avotiem, lai frontend vienmēr saņemtu izmantojamu src vērtību.
 function normalize_psychologist_image_path(string $path): string {
@@ -97,10 +99,10 @@ if (empty($psihologi)) {
             $initials = 'P';
         }
         ?>
-        <a href="psihologi/psychologist_profile.php?id=<?php echo (int)$psi['account_id']; ?>" class="group bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full transform hover:-translate-y-1 block">
+        <a href="<?php echo htmlspecialchars($basePath); ?>specialist/psychologist_profile.php?id=<?php echo (int)$psi['account_id']; ?>" class="group bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full transform hover:-translate-y-1 block">
             <div class="relative h-64 overflow-hidden">
                 <?php if ($psi['image_path'] !== ''): ?>
-                <img src="<?php echo htmlspecialchars($psi['image_path']); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500" alt="Psihologs">
+                <img src="<?php echo htmlspecialchars($basePath . $psi['image_path']); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500" alt="Psihologs">
                 <?php else: ?>
                 <div class="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                     <div class="w-24 h-24 rounded-full bg-white/80 text-primary text-3xl font-bold flex items-center justify-center shadow-lg">

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require '../database/db.php';
+require '../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     http_response_code(403);

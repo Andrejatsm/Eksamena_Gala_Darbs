@@ -1,7 +1,7 @@
 <?php 
 session_start();
-require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/database/db.php';
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../includes/db.php';
 
 \Stripe\Stripe::setApiKey('sk_test_51S7XQt3b1XY7a31CCbstqHPSNYoEFGXr5zcqQaaB5t25CYs3mFuYzOl1GB9jQ0Hzh7MJC8Gc1XneHycmqUYbqn5O00hVcvezVP');
 
@@ -35,7 +35,7 @@ function send_payment_confirmation_email(string $toEmail, string $userName, ?str
 
 // Pārbaudām, vai esam ielogojušies
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
@@ -193,7 +193,7 @@ if ($payment_verified && $appointment_created && filter_var($user_email, FILTER_
 }
 
 $pageTitle = "Maksājums veiksmīgs";
-require __DIR__ . '/header.php'; 
+require __DIR__ . '/../includes/header.php'; 
 ?>
 
 <div class="auth-shell page-surface">
@@ -243,10 +243,10 @@ require __DIR__ . '/header.php';
         </p>
         <?php endif; ?>
         
-        <a href="dashboard.php" class="button-primary w-full">
+        <a href="../pages/dashboard.php" class="button-primary w-full">
             Atgriezties sistēmā
         </a>
     </div>
 </div>
 
-<?php require __DIR__ . '/footer.php'; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>

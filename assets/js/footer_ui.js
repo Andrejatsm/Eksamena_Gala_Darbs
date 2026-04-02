@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            fetch(`${appPathPrefix}contact_handler.php`, {
+            fetch(`${appPathPrefix}api/contact_handler.php`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, message }),
@@ -100,13 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let html = escapeHtml(text);
 
             html = html.replace(/\btest\.php\b/gi, 'tests/tests.php');
-            html = html.replace(/\barticle\.php\b/gi, 'published_articles.php');
-            html = html.replace(/\barticles\.php\b/gi, 'published_articles.php');
-            html = html.replace(/\bprofile\.php\b/gi, 'user_profile.php');
+            html = html.replace(/\barticle\.php\b/gi, 'pages/published_articles.php');
+            html = html.replace(/\barticles\.php\b/gi, 'pages/published_articles.php');
+            html = html.replace(/\bprofile\.php\b/gi, 'pages/user_profile.php');
             html = html.replace(/\btests\.php\b/gi, 'tests/tests.php');
 
-            html = html.replace(/\bReģistrēties\b/g, `<a class="ai-link" href="${appPathPrefix}register.php">Reģistrēties</a>`);
-            html = html.replace(/\bIelogoties\b/g, `<a class="ai-link" href="${appPathPrefix}login.php">Ielogoties</a>`);
+            html = html.replace(/\bReģistrēties\b/g, `<a class="ai-link" href="${appPathPrefix}auth/register.php">Reģistrēties</a>`);
+            html = html.replace(/\bIelogoties\b/g, `<a class="ai-link" href="${appPathPrefix}auth/login.php">Ielogoties</a>`);
             html = html.replace(/\bPašnovērtējuma testi\b/g, `<a class="ai-link" href="${appPathPrefix}tests/tests.php">Pašnovērtējuma testi</a>`);
 
             html = html.replace(/\[([^\]]+)\]\(([^)]+\.php(?:\?[^)\s]+)?)\)/g, `<a class="ai-link" href="${appPathPrefix}$2">$1</a>`);
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             try {
-                const res = await fetch(`${appPathPrefix}ai_handler.php`, {
+                const res = await fetch(`${appPathPrefix}api/ai_handler.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message }),

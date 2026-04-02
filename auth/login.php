@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'database/db.php';
+require '../includes/db.php';
 
 function sanitize_next(string $next): string {
     $next = trim($next);
@@ -44,11 +44,11 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     if ($role === 'user' && $next !== '') {
         header("Location: " . $next);
     } elseif ($role === 'admin') {
-        header("Location: admin/admin_dashboard.php");
+        header("Location: ../admin/admin_dashboard.php");
     } elseif ($role === 'psychologist') {
-        header("Location: psihologi/specialist_dashboard.php");
+        header("Location: ../specialist/specialist_dashboard.php");
     } else {
-        header("Location: dashboard.php");
+        header("Location: ../pages/dashboard.php");
     }
     exit();
 }
@@ -86,11 +86,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($role === 'user' && $next !== '') {
                 header("Location: " . $next);
             } elseif ($role === 'admin') {
-                header("Location: admin/admin_dashboard.php");
+                header("Location: ../admin/admin_dashboard.php");
             } elseif ($role === 'psychologist') {
-                header("Location: psihologi/specialist_dashboard.php");
+                header("Location: ../specialist/specialist_dashboard.php");
             } else {
-                header("Location: dashboard.php");
+                header("Location: ../pages/dashboard.php");
             }
             exit();
         }
@@ -100,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 }
 
-require 'header.php';
+require '../includes/header.php';
 ?>
 
 <div class="auth-shell page-surface transition-colors duration-300">
@@ -148,4 +148,4 @@ require 'header.php';
     </div>
 </div>
 
-<?php require 'footer.php'; ?>
+<?php require '../includes/footer.php'; ?>
