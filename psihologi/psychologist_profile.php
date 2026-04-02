@@ -93,7 +93,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
         </a>
 
         <!-- Psychologist Header -->
-        <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-zinc-700 mb-12">
+        <div class="profile-header-card">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Profile Info -->
                 <div>
@@ -146,7 +146,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Raksti un resursi</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php foreach ($articles as $article): ?>
-                <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 border border-gray-200 dark:border-zinc-700 hover:shadow-lg transition">
+                <div class="article-card-sm">
                     <div class="mb-3">
                         <?php if ($article['category']): ?>
                         <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold mb-2">
@@ -175,7 +175,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                 <?php if (count($available_slots) > 0): ?>
                 <div class="space-y-3">
                     <?php foreach ($available_slots as $slot): ?>
-                    <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-gray-200 dark:border-zinc-700 flex items-center justify-between hover:shadow-md transition">
+                    <div class="slot-row">
                         <div>
                             <p class="font-semibold text-gray-900 dark:text-white">
                                 <?php echo date('d. F Y', strtotime($slot['starts_at'])); ?>
@@ -208,7 +208,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
             </div>
 
             <!-- Booking Summary -->
-            <div class="bg-gradient-to-br from-primary to-primaryHover rounded-2xl p-8 text-white shadow-xl sticky top-20 h-fit">
+            <div class="booking-card">
                 <h3 class="text-2xl font-bold mb-6">Pierakstīties konsultācijai</h3>
                 
                 <div class="space-y-4 mb-8 pb-8 border-b border-white/20">

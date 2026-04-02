@@ -421,7 +421,7 @@ require '../header.php';
                                     • <span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-semibold"><?php echo htmlspecialchars($article['category']); ?></span>
                                     <?php endif; ?>
                                 </p>
-                                <p class="text-gray-700 dark:text-gray-300 mb-4"><?php echo substr(htmlspecialchars($article['content']), 0, 200); ?>...</p>
+                                <p class="text-gray-700 dark:text-gray-300 mb-4 break-words overflow-hidden"><?php echo htmlspecialchars(mb_strimwidth(strip_tags($article['content']), 0, 200, '...')); ?></p>
                                 <p class="text-xs text-gray-500 dark:text-gray-500"><?php echo date('d.m.Y H:i', strtotime($article['created_at'])); ?></p>
                             </div>
                             
@@ -493,10 +493,10 @@ require '../header.php';
                                     <i class="fas fa-check"></i>
                                 </button>
                             </form>
-                            <form method="POST" class="inline m-0">
+                            <form method="POST" class="inline m-0" data-confirm-delete="Vai tiešām noraidīt šo testu?">
                                 <input type="hidden" name="action" value="decline_test">
                                 <input type="hidden" name="test_id" value="<?php echo (int)$test['id']; ?>">
-                                <button type="submit" class="px-3 py-1 bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee] rounded-lg hover:bg-[#b8dde0] dark:hover:bg-[#095d7e]/30 transition text-sm font-medium" title="Noraidīt testu" onclick="return confirm('Vai tiešām noraidīt šo testu?');">
+                                <button type="submit" class="px-3 py-1 bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee] rounded-lg hover:bg-[#b8dde0] dark:hover:bg-[#095d7e]/30 transition text-sm font-medium" title="Noraidīt testu">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </form>
@@ -628,7 +628,7 @@ require '../header.php';
             <div class="px-6 pt-6 pb-4">
                 <div class="flex justify-between items-start mb-5">
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="psychModalName"></h3>
-                    <button type="button" id="closePsychModalTopBtn" onclick="document.getElementById('psychModal').classList.add('hidden')" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1 ml-4 flex-shrink-0">
+                    <button type="button" id="closePsychModalTopBtn" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1 ml-4 flex-shrink-0">
                         <i class="fas fa-times fa-lg"></i>
                     </button>
                 </div>
@@ -671,12 +671,12 @@ require '../header.php';
             <div class="px-6 pt-6 pb-4">
                 <div class="flex justify-between items-start mb-2">
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="articleModalTitle"></h3>
-                    <button type="button" id="closeArticleModalTopBtn" onclick="document.getElementById('articleModal').classList.add('hidden')" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1 ml-4 flex-shrink-0">
+                    <button type="button" id="closeArticleModalTopBtn" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1 ml-4 flex-shrink-0">
                         <i class="fas fa-times fa-lg"></i>
                     </button>
                 </div>
                 <p class="text-sm text-primary font-semibold mb-5" id="articleModalAuthor"></p>
-                <div class="text-sm text-gray-700 dark:text-gray-300 bg-[#f1f9ff] dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 p-4 rounded-xl leading-relaxed max-h-[60vh] overflow-y-auto article-body" id="articleModalContent"></div>
+                <div class="text-sm text-gray-700 dark:text-gray-300 bg-[#f1f9ff] dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 p-4 rounded-xl leading-relaxed max-h-[60vh] overflow-y-auto overflow-x-hidden break-words article-body" id="articleModalContent"></div>
             </div>
             <div class="bg-[#f1f9ff] dark:bg-zinc-700/30 border-t border-[#ccecee] dark:border-zinc-700 px-6 py-4 flex flex-row-reverse gap-2 rounded-b-2xl">
                 <form method="POST" class="inline m-0">
@@ -690,7 +690,7 @@ require '../header.php';
                     <input type="hidden" name="action" value="delete_article">
                     <input type="hidden" name="article_id" id="articleModalRejectId">
                     <input type="hidden" name="account_id" id="articleModalAccId">
-                    <button type="submit" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold" onclick="return confirm('Vai tie&#353;&#257;m dz&#275;st &#353;o rakstu?');">
+                    <button type="submit" class="confirm-delete-article px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold">
                         <i class="fas fa-trash mr-2"></i>Dzēst
                     </button>
                 </form>

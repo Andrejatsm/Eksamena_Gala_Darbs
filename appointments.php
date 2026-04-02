@@ -127,7 +127,7 @@ $stmt->close();
                             </button>
                             <form method="POST" class="inline">
                                 <input type="hidden" name="appointment_id" value="<?php echo $appt['id']; ?>">
-                                <button type="submit" name="action" value="cancel" onclick="return confirm('Vai tiešām vēlaties atcelt pierakstu?')" class="text-[#095d7e] hover:text-[#14967f] dark:text-[#ccecee] hover:bg-[#ccecee]/30 dark:hover:bg-[#095d7e]/20 px-3 py-2 rounded-lg transition text-sm">
+                                <button type="submit" name="action" value="cancel" class="cancel-appt-btn text-[#095d7e] hover:text-[#14967f] dark:text-[#ccecee] hover:bg-[#ccecee]/30 dark:hover:bg-[#095d7e]/20 px-3 py-2 rounded-lg transition text-sm">
                                     <i class="fas fa-trash"></i> Atcelt
                                 </button>
                             </form>
@@ -184,7 +184,7 @@ $stmt->close();
                         <input type="datetime-local" name="new_time" id="new_time" required class="input-control mt-1">
                     </div>
                     <div class="border-t border-[#ccecee] dark:border-zinc-700 -mx-6 px-6 pt-4 mt-2 flex justify-end gap-2 bg-[#f1f9ff] dark:bg-zinc-700/30 rounded-b-2xl">
-                        <button type="button" id="closeRescheduleModalBtnFooter" onclick="document.getElementById('rescheduleModal').classList.add('hidden')" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
+                        <button type="button" id="closeRescheduleModalBtnFooter" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
                         <button type="submit" class="button-primary px-6 py-2">Apstiprināt jauno laiku</button>
                     </div>
                 </form>

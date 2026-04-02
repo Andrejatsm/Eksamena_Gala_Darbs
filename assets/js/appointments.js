@@ -33,4 +33,18 @@
     if (closeRescheduleModalBtn) {
         closeRescheduleModalBtn.addEventListener('click', window.closeRescheduleModal);
     }
+
+    const closeRescheduleModalBtnFooter = document.getElementById('closeRescheduleModalBtnFooter');
+    if (closeRescheduleModalBtnFooter) {
+        closeRescheduleModalBtnFooter.addEventListener('click', window.closeRescheduleModal);
+    }
+
+    // Confirm before cancelling an appointment
+    document.querySelectorAll('.cancel-appt-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            if (!window.confirm('Vai tiešām vēlaties atcelt pierakstu?')) {
+                e.preventDefault();
+            }
+        });
+    });
 })();

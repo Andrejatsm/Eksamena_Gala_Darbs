@@ -243,12 +243,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closePsychModalBtn) {
         closePsychModalBtn.addEventListener('click', closePsychModal);
     }
+    const closePsychModalTopBtn = document.getElementById('closePsychModalTopBtn');
+    if (closePsychModalTopBtn) {
+        closePsychModalTopBtn.addEventListener('click', closePsychModal);
+    }
     if (articleModalBackdrop) {
         articleModalBackdrop.addEventListener('click', closeArticleModal);
     }
     if (closeArticleModalBtn) {
         closeArticleModalBtn.addEventListener('click', closeArticleModal);
     }
+    const closeArticleModalTopBtn = document.getElementById('closeArticleModalTopBtn');
+    if (closeArticleModalTopBtn) {
+        closeArticleModalTopBtn.addEventListener('click', closeArticleModal);
+    }
+
+    // Confirm before deleting an article in the modal
+    document.querySelectorAll('.confirm-delete-article').forEach((btn) => {
+        btn.closest('form')?.addEventListener('submit', (e) => {
+            if (!window.confirm('Vai tiešām dzēst šo rakstu?')) e.preventDefault();
+        });
+    });
+
+    // Confirm for forms with data-confirm-delete attribute (e.g. decline_test)
+    document.querySelectorAll('form[data-confirm-delete]').forEach((form) => {
+        form.addEventListener('submit', (e) => {
+            if (!window.confirm(form.dataset.confirmDelete || 'Vai tiešām turpināt?')) {
+                e.preventDefault();
+            }
+        });
+    });
 
     const tabBtns = document.querySelectorAll('.tab-btn');
     tabBtns.forEach((btn) => {
