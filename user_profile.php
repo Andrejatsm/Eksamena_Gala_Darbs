@@ -306,7 +306,7 @@ $stmt->close();
                     <label class="field-label">Ievadiet savu paroli, lai apstiprinātu</label>
                     <input type="password" name="confirm_password" required class="input-control mb-5" placeholder="Jūsu parole">
                     <div class="border-t border-[#ccecee] dark:border-zinc-700 -mx-6 px-6 pt-4 mt-2 flex justify-end gap-2 bg-[#f1f9ff] dark:bg-zinc-700/30 rounded-b-2xl">
-                        <button type="button" onclick="document.getElementById('deleteAccountModal').classList.add('hidden')" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
+                        <button type="button" id="cancelDeleteAccountModalBtn" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
                         <button type="submit" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold">
                             <i class="fas fa-trash mr-2"></i>Jā, dzēst kontu
                         </button>

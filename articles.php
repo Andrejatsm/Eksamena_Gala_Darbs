@@ -162,9 +162,9 @@ $stmt->close();
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2"><?php echo htmlspecialchars(strip_tags(mb_strimwidth($article['content'], 0, 120, '...'))); ?></p>
                         <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">Publicēts: <?php echo date('d.m.Y', strtotime($article['created_at'])); ?></p>
                     </div>
-                    <form method="POST" class="flex-shrink-0">
+                    <form method="POST" class="flex-shrink-0" data-confirm-delete="Dzēst rakstu?">
                         <input type="hidden" name="article_id" value="<?php echo $article['id']; ?>">
-                        <button type="submit" name="delete_article" onclick="return confirm('Dzēst rakstu?')" class="button-danger-icon text-sm">
+                        <button type="submit" name="delete_article" class="button-danger-icon text-sm">
                             <i class="fas fa-trash"></i>
                         </button>
                     </form>

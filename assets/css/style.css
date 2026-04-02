@@ -495,3 +495,100 @@ body {
   color: rgb(228 228 231);
 }
 
+/* ── Specialist / Psychologist Dashboard Components ─────────────── */
+
+.stat-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0/0.1),0 4px 6px -4px rgb(0 0 0/0.1);
+  border: 1px solid #e5e7eb;
+}
+.dark .stat-card {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+.stat-icon {
+  width: 3rem;
+  height: 3rem;
+  background: rgba(20,150,127,0.15);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dark .stat-icon {
+  background: rgba(20,150,127,0.25);
+}
+
+.table-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0/0.1),0 4px 6px -4px rgb(0 0 0/0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+.dark .table-card {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+.profile-header-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0/0.1),0 4px 6px -4px rgb(0 0 0/0.1);
+  padding: 2rem;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 3rem;
+}
+.dark .profile-header-card {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+.article-card-sm {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s;
+}
+.article-card-sm:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0/0.1),0 4px 6px -4px rgb(0 0 0/0.1);
+}
+.dark .article-card-sm {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+.slot-row {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: box-shadow 0.2s;
+}
+.slot-row:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0/0.1),0 2px 4px -2px rgb(0 0 0/0.1);
+}
+.dark .slot-row {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+.booking-card {
+  background: linear-gradient(to bottom right, #14967f, #095d7e);
+  border-radius: 1rem;
+  padding: 2rem;
+  color: #fff;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0/0.1),0 8px 10px -6px rgb(0 0 0/0.1);
+  position: sticky;
+  top: 5rem;
+  height: fit-content;
+}
+

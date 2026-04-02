@@ -100,49 +100,49 @@ require '../header.php';
             $stats['total_articles'] = $countForPsychologist("SELECT COUNT(*) AS count FROM articles WHERE psychologist_account_id = ?");
             ?>
 
-            <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
+            <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Kopā pieraksti</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['total_appointments']; ?></p>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
+                    <div class="stat-icon">
                         <i class="fas fa-calendar-check text-primary text-xl"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
+            <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Gaida apstiprinājumu</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['pending_appointments']; ?></p>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
+                    <div class="stat-icon">
                         <i class="fas fa-clock text-primary text-xl"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
+            <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Apstiprināti</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['approved_appointments']; ?></p>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
+                    <div class="stat-icon">
                         <i class="fas fa-check-circle text-primary text-xl"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
+            <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Raksti</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['total_articles']; ?></p>
                     </div>
-                    <div class="w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-xl flex items-center justify-center">
+                    <div class="stat-icon">
                         <i class="fas fa-file-alt text-primary text-xl"></i>
                     </div>
                 </div>
@@ -150,7 +150,7 @@ require '../header.php';
         </div>
 
         <div>
-            <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+            <div class="table-card">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-zinc-700">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white">Pierakstu pārvaldība</h3>
                     <p class="text-gray-600 dark:text-gray-400 mt-1">Pārskatiet un apstipriniet klientu pierakstus</p>

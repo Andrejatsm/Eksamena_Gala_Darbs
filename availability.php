@@ -180,9 +180,9 @@ require 'header.php';
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words min-w-0"><?php echo htmlspecialchars($slot['note']); ?></p>
                             <?php endif; ?>
                         </div>
-                        <form method="POST" class="inline">
+                        <form method="POST" class="inline" data-confirm-delete="Dzēst laika slotu?">
                             <input type="hidden" name="slot_id" value="<?php echo $slot['id']; ?>">
-                            <button type="submit" name="delete_slot" onclick="return confirm('Dzēst slotu?')" class="button-danger-icon text-sm">
+                            <button type="submit" name="delete_slot" class="button-danger-icon text-sm">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>

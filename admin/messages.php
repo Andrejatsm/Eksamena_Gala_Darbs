@@ -149,7 +149,7 @@ require __DIR__ . '/../header.php';
                             </td>
                             <td class="px-4 py-4 align-top text-sm text-gray-600 dark:text-gray-400"><?php echo date('d.m.Y H:i', strtotime((string)$msg['created_at'])); ?></td>
                             <td class="px-4 py-4 align-top text-right">
-                                <form method="POST" onsubmit="return confirm('Vai tiešām dzēst šo ziņojumu?');" class="inline">
+                                <form method="POST" class="inline" data-confirm-delete="Vai tiešām dzēst šo ziņojumu?">
                                     <input type="hidden" name="delete_message_id" value="<?php echo (int)$msg['id']; ?>">
                                     <button type="submit" class="px-3 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] dark:bg-[#095d7e] dark:hover:bg-[#074e6b] transition text-sm font-semibold">
                                         <i class="fas fa-trash mr-1"></i>Dzēst
@@ -195,4 +195,5 @@ require __DIR__ . '/../header.php';
     </div>
 </div>
 
+<script src="messages.js"></script>
 <?php require __DIR__ . '/../footer.php'; ?>

@@ -32,3 +32,12 @@ document.addEventListener('DOMContentLoaded', function () {
         contentInput.value = quill.root.innerHTML;
     });
 });
+
+// Confirm before deleting an article
+document.querySelectorAll('form[data-confirm-delete]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+        if (!window.confirm(form.dataset.confirmDelete || 'Dzēst rakstu?')) {
+            e.preventDefault();
+        }
+    });
+});
