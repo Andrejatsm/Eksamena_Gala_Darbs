@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    const filterSpec = document.getElementById('filterSpecialization');
+    const filterCons = document.getElementById('filterConsultation');
+    const filterExp = document.getElementById('filterExperience');
+    const clearBtn = document.getElementById('clearFiltersBtn');
+
     let currentPage = 1;
     let currentSearch = '';
 
@@ -18,13 +23,24 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
 
+    function buildFilterParams() {
+        const params = new URLSearchParams();
+        params.set('base', '..');
+        if (currentSearch) params.set('search', currentSearch);
+        params.set('page', currentPage);
+        if (filterSpec && filterSpec.value) params.set('specialization', filterSpec.value);
+        if (filterCons && filterCons.value) params.set('consultation_type', filterCons.value);
+        if (filterExp && filterExp.value) params.set('min_experience', filterExp.value);
+        return params.toString();
+    }
+
     // Katru reizi ielādējam tikai vajadzīgo lapu un meklēšanas frāzi, lai saraksts būtu ātrs arī pie lielāka psihologu skaita.
     function loadPsychologists(page = 1, search = '') {
         currentPage = page;
         currentSearch = search;
         renderLoadingState();
 
-        fetch(`../api/fetch_psychologists.php?page=${page}&search=${encodeURIComponent(search)}&base=..`)
+        fetch(`../api/fetch_psychologists.php?${buildFilterParams()}`)
             .then((response) => response.text())
             .then((data) => {
                 psychologistsContainer.innerHTML = data;
@@ -81,6 +97,36 @@ document.addEventListener('DOMContentLoaded', () => {
             loadPsychologists(1, searchInput.value.trim());
         }, 300);
     });
+
+    // Filtru notikumi
+    [filterSpec, filterCons, filterExp].forEach(el => {
+        if (el) el.addEventListener('change', () => loadPsychologists(1, searchInput.value.trim()));
+    });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (filterSpec) filterSpec.value = '';
+            if (filterCons) filterCons.value = '';
+            if (filterExp) filterExp.value = '';
+            searchInput.value = '';
+            loadPsychologists(1, '');
+        });
+    }
+
+    // Ielādējam specializāciju sarakstu no API
+    if (filterSpec) {
+        fetch('../api/fetch_psychologists.php?get_filters=1&base=..')
+            .then(r => r.json())
+            .then(data => {
+                (data.specializations || []).forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    filterSpec.appendChild(opt);
+                });
+            })
+            .catch(() => {});
+    }
 
     loadPsychologists();
 });

@@ -592,3 +592,97 @@ body {
   height: fit-content;
 }
 
+/* ── Mobile Responsiveness ──────────────────────────────────────── */
+
+/* Appointment cards: stack actions below on small screens */
+@media (max-width: 639px) {
+  .panel-card .flex.justify-between {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .panel-card .flex.justify-between > .flex.gap-2:last-child {
+    align-self: flex-start;
+  }
+
+  /* Slot rows: stack button below */
+  .slot-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .slot-row .slot-select-btn {
+    margin-left: 0;
+    text-align: center;
+  }
+
+  /* Profile header: single column on small screens */
+  .profile-header-card .grid {
+    gap: 1.5rem;
+  }
+
+  /* Chat area smaller on mobile to leave room for input + keyboard */
+  #chatMessages {
+    height: 50vh;
+  }
+
+  /* Booking card: un-sticky on mobile */
+  .booking-card {
+    position: static;
+    padding: 1.5rem;
+  }
+
+  /* Specialist dashboard stats: 2-col grid on small screens instead of 1 */
+  .stat-card p.text-3xl {
+    font-size: 1.5rem;
+  }
+
+  /* Hero section smaller text */
+  .hero-title-responsive {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  /* Table card horizontal scroll hint */
+  .table-card {
+    position: relative;
+  }
+
+  /* Filter bar selects full width on mobile */
+  #filterBar .select-control {
+    min-width: 100%;
+  }
+}
+
+/* Medium screens */
+@media (max-width: 767px) {
+  /* Specialist dashboard header: stack buttons */
+  .specialist-header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .specialist-header-actions a {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Fix floating AI chat button on small screens */
+@media (max-width: 479px) {
+  #chat-toggle-btn {
+    bottom: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+    padding: 0.75rem;
+  }
+  #chat-toggle-btn i {
+    font-size: 1.25rem;
+  }
+  #chat-container {
+    right: 0.5rem;
+    left: 0.5rem;
+    bottom: 4.5rem;
+    width: auto;
+  }
+}
+
