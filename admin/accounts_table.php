@@ -106,15 +106,17 @@ while ($row = $result->fetch_assoc()) {
 }
 $dataStmt->close();
 
-$makePageButton = static function (int $targetPage, string $label, bool $isActive = false, bool $disabled = false): string {
-    $baseClasses = 'px-3 py-2 rounded-lg border text-sm transition';
-    $stateClasses = $disabled
-        ? ' border-gray-200 dark:border-zinc-700 text-gray-400 dark:text-gray-600 pointer-events-none opacity-50'
-        : ($isActive
-            ? ' border-primary bg-primary text-white'
-            : ' border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700');
-
-    return '<button type="button" data-admin-page="' . $targetPage . '" class="' . $baseClasses . $stateClasses . '">' . htmlspecialchars($label) . '</button>';
+$makePageButton = static function (int $targetPage, string $label, bool $isActive = false, bool $disabled = false) use (&$page, &$totalPages): string {
+    if ($label === 'Iepriekšējā') {
+        if ($disabled) return '<span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>';
+        return '<button type="button" data-admin-page="' . $targetPage . '" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</button>';
+    }
+    if ($label === 'Nākamā') {
+        if ($disabled) return '<span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>';
+        return '<button type="button" data-admin-page="' . $targetPage . '" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></button>';
+    }
+    // page number — skip, replaced by "Lapa X no Y" text
+    return '';
 };
 ?>
 <div class="overflow-x-auto">
@@ -199,14 +201,6 @@ $makePageButton = static function (int $targetPage, string $label, bool $isActiv
                             data-cert="<?php echo htmlspecialchars((string)($row['certificate_path'] ?? '')); ?>">
                             <i class="fas fa-eye mr-2"></i>Skatīt
                         </button>
-                        <?php if (($row['status'] ?? '') === 'pending'): ?>
-                        <button type="button" data-account-action="approve_psych" data-account-id="<?php echo (int)$row['id']; ?>" class="px-3 py-2 bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6] rounded-lg hover:bg-[#ccecee] dark:hover:bg-[#14967f]/30 transition text-sm font-semibold">
-                            <i class="fas fa-check mr-2"></i>Apstiprināt
-                        </button>
-                        <button type="button" data-account-action="reject_psych" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām noraidīt šo psihologa profilu?" class="px-3 py-2 bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee] rounded-lg hover:bg-[#b8dde0] dark:hover:bg-[#095d7e]/30 transition text-sm font-semibold">
-                            <i class="fas fa-times mr-2"></i>Noraidīt
-                        </button>
-                        <?php endif; ?>
                         <button type="button" data-account-action="delete_psych" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām dzēst šo psihologa kontu?" class="px-3 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] dark:bg-[#095d7e] dark:hover:bg-[#074e6b] transition text-sm font-semibold">
                             <i class="fas fa-trash mr-2"></i>Dzēst
                         </button>
@@ -226,11 +220,9 @@ $makePageButton = static function (int $targetPage, string $label, bool $isActiv
 
 <div class="px-4 py-4 border-t border-gray-200 dark:border-zinc-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <p class="text-sm text-gray-600 dark:text-gray-400">Atrasti <?php echo $totalRows; ?> konti</p>
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap justify-center items-center gap-2">
         <?php echo $makePageButton(max(1, $page - 1), 'Iepriekšējā', false, $page <= 1); ?>
-        <?php for ($pageNumber = 1; $pageNumber <= $totalPages; $pageNumber++): ?>
-            <?php echo $makePageButton($pageNumber, (string)$pageNumber, $pageNumber === $page, false); ?>
-        <?php endfor; ?>
+        <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $totalPages; ?></span>
         <?php echo $makePageButton(min($totalPages, $page + 1), 'Nākamā', false, $page >= $totalPages); ?>
     </div>
 </div>

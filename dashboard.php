@@ -27,14 +27,11 @@ require 'header.php';
     </div>
 
     <div class="mt-10 flex justify-center">
-        <nav aria-label="Lapošana">
-            <ul class="inline-flex items-center -space-x-px rounded-md shadow-sm bg-white dark:bg-zinc-800" id="paginationControls">
-            </ul>
-        </nav>
+        <div class="flex items-center gap-2" id="paginationControls"></div>
     </div>
 </div>
 
-<script src="psihologi/dashboard_psychologists.js"></script>
+<script src="psihologi/dashboard_psychologists.js?v=<?php echo filemtime(__DIR__ . '/psihologi/dashboard_psychologists.js'); ?>"></script>
 
 <?php 
 require 'footer.php'; 

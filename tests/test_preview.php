@@ -45,28 +45,41 @@ $qStmt->close();
 </head>
 <body>
     <div class="preview-wrap">
-        <div class="preview-head">
-            <h2 class="preview-head-title"><?php echo htmlspecialchars($test['title']); ?></h2>
-            <p class="preview-head-desc"><?php echo htmlspecialchars($test['description'] ?? 'Nav apraksta.'); ?></p>
-            <span class="status"><?php echo htmlspecialchars($test['status'] ?? 'draft'); ?></span>
-            <p class="hint">Priekšskatījums ir tikai lasāms režīms bez navigācijas un bez sesijas darbībām.</p>
+        <div class="preview-heading">
+            <h1><?php echo htmlspecialchars($test['title']); ?></h1>
+            <p><?php echo htmlspecialchars($test['description'] ?? ''); ?></p>
+        </div>
+
+        <div class="info-banner">
+            &#9432; Priekšskatījums &mdash; rezultāts netiks saglabāts.
         </div>
 
         <?php if (empty($questions)): ?>
-            <div class="question">Šim testam vēl nav pievienotu jautājumu.</div>
+            <div class="form-card">Šim testam vēl nav pievienotu jautājumu.</div>
         <?php else: ?>
-            <?php foreach ($questions as $idx => $q): ?>
-                <div class="question">
-                    <p class="q-title"><?php echo ($idx + 1) . '. ' . htmlspecialchars($q['question_text']); ?></p>
-                    <ol class="scale">
-                        <li>Pilnīgi nepiekrītu</li>
-                        <li>Daļēji nepiekrītu</li>
-                        <li>Neitrāli</li>
-                        <li>Daļēji piekrītu</li>
-                        <li>Pilnīgi piekrītu</li>
-                    </ol>
+        <form class="form-card">
+            <?php foreach ($questions as $index => $q): ?>
+                <div class="question-block">
+                    <label class="question-label">
+                        <?php echo ($index + 1) . '. ' . htmlspecialchars($q['question_text']); ?>
+                    </label>
+                    <div class="options">
+                        <?php
+                        $labels = [1 => 'Pilnīgi nepiekrītu', 2 => 'Daļēji nepiekrītu', 3 => 'Neitrāli', 4 => 'Daļēji piekrītu', 5 => 'Pilnīgi piekrītu'];
+                        foreach ($labels as $val => $lbl):
+                        ?>
+                        <label class="option-label">
+                            <input type="radio" name="answer_<?php echo $q['id']; ?>" value="<?php echo $val; ?>">
+                            <span><?php echo $val . ' — ' . $lbl; ?></span>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             <?php endforeach; ?>
+            <div class="form-actions">
+                <button type="button" class="btn-primary" disabled>Iesniegt atbildes (priekšskatījums)</button>
+            </div>
+        </form>
         <?php endif; ?>
     </div>
 </body>

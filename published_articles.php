@@ -27,12 +27,22 @@ if ($article_id > 0) {
 
 $articles = [];
 if ($article_id === 0) {
+    $per_page = 9;
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $offset = ($page - 1) * $per_page;
+
+    $count_result = $conn->query("SELECT COUNT(*) FROM articles a JOIN psychologist_profiles p ON a.psychologist_account_id = p.account_id WHERE a.is_published = 1");
+    $total_articles = (int)$count_result->fetch_row()[0];
+    $total_pages = (int)ceil($total_articles / $per_page);
+    $page = min($page, max(1, $total_pages));
+
     $result = $conn->query(
         "SELECT a.id, a.title, a.content, a.category, a.created_at, p.full_name
          FROM articles a
          JOIN psychologist_profiles p ON a.psychologist_account_id = p.account_id
          WHERE a.is_published = 1
-         ORDER BY a.created_at DESC"
+         ORDER BY a.created_at DESC
+         LIMIT {$per_page} OFFSET {$offset}"
     );
     if ($result) {
         while ($row = $result->fetch_assoc()) {
@@ -95,7 +105,24 @@ if ($article_id === 0) {
         </div>
         <?php endif; ?>
     </div>
-    <?php endif; ?>
+    <?php if (!empty($total_pages) && $total_pages > 1): ?>
+    <div class="flex justify-center items-center gap-2 mt-8">
+        <?php
+        $buildUrl = fn($p) => '?' . http_build_query(array_filter(['page' => $p > 1 ? $p : null]));
+        ?>
+        <?php if ($page > 1): ?>
+            <a href="<?php echo htmlspecialchars($buildUrl($page - 1)); ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+        <?php else: ?>
+            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+        <?php endif; ?>
+        <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
+        <?php if ($page < $total_pages): ?>
+            <a href="<?php echo htmlspecialchars($buildUrl($page + 1)); ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+        <?php else: ?>
+            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>    <?php endif; ?>
 </div>
 
 <?php require 'footer.php'; ?>

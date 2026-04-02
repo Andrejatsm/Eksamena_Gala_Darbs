@@ -178,11 +178,17 @@ require __DIR__ . '/../header.php';
                         return 'messages.php' . (empty($query) ? '' : '?' . http_build_query($query));
                     };
                     ?>
-                    <a href="<?php echo htmlspecialchars($buildPageUrl(max(1, $page - 1), $search)); ?>" class="px-3 py-2 rounded-lg border text-sm transition <?php echo $page <= 1 ? 'border-gray-200 dark:border-zinc-700 text-gray-400 pointer-events-none opacity-50' : 'border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700'; ?>">Iepriekšējā</a>
-                    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                        <a href="<?php echo htmlspecialchars($buildPageUrl($p, $search)); ?>" class="px-3 py-2 rounded-lg border text-sm transition <?php echo $p === $page ? 'border-primary bg-primary text-white' : 'border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700'; ?>"><?php echo $p; ?></a>
-                    <?php endfor; ?>
-                    <a href="<?php echo htmlspecialchars($buildPageUrl(min($totalPages, $page + 1), $search)); ?>" class="px-3 py-2 rounded-lg border text-sm transition <?php echo $page >= $totalPages ? 'border-gray-200 dark:border-zinc-700 text-gray-400 pointer-events-none opacity-50' : 'border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700'; ?>">Nākamā</a>
+                    <?php if ($page <= 1): ?>
+                        <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+                    <?php else: ?>
+                        <a href="<?php echo htmlspecialchars($buildPageUrl(max(1, $page - 1), $search)); ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+                    <?php endif; ?>
+                    <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $totalPages; ?></span>
+                    <?php if ($page >= $totalPages): ?>
+                        <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+                    <?php else: ?>
+                        <a href="<?php echo htmlspecialchars($buildPageUrl(min($totalPages, $page + 1), $search)); ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
