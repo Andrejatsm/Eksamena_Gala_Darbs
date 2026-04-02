@@ -1,12 +1,34 @@
 <?php
 require '../includes/db.php';
 
+// Filtru opciju pieprasījums (specializāciju saraksts dropdown izvēlnei)
+if (isset($_GET['get_filters'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    $specs = [];
+    $specResult = $conn->query(
+        "SELECT name FROM psychologist_specializations WHERE is_active = 1 ORDER BY sort_order ASC, name ASC"
+    );
+    if ($specResult) {
+        while ($row = $specResult->fetch_assoc()) {
+            $specs[] = $row['name'];
+        }
+        $specResult->free();
+    }
+    echo json_encode(['specializations' => $specs]);
+    exit();
+}
+
 $search = trim($_GET['search'] ?? '');
 $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 9;
 $offset = ($page - 1) * $limit;
 $basePath = rtrim($_GET['base'] ?? '', '/');  // path prefix for links (e.g. '..')
 if ($basePath !== '') $basePath .= '/';
+
+// Papildu filtri
+$filterSpecialization = trim($_GET['specialization'] ?? '');
+$filterConsultationType = trim($_GET['consultation_type'] ?? '');
+$filterMinExperience = (int)($_GET['min_experience'] ?? 0);
 
 // Vienādojam attēlu ceļus no dažādiem datu avotiem, lai frontend vienmēr saņemtu izmantojamu src vērtību.
 function normalize_psychologist_image_path(string $path): string {
@@ -30,8 +52,24 @@ $types = '';
 $params = [];
 if ($search !== '') {
     $whereSQL .= " AND (p.full_name LIKE ? OR p.specialization LIKE ?)";
-    $types = 'ss';
-    $params = [$searchLike, $searchLike];
+    $types .= 'ss';
+    $params[] = $searchLike;
+    $params[] = $searchLike;
+}
+if ($filterSpecialization !== '') {
+    $whereSQL .= " AND p.specialization LIKE ?";
+    $types .= 's';
+    $params[] = '%' . $filterSpecialization . '%';
+}
+if ($filterMinExperience > 0) {
+    $whereSQL .= " AND p.experience_years >= ?";
+    $types .= 'i';
+    $params[] = $filterMinExperience;
+}
+if ($filterConsultationType !== '' && in_array($filterConsultationType, ['online', 'in_person'], true)) {
+    $whereSQL .= " AND EXISTS (SELECT 1 FROM availability_slots s WHERE s.psychologist_account_id = p.account_id AND s.consultation_type = ? AND s.is_booked = 0)";
+    $types .= 's';
+    $params[] = $filterConsultationType;
 }
 
 $total_sql = "SELECT COUNT(*) AS count

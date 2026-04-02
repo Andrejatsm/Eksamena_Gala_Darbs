@@ -10,7 +10,7 @@ require '../includes/header.php';
 ?>
 
 <div class="flex-grow ui-container py-10">
-    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h3 class="text-3xl font-bold text-gray-900 dark:text-white">Pieejamie psihologi</h3>
         <div class="relative w-full md:w-1/3">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -18,6 +18,36 @@ require '../includes/header.php';
             </span>
             <input type="text" id="searchInput" class="ui-input pl-10" placeholder="Meklēt speciālistu...">
         </div>
+    </div>
+
+    <div id="filterBar" class="flex flex-wrap gap-3 mb-8 items-end">
+        <div class="w-full sm:w-auto">
+            <label for="filterSpecialization" class="field-label">Specializācija</label>
+            <select id="filterSpecialization" class="select-control text-sm py-2">
+                <option value="">Visas</option>
+            </select>
+        </div>
+        <div class="w-full sm:w-auto">
+            <label for="filterConsultation" class="field-label">Konsultācijas veids</label>
+            <select id="filterConsultation" class="select-control text-sm py-2">
+                <option value="">Visi</option>
+                <option value="online">Tiešsaistē</option>
+                <option value="in_person">Klātienē</option>
+            </select>
+        </div>
+        <div class="w-full sm:w-auto">
+            <label for="filterExperience" class="field-label">Pieredze (min. gadi)</label>
+            <select id="filterExperience" class="select-control text-sm py-2">
+                <option value="">Jebkura</option>
+                <option value="1">1+ gads</option>
+                <option value="3">3+ gadi</option>
+                <option value="5">5+ gadi</option>
+                <option value="10">10+ gadi</option>
+            </select>
+        </div>
+        <button type="button" id="clearFiltersBtn" class="button-secondary text-sm py-2 px-4 h-[2.5rem]">
+            <i class="fas fa-times mr-1"></i> Notīrīt
+        </button>
     </div>
     
     <div id="psychologistsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
