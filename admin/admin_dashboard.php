@@ -1,10 +1,10 @@
 <?php
 session_start();
-require '../database/db.php';
+require '../includes/db.php';
 
 // Check admin access BEFORE including header.php to prevent headers already sent error
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
@@ -259,7 +259,7 @@ $chartStats = [
     'tests' => $stats['published_tests'],
 ];
 
-require '../header.php';
+require '../includes/header.php';
 ?>
 
 <div class="min-h-screen page-surface dark:bg-zinc-900">
@@ -704,4 +704,4 @@ require '../header.php';
 <script type="application/json" id="admin-dashboard-data"><?php echo json_encode(['chartStats' => $chartStats, 'accountsConfig' => ['listUrl' => 'accounts_table.php', 'actionUrl' => 'accounts_action.php']], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?></script>
 <script src="admin_dashboard.js"></script>
 
-<?php require '../footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

@@ -1,10 +1,10 @@
 <?php
 session_start();
-require '../database/db.php';
+require '../includes/db.php';
 
 // Pārbaude vai ir psihologs
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'psychologist') {
-    header("Location: ../login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
@@ -47,7 +47,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $pageTitle = "Speciālista Panelis";
-require '../header.php';
+require '../includes/header.php';
 ?>
 
 <div class="min-h-screen page-surface dark:bg-zinc-900">
@@ -61,10 +61,10 @@ require '../header.php';
                     <p class="text-xl text-gray-600 dark:text-gray-400 mt-2">Pārvaldiet savu praksi un klientus efektīvi</p>
                 </div>
                 <div class="flex gap-3">
-                    <a href="../articles.php" class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primaryHover transition shadow-lg">
+                    <a href="../pages/articles.php" class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primaryHover transition shadow-lg">
                         <i class="fas fa-plus mr-2"></i>Rakstīt rakstu
                     </a>
-                    <a href="../availability.php" class="px-6 py-3 bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition">
+                    <a href="../pages/availability.php" class="px-6 py-3 bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition">
                         <i class="fas fa-calendar-plus mr-2"></i>Pievienot laiku
                     </a>
                 </div>
@@ -225,7 +225,20 @@ require '../header.php';
                                                     </form>
                                                 </div>
                                             <?php else: ?>
+                                                <?php if ($row['status'] === 'approved'): ?>
+                                                <div class="flex justify-end gap-2">
+                                                    <a href="../pages/chat.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-primary/15 dark:bg-primary/25 text-primary rounded-lg hover:bg-primary/25 dark:hover:bg-primary/35 transition text-sm font-medium" title="Čats">
+                                                        <i class="fas fa-comments"></i>
+                                                    </a>
+                                                    <?php if ($row['consultation_type'] === 'online'): ?>
+                                                    <a href="../pages/video_call.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium" title="Videozvans">
+                                                        <i class="fas fa-video"></i>
+                                                    </a>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php else: ?>
                                                 <span class="text-gray-400">-</span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -250,4 +263,4 @@ require '../header.php';
     </div>
 </div>
 
-<?php require '../footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

@@ -10,7 +10,7 @@ $pathPrefix = str_repeat('../', $depth);
 // Nosakām, kurš ir ielogojies (vienota autorizācija: account_id + role)
 $user_name = '';
 $user_role = '';
-$dashboard_link = $pathPrefix . 'login.php';
+$dashboard_link = $pathPrefix . 'auth/login.php';
 $is_logged_in = false;
 
 if (isset($_SESSION['account_id'], $_SESSION['role'])) {
@@ -22,10 +22,10 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
         $dashboard_link = $pathPrefix . 'admin/admin_dashboard.php';
     } elseif ($role === 'psychologist') {
         $user_role = 'Psihologs';
-        $dashboard_link = $pathPrefix . 'psihologi/specialist_dashboard.php';
+        $dashboard_link = $pathPrefix . 'specialist/specialist_dashboard.php';
     } else {
         $user_role = 'Lietotājs';
-        $dashboard_link = $pathPrefix . 'dashboard.php';
+        $dashboard_link = $pathPrefix . 'pages/dashboard.php';
     }
 }
 ?>
@@ -134,7 +134,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                     
                                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
                                     <li>
-                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>user_profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/user_profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
                                             <i class="fas fa-user-circle w-5 text-center mr-2"></i> Mans profils
                                         </a>
                                     </li>
@@ -148,14 +148,14 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>appointments.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/appointments.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
                                             <i class="fas fa-calendar-check w-5 text-center mr-2"></i> Mani pieraksti
                                         </a>
                                     </li>
                                     <?php endif; ?>
                                     
                                     <li class="border-t border-gray-100 dark:border-zinc-700">
-                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>logout.php" class="block px-4 py-2 text-sm text-[#095d7e] hover:bg-[#f1f9ff] dark:hover:bg-zinc-700 dark:text-[#ccecee] transition">
+                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/logout.php" class="block px-4 py-2 text-sm text-[#095d7e] hover:bg-[#f1f9ff] dark:hover:bg-zinc-700 dark:text-[#ccecee] transition">
                                             <i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> Iziet
                                         </a>
                                     </li>
@@ -164,7 +164,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                         </div>
 
                     <?php else: ?>
-                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>login.php" class="text-gray-700 dark:text-gray-300 hover:text-primary transition font-medium">Ielogoties</a>
+                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/login.php" class="text-gray-700 dark:text-gray-300 hover:text-primary transition font-medium">Ielogoties</a>
                     <?php endif; ?>
                 </div>
 
@@ -200,17 +200,17 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                     <?php endif; ?>
                     
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mans profils</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mans profils</a>
                     <?php endif; ?>
                     
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
                           <a href="<?php echo htmlspecialchars($pathPrefix); ?>tests/tests.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pašnovērtējuma testi</a>
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani pieraksti</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani pieraksti</a>
                       <?php endif; ?>
                     
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-[#095d7e] dark:text-[#ccecee] hover:bg-[#f1f9ff] dark:hover:bg-zinc-800">Iziet</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-[#095d7e] dark:text-[#ccecee] hover:bg-[#f1f9ff] dark:hover:bg-zinc-800">Iziet</a>
                  <?php else: ?>
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>login.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ielogoties</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/login.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ielogoties</a>
                  <?php endif; ?>
 
                  <div class="pt-4 border-t border-gray-200 dark:border-zinc-700 mt-2">

@@ -2,14 +2,14 @@
 session_start();
 $pageTitle = "Mani raksti";
 $pageHead = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css">';
-require 'database/db.php';
+require '../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'psychologist') {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
-require 'header.php';
+require '../includes/header.php';
 
 $account_id = (int)$_SESSION['account_id'];
 $message = "";
@@ -196,5 +196,5 @@ $stmt->close();
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
-<script src="assets/js/articles.js"></script>
-<?php require 'footer.php'; ?>
+<script src="../assets/js/articles.js"></script>
+<?php require '../includes/footer.php'; ?>

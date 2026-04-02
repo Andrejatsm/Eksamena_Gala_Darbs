@@ -1,14 +1,14 @@
 <?php
 session_start();
 $pageTitle = "Mani pieraksti";
-require 'database/db.php';
+require '../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
-require 'header.php';
+require '../includes/header.php';
 
 $account_id = (int)$_SESSION['account_id'];
 $message = "";
@@ -118,6 +118,19 @@ $stmt->close();
                         <span class="inline-block mt-2 px-2 py-1 text-xs rounded-full <?php echo $status_classes[$appt['status']] ?? 'bg-gray-100 text-gray-800'; ?>">
                             <?php echo $status_labels[$appt['status']] ?? ucfirst((string)$appt['status']); ?>
                         </span>
+
+                        <?php if($appt['status'] === 'approved'): ?>
+                        <div class="flex gap-2 mt-3">
+                            <a href="chat.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition text-sm font-medium">
+                                <i class="fas fa-comments"></i> Čats
+                            </a>
+                            <?php if($appt['consultation_type'] === 'online'): ?>
+                            <a href="video_call.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium">
+                                <i class="fas fa-video"></i> Videozvans
+                            </a>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
                     
                     <?php if($appt['status'] === 'pending' || $appt['status'] === 'approved'): ?>
@@ -193,6 +206,6 @@ $stmt->close();
     </div>
 </div>
 
-<script src="assets/js/appointments.js"></script>
+<script src="../assets/js/appointments.js"></script>
 
-<?php require 'footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

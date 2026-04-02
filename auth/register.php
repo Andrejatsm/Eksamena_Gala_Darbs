@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'database/db.php';
+require '../includes/db.php';
 
 function sanitize_next(string $next): string {
     $next = trim($next);
@@ -26,9 +26,9 @@ if ($specResult) {
 
 if (isset($_SESSION['account_id'])) {
     $redirect = match ($_SESSION['role'] ?? 'user') {
-        'admin' => 'admin/admin_dashboard.php',
-        'psychologist' => 'psihologi/specialist_dashboard.php',
-        default => 'dashboard.php',
+        'admin' => '../admin/admin_dashboard.php',
+        'psychologist' => '../specialist/specialist_dashboard.php',
+        default => '../pages/dashboard.php',
     };
     header("Location: " . $redirect);
     exit();
@@ -191,7 +191,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-require 'header.php';
+require '../includes/header.php';
 ?>
 
 <div class="auth-shell page-surface">
@@ -300,6 +300,6 @@ require 'header.php';
     </div>
 </div>
 
-<script src="assets/js/register.js"></script>
+<script src="../assets/js/register.js"></script>
 
-<?php require 'footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

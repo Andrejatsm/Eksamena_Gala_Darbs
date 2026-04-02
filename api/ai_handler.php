@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require 'database/db.php';
+require '../includes/db.php';
 header('Content-Type: application/json');
 
 // Saņemam lietotāja ziņojumu
@@ -32,23 +32,23 @@ $roleLabel = match ($role) {
 
 $relevantPages = [
     '- Sākumlapa: index.php',
-    '- Reģistrācija: register.php',
-    '- Ielogošanās: login.php',
+    '- Reģistrācija: auth/register.php',
+    '- Ielogošanās: auth/login.php',
     '- Pašnovērtējuma testi: tests/tests.php',
-    '- Publicētie raksti: published_articles.php',
-    '- Lietotāja panelis: dashboard.php',
-    '- Psihologa panelis: psihologi/specialist_dashboard.php',
+    '- Publicētie raksti: pages/published_articles.php',
+    '- Lietotāja panelis: pages/dashboard.php',
+    '- Psihologa panelis: specialist/specialist_dashboard.php',
     '- Administratora panelis: admin/admin_dashboard.php',
 ];
 
 $allowedPageTargets = [
     'index.php',
-    'register.php',
-    'login.php',
+    'auth/register.php',
+    'auth/login.php',
     'tests/tests.php',
-    'published_articles.php',
-    'dashboard.php',
-    'psihologi/specialist_dashboard.php',
+    'pages/published_articles.php',
+    'pages/dashboard.php',
+    'specialist/specialist_dashboard.php',
     'admin/admin_dashboard.php',
 ];
 
@@ -269,7 +269,7 @@ $preferredModeInstruction = $preferredMode === 'answer'
     : 'Servera heuristika norāda, ka lietotāja ziņojums ir pārāk īss, emocionāls vai neskaidrs. Primāri atbildi režīmā [MODE:clarify].';
 
 // Gemini API atslēga no vides mainīgā, ar esošo fallback savietojamībai.
-$apiKey = getenv('GEMINI_API_KEY') ?: 'AIzaSyDXCiCyHNfaDtYKD8hJOdWOJYIPkbe1Qro';
+$apiKey = getenv('GEMINI_API_KEY') ?: 'yourapiKeyHere';
 
 $pagesText = implode("\n", $relevantPages);
 $authLine = $isLoggedIn ? "Jā" : "Nē";

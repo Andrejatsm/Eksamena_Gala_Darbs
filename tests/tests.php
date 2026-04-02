@@ -1,9 +1,9 @@
 <?php
 session_start();
 $pageTitle = "Pašnovērtējuma testi";
-require '../database/db.php';
+require '../includes/db.php';
 
-require '../header.php';
+require '../includes/header.php';
 
 $account_id = isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user'
     ? (int)$_SESSION['account_id']
@@ -85,4 +85,4 @@ if ($show_attempts) {
     <?php endif; ?>
 </div>
 
-<?php require '../footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

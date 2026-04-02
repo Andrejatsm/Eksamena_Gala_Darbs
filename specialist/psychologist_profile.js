@@ -35,7 +35,7 @@
 
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '../checkout.php';
+        form.action = '../api/checkout.php';
 
         const fields = {
             psychologist_account_id: psychologistId,

@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSearch = search;
         renderLoadingState();
 
-        fetch(`fetch_psychologists.php?page=${page}&search=${encodeURIComponent(search)}`)
+        fetch(`../api/fetch_psychologists.php?page=${page}&search=${encodeURIComponent(search)}&base=..`)
             .then((response) => response.text())
             .then((data) => {
                 psychologistsContainer.innerHTML = data;

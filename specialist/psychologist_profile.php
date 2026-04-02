@@ -1,7 +1,7 @@
 <?php
 session_start();
 $pageTitle = "Psihologa profils";
-require '../database/db.php';
+require '../includes/db.php';
 
 function normalize_psychologist_image_path(string $path): string {
     $normalized = trim($path);
@@ -25,17 +25,17 @@ function normalize_psychologist_image_path(string $path): string {
 
 // Check if user is logged in
 if (!isset($_SESSION['account_id'])) {
-    header("Location: ../login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
-require '../header.php';
+require '../includes/header.php';
 
 // Get psychologist ID from URL
 $psychologist_id = intval($_GET['id'] ?? 0);
 
 if ($psychologist_id === 0) {
-    header("Location: ../dashboard.php");
+    header("Location: ../pages/dashboard.php");
     exit();
 }
 
@@ -54,7 +54,7 @@ $psychologist = $result->fetch_assoc();
 $psychologist['image_path'] = normalize_psychologist_image_path((string)($psychologist['image_path'] ?? ''));
 
 if (!$psychologist) {
-    header("Location: ../dashboard.php");
+    header("Location: ../pages/dashboard.php");
     exit();
 }
 
@@ -88,7 +88,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <!-- Back button -->
-        <a href="../dashboard.php" class="inline-flex items-center text-primary hover:text-primaryHover mb-8 font-semibold">
+        <a href="../pages/dashboard.php" class="inline-flex items-center text-primary hover:text-primaryHover mb-8 font-semibold">
             <i class="fas fa-arrow-left mr-2"></i> Atpakaļ uz speciālistiem
         </a>
 
@@ -249,4 +249,4 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
 
 <script src="psychologist_profile.js"></script>
 
-<?php require '../footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

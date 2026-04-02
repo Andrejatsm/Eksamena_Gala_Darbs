@@ -1,14 +1,14 @@
 <?php
 session_start();
 $pageTitle = "Mana profila informācija";
-require 'database/db.php';
+require '../includes/db.php';
 
 if (!isset($_SESSION['account_id'])) {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
-require 'header.php';
+require '../includes/header.php';
 
 $account_id = (int)$_SESSION['account_id'];
 $role = $_SESSION['role'];
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') === 'delete
         $d = $conn->prepare("DELETE FROM accounts WHERE id = ?");
         $d->bind_param("i", $account_id); $d->execute(); $d->close();
         session_destroy();
-        header("Location: index.php");
+        header("Location: ../index.php");
         exit();
     }
 }
@@ -316,6 +316,6 @@ $stmt->close();
         </div>
     </div>
 </div>
-<script src="assets/js/user_profile.js"></script>
+<script src="../assets/js/user_profile.js"></script>
 
-<?php require 'footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

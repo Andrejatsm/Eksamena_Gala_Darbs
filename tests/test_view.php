@@ -1,7 +1,7 @@
 <?php
 session_start();
 $pageTitle = "Tests";
-require '../database/db.php';
+require '../includes/db.php';
 
 if (empty($_GET['test_id'])) {
     header("Location: tests.php");
@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_test'])) {
     }
 }
 
-require '../header.php';
+require '../includes/header.php';
 ?>
 
 <div class="page-shell-narrow page-surface">
@@ -145,4 +145,4 @@ require '../header.php';
     </form>
 </div>
 
-<?php require '../footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

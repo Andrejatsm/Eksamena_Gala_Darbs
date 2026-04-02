@@ -2,8 +2,8 @@
 session_start();
 $pageTitle = 'Publicētie raksti';
 $pageStyles = ['content.css'];
-require 'database/db.php';
-require 'header.php';
+require '../includes/db.php';
+require '../includes/header.php';
 
 $article_id = (int)($_GET['id'] ?? 0);
 
@@ -125,4 +125,4 @@ if ($article_id === 0) {
     <?php endif; ?>    <?php endif; ?>
 </div>
 
-<?php require 'footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

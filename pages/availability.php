@@ -1,10 +1,10 @@
 <?php
 session_start();
 $pageTitle = "Pieejamība";
-require 'database/db.php';
+require '../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'psychologist') {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
@@ -104,7 +104,7 @@ while($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-require 'header.php';
+require '../includes/header.php';
 ?>
 
 <div class="page-shell page-surface">
@@ -214,6 +214,6 @@ require 'header.php';
     </div>
 </div>
 
-<script src="assets/js/availability.js"></script>
+<script src="../assets/js/availability.js"></script>
 
-<?php require 'footer.php'; ?>
+<?php require '../includes/footer.php'; ?>
