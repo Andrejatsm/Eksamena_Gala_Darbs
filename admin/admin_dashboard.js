@@ -289,6 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
             psychModalRejectBtn.dataset.accountId = btn.dataset.id || '';
             psychModalDeleteBtn.dataset.accountId = btn.dataset.id || '';
 
+            const isPending = btn.dataset.status === 'pending';
+            psychModalApproveBtn.classList.toggle('hidden', !isPending);
+            psychModalRejectBtn.classList.toggle('hidden', !isPending);
+
             if (btn.dataset.cert) {
                 const certUrl = encodeURI(toPublicPath(btn.dataset.cert));
                 certContainer.innerHTML = `<a href="${certUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline"><i class="fas fa-file-pdf mr-2"></i>Apskatīt failu</a>`;
@@ -385,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             articleModalTitle.textContent = btn.dataset.title || '';
             articleModalAuthor.textContent = 'Autors: ' + (btn.dataset.author || '');
-            articleModalContent.textContent = btn.dataset.content || '';
+            articleModalContent.innerHTML = btn.dataset.content || '';
             articleModalApproveId.value = btn.dataset.id || '';
             articleModalRejectId.value = btn.dataset.id || '';
             articleModalAccId.value = btn.dataset.acc || '';

@@ -63,10 +63,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
 }
 
 // Iegūstam pierakstus
+$per_page = 8;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$offset = ($page - 1) * $per_page;
+
+$count_stmt = $conn->prepare("SELECT COUNT(*) FROM appointments WHERE user_account_id = ?");
+$count_stmt->bind_param("i", $account_id);
+$count_stmt->execute();
+$total_appointments = (int)$count_stmt->get_result()->fetch_row()[0];
+$count_stmt->close();
+$total_pages = (int)ceil($total_appointments / $per_page);
+$page = min($page, max(1, $total_pages));
+
 $sql = "SELECT a.id, a.scheduled_at, a.consultation_type, a.status, p.full_name FROM appointments a 
         JOIN psychologist_profiles p ON a.psychologist_account_id = p.account_id 
         WHERE a.user_account_id = ? 
-        ORDER BY a.scheduled_at DESC";
+        ORDER BY a.scheduled_at DESC
+        LIMIT {$per_page} OFFSET {$offset}";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $account_id);
 $stmt->execute();
@@ -132,6 +145,22 @@ $stmt->close();
                 Atrast speciālistu
             </a>
         </div>
+    <?php endif; ?>
+
+    <?php if ($total_pages > 1): ?>
+    <div class="flex justify-center items-center gap-2 mt-6">
+        <?php if ($page > 1): ?>
+            <a href="?page=<?php echo $page - 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+        <?php else: ?>
+            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+        <?php endif; ?>
+        <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
+        <?php if ($page < $total_pages): ?>
+            <a href="?page=<?php echo $page + 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+        <?php else: ?>
+            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+        <?php endif; ?>
+    </div>
     <?php endif; ?>
 </div>
 

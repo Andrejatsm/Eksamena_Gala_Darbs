@@ -37,7 +37,32 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     <title><?php echo $pageTitle ?? 'Saprasts - Psihologu pieteikumi'; ?></title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/tailwind_config.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#14967f',
+                        primaryHover: '#095d7e',
+                        secondary: '#095d7e',
+                        surface: '#f1f9ff',
+                        background: '#f1f9ff',
+                        mint: '#e2fcd6',
+                        accent: '#ccecee',
+                        onSurface: '#0d2d3a',
+                        onSurfaceVariant: '#2d6a7f',
+                        tertiary: '#ccecee',
+                        dark: {
+                            bg: '#121212',
+                            card: '#1e1e1e',
+                            text: '#e0e0e0'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

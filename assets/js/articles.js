@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', function () {
         placeholder: 'Rakstiet raksta saturu šeit...'
     });
 
+    // Pre-fill editor if editing existing content
+    const existing = contentInput.value;
+    if (existing) {
+        quill.root.innerHTML = existing;
+    }
+
     form.addEventListener('submit', function () {
         contentInput.value = quill.root.innerHTML;
     });

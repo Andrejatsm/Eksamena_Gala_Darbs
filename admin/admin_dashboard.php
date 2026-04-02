@@ -676,7 +676,7 @@ require '../header.php';
                     </button>
                 </div>
                 <p class="text-sm text-primary font-semibold mb-5" id="articleModalAuthor"></p>
-                <div class="text-sm text-gray-700 dark:text-gray-300 bg-[#f1f9ff] dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 p-4 rounded-xl whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto" id="articleModalContent"></div>
+                <div class="text-sm text-gray-700 dark:text-gray-300 bg-[#f1f9ff] dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 p-4 rounded-xl leading-relaxed max-h-[60vh] overflow-y-auto article-body" id="articleModalContent"></div>
             </div>
             <div class="bg-[#f1f9ff] dark:bg-zinc-700/30 border-t border-[#ccecee] dark:border-zinc-700 px-6 py-4 flex flex-row-reverse gap-2 rounded-b-2xl">
                 <form method="POST" class="inline m-0">

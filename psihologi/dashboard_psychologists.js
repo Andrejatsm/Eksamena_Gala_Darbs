@@ -57,12 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevDisabled = currentPage <= 1;
         const nextDisabled = currentPage >= totalPages;
 
-        paginationHTML += `<li><button class="px-3 py-2 leading-tight border border-gray-300 dark:border-zinc-600 ${prevDisabled ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed bg-gray-50 dark:bg-zinc-900' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 bg-white dark:bg-zinc-800'} transition" data-page="${currentPage - 1}" ${prevDisabled ? 'disabled' : ''}>Iepriekšējā</button></li>`;
-        for (let i = 1; i <= totalPages; i += 1) {
-            const activeClass = i === currentPage ? 'bg-primary text-white' : 'bg-white dark:bg-zinc-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-700';
-            paginationHTML += `<li><button class="px-3 py-2 leading-tight border border-gray-300 dark:border-zinc-600 ${activeClass} transition" data-page="${i}">${i}</button></li>`;
-        }
-        paginationHTML += `<li><button class="px-3 py-2 leading-tight border border-gray-300 dark:border-zinc-600 ${nextDisabled ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed bg-gray-50 dark:bg-zinc-900' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 bg-white dark:bg-zinc-800'} transition" data-page="${currentPage + 1}" ${nextDisabled ? 'disabled' : ''}>Nākamā</button></li>`;
+        const btnTeal = 'px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition';
+        const btnTealDisabled = 'px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed';
+
+        paginationHTML += `<button class="${prevDisabled ? btnTealDisabled : btnTeal}" data-page="${currentPage - 1}" ${prevDisabled ? 'disabled' : ''}><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</button>`;
+        paginationHTML += `<span class="px-2 py-1.5 text-sm text-gray-600 dark:text-gray-400">Lapa ${currentPage} no ${totalPages}</span>`;
+        paginationHTML += `<button class="${nextDisabled ? btnTealDisabled : btnTeal}" data-page="${currentPage + 1}" ${nextDisabled ? 'disabled' : ''}>Nākamā<i class="fas fa-chevron-right ml-1"></i></button>`;
         paginationControls.innerHTML = paginationHTML;
 
         paginationControls.querySelectorAll('button:not([disabled])').forEach((btn) => {

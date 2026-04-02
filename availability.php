@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_slot'])) {
 
 // Esošos slotus ielādējam vienā vietā, lai var gan attēlot sarakstu, gan uzreiz dzēst nevajadzīgos laikus.
 $page = max(1, (int)($_GET['page'] ?? 1));
-$per_page = 8;
+$per_page = 5;
 $offset = ($page - 1) * $per_page;
 
 $count_stmt = $conn->prepare("SELECT COUNT(*) FROM availability_slots WHERE psychologist_account_id = ?");
@@ -163,11 +163,11 @@ require 'header.php';
         </div>
 
         <!-- Esošo slotu saraksts -->
-        <div class="lg:col-span-2 space-y-4">
+        <div class="space-y-4">
             <?php foreach($slots as $slot): ?>
                 <div class="list-card p-4">
-                    <div class="flex justify-between items-start">
-                        <div>
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="min-w-0 flex-1">
                             <p class="font-bold text-gray-900 dark:text-white">
                                 <i class="fas fa-calendar-alt text-primary"></i> 
                                 <?php echo date('d.m.Y H:i', strtotime($slot['starts_at'])); ?> - 
@@ -177,7 +177,7 @@ require 'header.php';
                                 <i class="fas fa-video mr-1"></i><?php echo ($slot['consultation_type'] ?? 'online') === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?>
                             </p>
                             <?php if($slot['note']): ?>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><?php echo htmlspecialchars($slot['note']); ?></p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words min-w-0"><?php echo htmlspecialchars($slot['note']); ?></p>
                             <?php endif; ?>
                         </div>
                         <form method="POST" class="inline">
@@ -199,10 +199,14 @@ require 'header.php';
             <div class="flex justify-center items-center gap-2 pt-4">
                 <?php if ($page > 1): ?>
                     <a href="?page=<?php echo $page - 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+                <?php else: ?>
+                    <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
                 <?php endif; ?>
                 <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
                 <?php if ($page < $total_pages): ?>
                     <a href="?page=<?php echo $page + 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+                <?php else: ?>
+                    <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
                 <?php endif; ?>
             </div>
             <?php endif; ?>
