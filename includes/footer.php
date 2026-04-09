@@ -78,6 +78,7 @@ if (!isset($pathPrefix)) {
         </div>
     </div>
 
+    <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/modals.js"></script>
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/script.js"></script>
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/footer_ui.js"></script>
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/notifications.js"></script>

@@ -28,6 +28,7 @@ $status_labels = [
 // Apstrādājam pieraksta atcelšanu vai pārcelšanu
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_POST['action'])) {
     $appointment_id = (int)$_POST['appointment_id'];
+    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     
     if ($_POST['action'] === 'cancel') {
             // Vispirms iegūstam pieraksta info, lai atbrīvotu slotu
@@ -51,6 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
                 $freeStmt->close();
             }
             $message = "Pieraksts atcelts.";
+
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'message' => $message]);
+                exit();
+            }
     } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_time'])) {
             $new_time = $_POST['new_time'];
             $status = 'rescheduled';
@@ -59,6 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
             $stmt->execute();
             $stmt->close();
             $message = "Pieraksts pārcelts uz " . date('d.m.Y H:i', strtotime($new_time)) . ".";
+
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'message' => $message]);
+                exit();
+            }
     }
 }
 
@@ -75,7 +88,7 @@ $count_stmt->close();
 $total_pages = (int)ceil($total_appointments / $per_page);
 $page = min($page, max(1, $total_pages));
 
-$sql = "SELECT a.id, a.scheduled_at, a.consultation_type, a.status, p.full_name FROM appointments a 
+$sql = "SELECT a.id, a.scheduled_at, a.consultation_type, a.status, a.chat_activated_at, p.full_name FROM appointments a 
         JOIN psychologist_profiles p ON a.psychologist_account_id = p.account_id 
         WHERE a.user_account_id = ? 
         ORDER BY a.scheduled_at DESC
@@ -120,16 +133,22 @@ $stmt->close();
                         </span>
 
                         <?php if($appt['status'] === 'approved'): ?>
-                        <div class="flex gap-2 mt-3">
-                            <a href="chat.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition text-sm font-medium">
-                                <i class="fas fa-comments"></i> Čats
-                            </a>
-                            <?php if($appt['consultation_type'] === 'online'): ?>
-                            <a href="video_call.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium">
-                                <i class="fas fa-video"></i> Videozvans
-                            </a>
+                            <?php if(!empty($appt['chat_activated_at'])): ?>
+                            <div class="flex gap-2 mt-3">
+                                <a href="chat.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition text-sm font-medium">
+                                    <i class="fas fa-comments"></i> Čats
+                                </a>
+                                <?php if($appt['consultation_type'] === 'online'): ?>
+                                <a href="video_call.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium">
+                                    <i class="fas fa-video"></i> Videozvans
+                                </a>
+                                <?php endif; ?>
+                            </div>
+                            <?php else: ?>
+                            <p class="text-xs text-amber-600 dark:text-amber-400 mt-3">
+                                <i class="fas fa-clock mr-1"></i> Gaida aktivizāciju no psihologa
+                            </p>
                             <?php endif; ?>
-                        </div>
                         <?php endif; ?>
                     </div>
                     
@@ -163,15 +182,15 @@ $stmt->close();
     <?php if ($total_pages > 1): ?>
     <div class="flex justify-center items-center gap-2 mt-6">
         <?php if ($page > 1): ?>
-            <a href="?page=<?php echo $page - 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+            <a href="?page=<?php echo $page - 1; ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
         <?php else: ?>
-            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+            <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
         <?php endif; ?>
         <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
         <?php if ($page < $total_pages): ?>
-            <a href="?page=<?php echo $page + 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+            <a href="?page=<?php echo $page + 1; ?>" class="pagination-btn">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
         <?php else: ?>
-            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+            <span class="pagination-btn-disabled">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
         <?php endif; ?>
     </div>
     <?php endif; ?>

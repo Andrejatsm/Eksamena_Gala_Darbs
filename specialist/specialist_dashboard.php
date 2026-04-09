@@ -12,30 +12,42 @@ $psihologs_id = (int)$_SESSION['account_id'];
 
 // Statusa maiņas loģika
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'], $_POST['appoint_id'])) {
-    $status = ($_POST['action'] === 'accept') ? 'approved' : 'rejected';
     $appoint_id = (int)$_POST['appoint_id'];
 
-    // Ja noraidām, vispirms iegūstam pieraksta laiku, lai atbrīvotu slotu
-    $apptRow = null;
-    if ($status === 'rejected') {
-        $getStmt = $conn->prepare("SELECT scheduled_at FROM appointments WHERE id = ? AND psychologist_account_id = ?");
-        $getStmt->bind_param("ii", $appoint_id, $psihologs_id);
-        $getStmt->execute();
-        $apptRow = $getStmt->get_result()->fetch_assoc();
-        $getStmt->close();
-    }
+    if ($_POST['action'] === 'activate') {
+        // Psihologs aktivizē čatu/video pirms sesijas
+        $stmt = $conn->prepare(
+            "UPDATE appointments SET chat_activated_at = NOW()
+             WHERE id = ? AND psychologist_account_id = ? AND status = 'approved' AND chat_activated_at IS NULL"
+        );
+        $stmt->bind_param("ii", $appoint_id, $psihologs_id);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        $status = ($_POST['action'] === 'accept') ? 'approved' : 'rejected';
 
-    $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ? AND psychologist_account_id = ?");
-    $stmt->bind_param("sii", $status, $appoint_id, $psihologs_id);
-    $stmt->execute();
-    $stmt->close();
+        // Ja noraidām, vispirms iegūstam pieraksta laiku, lai atbrīvotu slotu
+        $apptRow = null;
+        if ($status === 'rejected') {
+            $getStmt = $conn->prepare("SELECT scheduled_at FROM appointments WHERE id = ? AND psychologist_account_id = ?");
+            $getStmt->bind_param("ii", $appoint_id, $psihologs_id);
+            $getStmt->execute();
+            $apptRow = $getStmt->get_result()->fetch_assoc();
+            $getStmt->close();
+        }
 
-    // Atbrīvojam slotu, lai citi var pierakstīties
-    if ($status === 'rejected' && $apptRow && !empty($apptRow['scheduled_at'])) {
-        $freeStmt = $conn->prepare("UPDATE availability_slots SET is_booked = 0 WHERE psychologist_account_id = ? AND starts_at = ?");
-        $freeStmt->bind_param("is", $psihologs_id, $apptRow['scheduled_at']);
-        $freeStmt->execute();
-        $freeStmt->close();
+        $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ? AND psychologist_account_id = ?");
+        $stmt->bind_param("sii", $status, $appoint_id, $psihologs_id);
+        $stmt->execute();
+        $stmt->close();
+
+        // Atbrīvojam slotu, lai citi var pierakstīties
+        if ($status === 'rejected' && $apptRow && !empty($apptRow['scheduled_at'])) {
+            $freeStmt = $conn->prepare("UPDATE availability_slots SET is_booked = 0 WHERE psychologist_account_id = ? AND starts_at = ?");
+            $freeStmt->bind_param("is", $psihologs_id, $apptRow['scheduled_at']);
+            $freeStmt->execute();
+            $freeStmt->close();
+        }
     }
 }
 
@@ -226,16 +238,25 @@ require '../includes/header.php';
                                                 </div>
                                             <?php else: ?>
                                                 <?php if ($row['status'] === 'approved'): ?>
-                                                <div class="flex justify-end gap-2">
-                                                    <a href="../pages/chat.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-primary/15 dark:bg-primary/25 text-primary rounded-lg hover:bg-primary/25 dark:hover:bg-primary/35 transition text-sm font-medium" title="Čats">
-                                                        <i class="fas fa-comments"></i>
-                                                    </a>
-                                                    <?php if ($row['consultation_type'] === 'online'): ?>
-                                                    <a href="../pages/video_call.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium" title="Videozvans">
-                                                        <i class="fas fa-video"></i>
-                                                    </a>
+                                                    <?php if (!empty($row['chat_activated_at'])): ?>
+                                                    <div class="flex justify-end gap-2">
+                                                        <a href="../pages/chat.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-primary/15 dark:bg-primary/25 text-primary rounded-lg hover:bg-primary/25 dark:hover:bg-primary/35 transition text-sm font-medium" title="Čats">
+                                                            <i class="fas fa-comments"></i>
+                                                        </a>
+                                                        <?php if ($row['consultation_type'] === 'online'): ?>
+                                                        <a href="../pages/video_call.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium" title="Videozvans">
+                                                            <i class="fas fa-video"></i>
+                                                        </a>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <form method="POST" class="inline">
+                                                        <input type="hidden" name="appoint_id" value="<?php echo (int)$row['id']; ?>">
+                                                        <button type="submit" name="action" value="activate" class="px-3 py-1.5 bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-500/25 dark:hover:bg-amber-500/35 transition text-sm font-medium" title="Aktivizēt čatu un video">
+                                                            <i class="fas fa-bolt mr-1"></i> Aktivizēt
+                                                        </button>
+                                                    </form>
                                                     <?php endif; ?>
-                                                </div>
                                                 <?php else: ?>
                                                 <span class="text-gray-400">-</span>
                                                 <?php endif; ?>

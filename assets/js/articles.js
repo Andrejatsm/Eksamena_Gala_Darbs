@@ -36,8 +36,13 @@ document.addEventListener('DOMContentLoaded', function () {
 // Confirm before deleting an article
 document.querySelectorAll('form[data-confirm-delete]').forEach((form) => {
     form.addEventListener('submit', (e) => {
-        if (!window.confirm(form.dataset.confirmDelete || 'Dzēst rakstu?')) {
-            e.preventDefault();
-        }
+        if (form._confirmed) return;
+        e.preventDefault();
+        SaprastsConfirm.show(form.dataset.confirmDelete || 'Dzēst rakstu?', { okText: 'Dzēst', type: 'danger' }).then((confirmed) => {
+            if (confirmed) {
+                form._confirmed = true;
+                form.submit();
+            }
+        });
     });
 });

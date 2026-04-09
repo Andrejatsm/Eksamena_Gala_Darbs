@@ -39,12 +39,46 @@
         closeRescheduleModalBtnFooter.addEventListener('click', window.closeRescheduleModal);
     }
 
-    // Confirm before cancelling an appointment
+    // Confirm before cancelling an appointment (AJAX)
     document.querySelectorAll('.cancel-appt-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
-            if (!window.confirm('Vai tiešām vēlaties atcelt pierakstu?')) {
-                e.preventDefault();
-            }
+            e.preventDefault();
+            SaprastsConfirm.show('Vai tiešām vēlaties atcelt pierakstu?', { okText: 'Jā, atcelt', type: 'danger' }).then((confirmed) => {
+                if (!confirmed) return;
+
+                const form = btn.closest('form');
+                if (!form) return;
+
+                const formData = new FormData(form);
+                // Submit button value isn't included by FormData — add manually
+                if (btn.name && btn.value) {
+                    formData.set(btn.name, btn.value);
+                }
+                fetch(form.action || window.location.href, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then((r) => r.json())
+                .then((data) => {
+                    if (data.success) {
+                        SaprastsToast.success(data.message || 'Pieraksts atcelts.');
+                        // Noņemam kartīti no DOM
+                        const card = btn.closest('.panel-card') || btn.closest('.appointment-card');
+                        if (card) {
+                            card.style.transition = 'opacity 0.3s, transform 0.3s';
+                            card.style.opacity = '0';
+                            card.style.transform = 'scale(0.95)';
+                            setTimeout(() => card.remove(), 300);
+                        }
+                    } else {
+                        SaprastsToast.error(data.message || 'Kļūda atceļot pierakstu.');
+                    }
+                })
+                .catch(() => {
+                    SaprastsToast.error('Tīkla kļūda. Mēģiniet vēlreiz.');
+                });
+            });
         });
     });
 })();

@@ -56,6 +56,24 @@
             if (!res.ok) return;
             const data = await res.json();
 
+            // Sesija nav aktivizēta — parādām gaidīšanas ziņojumu
+            if (data.chat_inactive) {
+                if (!messagesContainer.querySelector('.chat-waiting-msg')) {
+                    messagesContainer.innerHTML = `
+                        <div class="chat-waiting-msg flex flex-col items-center justify-center h-full text-amber-500 dark:text-amber-400">
+                            <i class="fas fa-clock text-4xl mb-3"></i>
+                            <p class="text-sm text-center">Psihologs vēl nav aktivizējis sesiju.</p>
+                        </div>`;
+                }
+                return;
+            }
+
+            // Ja sesija tikko tika aktivizēta — pārlādējam lapu, lai serveris ģenerē ievades formu
+            if (messagesContainer.querySelector('.chat-waiting-msg')) {
+                window.location.reload();
+                return;
+            }
+
             if (data.messages && data.messages.length > 0) {
                 // Remove loading spinner on first load
                 if (lastMessageId === 0) {

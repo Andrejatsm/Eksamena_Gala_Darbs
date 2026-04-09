@@ -26,7 +26,7 @@
 
     window.openPayment = (psychologistId) => {
         if (!selectedSlotId) {
-            alert('Lūdzu, izvēlieties laiku.');
+            SaprastsToast.warning('Lūdzu, izvēlieties laiku.');
             return;
         }
 

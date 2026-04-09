@@ -25,7 +25,7 @@ $stmt = $conn->prepare(
      FROM appointments a
      JOIN psychologist_profiles p ON a.psychologist_account_id = p.account_id
      JOIN user_profiles u ON a.user_account_id = u.account_id
-     WHERE a.id = ? AND a.status = 'approved' AND a.consultation_type = 'online'"
+     WHERE a.id = ? AND a.status = 'approved' AND a.consultation_type = 'online' AND a.chat_activated_at IS NOT NULL"
 );
 $stmt->bind_param("i", $appointment_id);
 $stmt->execute();

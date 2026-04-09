@@ -100,6 +100,25 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                     </div>
 
                     <?php if ($is_logged_in): ?>
+                        <!-- Notifikāciju zvaniņš -->
+                        <div class="relative" id="notification-bell-wrapper">
+                            <button type="button" id="notification-bell-btn" class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800" aria-label="Paziņojumi">
+                                <i class="fas fa-bell text-lg"></i>
+                                <span id="notification-bell-badge" class="hidden absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full"></span>
+                            </button>
+                            <div id="notification-dropdown" class="hidden absolute right-0 z-50 mt-2 w-80 bg-white dark:bg-zinc-800 rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                                <div class="px-4 py-3 border-b border-gray-100 dark:border-zinc-700 flex items-center justify-between">
+                                    <h4 class="font-bold text-sm text-gray-900 dark:text-white">Paziņojumi</h4>
+                                    <span id="notification-count-label" class="text-xs text-gray-500 dark:text-gray-400"></span>
+                                </div>
+                                <div id="notification-list" class="max-h-80 overflow-y-auto">
+                                    <div class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        Nav jaunu paziņojumu
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="relative ml-3">
                             <button type="button" class="flex text-sm bg-gray-100 dark:bg-zinc-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-zinc-600 p-2 items-center gap-2 transition hover:bg-gray-200 dark:hover:bg-zinc-700" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown">
                                 <span class="sr-only">Atvērt lietotāja izvēlni</span>
@@ -194,6 +213,9 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                         </div>
                     </div>
                     <a href="<?php echo $dashboard_link; ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Panelis</a>
+                    <button type="button" id="mobile-notification-btn" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">
+                        <i class="fas fa-bell w-5 text-center mr-1"></i> Paziņojumi <span id="mobile-notification-badge" class="hidden ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full"></span>
+                    </button>
 
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                         <a href="<?php echo htmlspecialchars($pathPrefix); ?>admin/messages.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ziņojumi</a>

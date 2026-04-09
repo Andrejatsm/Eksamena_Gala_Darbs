@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../includes/db.php';
+require '../includes/encryption.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -17,7 +18,7 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 // Verify that this user is a participant in the appointment
 function verifyParticipant(mysqli $conn, int $appointmentId, int $accountId): ?array {
     $stmt = $conn->prepare(
-        "SELECT id, user_account_id, psychologist_account_id, status, consultation_type
+        "SELECT id, user_account_id, psychologist_account_id, status, consultation_type, scheduled_at, chat_activated_at
          FROM appointments WHERE id = ?"
     );
     $stmt->bind_param("i", $appointmentId);
@@ -29,6 +30,13 @@ function verifyParticipant(mysqli $conn, int $appointmentId, int $accountId): ?a
     if ((int)$appt['user_account_id'] !== $accountId && (int)$appt['psychologist_account_id'] !== $accountId) return null;
 
     return $appt;
+}
+
+// Čats ir aktīvs tikai tad, kad psihologs to ir aktivizējis un sesija nav beigusies
+function isChatActive(array $appt): bool {
+    if (empty($appt['chat_activated_at'])) return false;
+    $scheduledTs = strtotime($appt['scheduled_at'] ?? '');
+    return $scheduledTs > time() - 7200; // 2h pēc sesijas sākuma
 }
 
 // GET: Fetch messages for an appointment
@@ -46,6 +54,11 @@ if ($action === 'fetch' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$appt) {
         http_response_code(403);
         echo json_encode(['error' => 'Nav piekļuves.']);
+        exit();
+    }
+
+    if (!isChatActive($appt)) {
+        echo json_encode(['messages' => [], 'chat_inactive' => true]);
         exit();
     }
 
@@ -74,7 +87,7 @@ if ($action === 'fetch' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         $messages[] = [
             'id' => (int)$row['id'],
             'sender_id' => (int)$row['sender_account_id'],
-            'message' => $row['message'],
+            'message' => saprasts_decrypt($row['message']),
             'is_read' => (bool)$row['is_read'],
             'created_at' => $row['created_at'],
             'is_mine' => (int)$row['sender_account_id'] === $account_id,
@@ -117,10 +130,17 @@ if ($action === 'send' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    if (!isChatActive($appt)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Čats pašlaik nav aktīvs. Psihologs to vēl nav aktivizējis.']);
+        exit();
+    }
+
+    $encryptedMessage = saprasts_encrypt($message);
     $stmt = $conn->prepare(
         "INSERT INTO chat_messages (appointment_id, sender_account_id, message) VALUES (?, ?, ?)"
     );
-    $stmt->bind_param("iis", $appointment_id, $account_id, $message);
+    $stmt->bind_param("iis", $appointment_id, $account_id, $encryptedMessage);
     $stmt->execute();
     $newId = (int)$stmt->insert_id;
     $stmt->close();

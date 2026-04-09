@@ -179,15 +179,15 @@ require __DIR__ . '/../includes/header.php';
                     };
                     ?>
                     <?php if ($page <= 1): ?>
-                        <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+                        <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
                     <?php else: ?>
-                        <a href="<?php echo htmlspecialchars($buildPageUrl(max(1, $page - 1), $search)); ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+                        <a href="<?php echo htmlspecialchars($buildPageUrl(max(1, $page - 1), $search)); ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
                     <?php endif; ?>
                     <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $totalPages; ?></span>
                     <?php if ($page >= $totalPages): ?>
-                        <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+                        <span class="pagination-btn-disabled">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
                     <?php else: ?>
-                        <a href="<?php echo htmlspecialchars($buildPageUrl(min($totalPages, $page + 1), $search)); ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+                        <a href="<?php echo htmlspecialchars($buildPageUrl(min($totalPages, $page + 1), $search)); ?>" class="pagination-btn">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
                     <?php endif; ?>
                 </div>
             </div>

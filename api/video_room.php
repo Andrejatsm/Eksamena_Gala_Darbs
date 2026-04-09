@@ -21,8 +21,8 @@ if ($appointment_id <= 0) {
 
 // Verify participant
 $stmt = $conn->prepare(
-    "SELECT id, user_account_id, psychologist_account_id, status, consultation_type
-     FROM appointments WHERE id = ? AND status = 'approved' AND consultation_type = 'online'"
+    "SELECT id, user_account_id, psychologist_account_id, status, consultation_type, chat_activated_at
+     FROM appointments WHERE id = ? AND status = 'approved' AND consultation_type = 'online' AND chat_activated_at IS NOT NULL"
 );
 $stmt->bind_param("i", $appointment_id);
 $stmt->execute();
@@ -51,7 +51,7 @@ $stmt->close();
 if ($room) {
     $token = $room['room_token'];
 } else {
-    $token = 'saprasts-' . $appointment_id . '-' . bin2hex(random_bytes(8));
+    $token = bin2hex(random_bytes(32));
     $stmt = $conn->prepare("INSERT INTO video_rooms (appointment_id, room_token) VALUES (?, ?)");
     $stmt->bind_param("is", $appointment_id, $token);
     $stmt->execute();

@@ -47,6 +47,7 @@ if (!$is_user && !$is_psychologist) {
 
 $chat_partner_name = $is_user ? $appt['psychologist_name'] : $appt['user_name'];
 $back_url = $is_user ? 'appointments.php' : '../specialist/specialist_dashboard.php';
+$chat_active = $appt['status'] === 'approved' && !empty($appt['chat_activated_at']);
 
 require '../includes/header.php';
 ?>
@@ -67,7 +68,7 @@ require '../includes/header.php';
                     </p>
                 </div>
             </div>
-            <?php if ($appt['consultation_type'] === 'online' && $appt['status'] === 'approved'): ?>
+            <?php if ($appt['consultation_type'] === 'online' && $chat_active): ?>
                 <a href="video_call.php?appointment_id=<?php echo $appointment_id; ?>" class="button-primary px-4 py-2 text-sm">
                     <i class="fas fa-video mr-2"></i>Videozvans
                 </a>
@@ -82,7 +83,7 @@ require '../includes/header.php';
         </div>
 
         <!-- Message input -->
-        <?php if ($appt['status'] === 'approved'): ?>
+        <?php if ($chat_active): ?>
         <form id="chatForm" class="flex gap-2">
             <input type="text" id="chatInput" maxlength="5000" placeholder="Rakstiet ziņojumu..." autocomplete="off"
                 class="flex-1 input-control" required>
@@ -90,6 +91,10 @@ require '../includes/header.php';
                 <i class="fas fa-paper-plane"></i>
             </button>
         </form>
+        <?php elseif ($appt['status'] === 'approved'): ?>
+        <div class="text-center text-amber-600 dark:text-amber-400 text-sm py-3">
+            <i class="fas fa-clock mr-1"></i> Psihologs vēl nav aktivizējis sesiju. Lūdzu, uzgaidiet.
+        </div>
         <?php else: ?>
         <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-3">
             Čats ir pieejams tikai apstiprinātiem pierakstiem.
