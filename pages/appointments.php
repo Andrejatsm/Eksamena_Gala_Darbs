@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../includes/lang.php';
 $pageTitle = t('appointments_title');
 require '../includes/db.php';
 

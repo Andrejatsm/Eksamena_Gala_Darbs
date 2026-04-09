@@ -1,6 +1,7 @@
 <?php
 session_start();
-$pageTitle = "Videozvans";
+require_once __DIR__ . '/../includes/lang.php';
+$pageTitle = t('video_call_title');
 require '../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role'])) {
@@ -62,7 +63,7 @@ require '../includes/header.php';
                 </a>
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                        Videozvans ar <?php echo htmlspecialchars($chat_partner_name); ?>
+                        <?php echo t('video_call_with', htmlspecialchars($chat_partner_name)); ?>
                     </h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         <?php echo date('d.m.Y H:i', strtotime($appt['scheduled_at'])); ?>
@@ -70,7 +71,7 @@ require '../includes/header.php';
                 </div>
             </div>
             <a href="<?php echo $back_url; ?>" class="button-primary px-4 py-2 text-sm bg-red-500 hover:bg-red-600" id="endCallBtn">
-                <i class="fas fa-phone-slash mr-2"></i>Beigt zvanu
+                <i class="fas fa-phone-slash mr-2"></i><?php echo t('end_call'); ?>
             </a>
         </div>
 
@@ -79,7 +80,7 @@ require '../includes/header.php';
             <div class="flex items-center justify-center h-full text-white">
                 <div class="text-center">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-4"></div>
-                    <p>Savienojam videozvanu...</p>
+                    <p><?php echo t('connecting_video'); ?></p>
                 </div>
             </div>
         </div>

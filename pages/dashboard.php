@@ -10,6 +10,7 @@ require '../includes/header.php';
 ?>
 
 <div class="flex-grow ui-container py-10">
+
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h3 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo t('available_psychologists'); ?></h3>
         <div class="relative w-full md:w-1/3">

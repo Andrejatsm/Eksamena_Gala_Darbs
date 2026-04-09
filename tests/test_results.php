@@ -1,6 +1,7 @@
 <?php
 session_start();
-$pageTitle = "Testa rezultāti";
+require_once __DIR__ . '/../includes/lang.php';
+$pageTitle = t('test_results_title');
 require '../includes/db.php';
 
 // Guest flow: result is temporarily stored in session until user logs in
@@ -16,23 +17,23 @@ if (isset($_GET['guest']) && isset($_SESSION['guest_test_result'])) {
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-[#ccecee] dark:bg-[#095d7e]/20 rounded-full mb-4">
                         <i class="fas fa-lock text-3xl text-[#095d7e] dark:text-[#ccecee]"></i>
                     </div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Tests pabeigts!</h1>
-                    <p class="text-gray-600 dark:text-gray-400 mt-2">Lai redzētu rezultātu testam <strong><?php echo htmlspecialchars($guest_result['test_title']); ?></strong>, ielogojies vai izveido profilu.</p>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo t('test_completed_msg'); ?></h1>
+                    <p class="text-gray-600 dark:text-gray-400 mt-2"><?php echo t('login_to_see_result', '<strong>' . htmlspecialchars($guest_result['test_title']) . '</strong>'); ?></p>
                 </div>
 
                 <div class="panel-card mb-6 text-left">
                     <p class="text-sm text-gray-700 dark:text-gray-300">
                         <i class="fas fa-shield-alt text-primary mr-2"></i>
-                        Tavs testa mēģinājums ir īslaicīgi saglabāts šajā pārlūka sesijā.
+                        <?php echo t('temp_saved'); ?>
                     </p>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
                     <a href="../auth/login.php?next=tests/test_results.php%3Fguest%3D1" class="flex-1 bg-primary hover:bg-primaryHover text-white px-6 py-3 rounded-lg transition font-medium">
-                        Ielogoties un redzēt rezultātu
+                        <?php echo t('login_see_result'); ?>
                     </a>
                     <a href="../auth/register.php?next=tests/test_results.php%3Fguest%3D1" class="flex-1 border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 px-6 py-3 rounded-lg transition font-medium">
-                        Reģistrēties
+                        <?php echo t('register_btn_alt'); ?>
                     </a>
                 </div>
             </div>
@@ -94,26 +95,26 @@ if (!$attempt) {
             <div class="inline-flex items-center justify-center w-16 h-16 bg-[#e2fcd6] dark:bg-[#14967f]/20 rounded-full mb-4">
                 <i class="fas fa-check text-3xl text-[#14967f] dark:text-[#e2fcd6]"></i>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Tests pabeigts!</h1>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo t('test_completed_msg'); ?></h1>
         </div>
 
         <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-6 mb-6">
-            <p class="text-gray-600 dark:text-gray-300 mb-2">Jūsu rezultāts:</p>
+            <p class="text-gray-600 dark:text-gray-300 mb-2"><?php echo t('your_result'); ?></p>
             <p class="text-5xl font-bold text-primary mb-2"><?php echo $attempt['total_score']; ?></p>
             <p class="text-gray-600 dark:text-gray-400"><?php echo htmlspecialchars($attempt['result_text']); ?></p>
-            <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">Pabeigtā: <?php echo date("d.m.Y H:i", strtotime($attempt['created_at'])); ?></p>
+            <p class="text-xs text-gray-500 dark:text-gray-500 mt-2"><?php echo t('completed_at'); ?><?php echo date("d.m.Y H:i", strtotime($attempt['created_at'])); ?></p>
         </div>
 
         <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            <p>Pamatojoties uz Jūsu atbildēm, ieteicam sazināties ar speciālistu, kas specializējas jūsu problēmas risināšanā.</p>
+            <p><?php echo t('specialist_recommendation'); ?></p>
         </div>
 
         <div class="flex gap-4">
             <a href="../pages/dashboard.php" class="button-primary flex-1">
-                Atrast speciālistu
+                <?php echo t('find_specialist'); ?>
             </a>
             <a href="tests.php" class="button-secondary flex-1">
-                Citi testi
+                <?php echo t('other_tests'); ?>
             </a>
         </div>
     </div>

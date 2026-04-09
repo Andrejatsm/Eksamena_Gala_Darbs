@@ -1,6 +1,7 @@
 <?php
 session_start();
-$pageTitle = "Psihologa profils";
+require_once __DIR__ . '/../includes/lang.php';
+$pageTitle = t('psychologist_profile');
 require '../includes/db.php';
 
 function normalize_psychologist_image_path(string $path): string {
@@ -89,7 +90,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
         
         <!-- Back button -->
         <a href="../pages/dashboard.php" class="inline-flex items-center text-primary hover:text-primaryHover mb-8 font-semibold">
-            <i class="fas fa-arrow-left mr-2"></i> Atpakaļ uz speciālistiem
+            <i class="fas fa-arrow-left mr-2"></i> <?php echo t('back_to_specialists'); ?>
         </a>
 
         <!-- Psychologist Header -->
@@ -117,24 +118,24 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                 <!-- Key Info -->
                 <div class="space-y-6">
                     <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Pieredze</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1"><?php echo t('experience'); ?></p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo $psychologist['experience_years']; ?> gadi</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Konsultācijas cena</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1"><?php echo t('consultation_price'); ?></p>
                         <p class="text-2xl font-bold text-primary">€50 / sesija</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Pieņemti pacienti</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1"><?php echo t('patients_accepted'); ?></p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo $psychologist['total_appointments'] ?? 0; ?></p>
                     </div>
                 </div>
 
                 <!-- Description -->
                 <div>
-                    <h3 class="font-bold text-gray-900 dark:text-white mb-2">Par mani</h3>
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-2"><?php echo t('about_me'); ?></h3>
                     <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                        <?php echo htmlspecialchars($psychologist['description'] ?? 'Nav apraksta'); ?>
+                        <?php echo htmlspecialchars($psychologist['description'] ?? t('no_description')); ?>
                     </p>
                 </div>
             </div>
@@ -143,7 +144,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
         <!-- Articles Section -->
         <?php if (count($articles) > 0): ?>
         <div class="mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Raksti un resursi</h2>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8"><?php echo t('articles_resources'); ?></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php foreach ($articles as $article): ?>
                 <div class="article-card-sm">
@@ -171,7 +172,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Available Slots -->
             <div class="lg:col-span-2">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pieejamie laiki</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6"><?php echo t('available_times'); ?></h2>
                 <?php if (count($available_slots) > 0): ?>
                 <div class="space-y-3">
                     <?php foreach ($available_slots as $slot): ?>
@@ -184,7 +185,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                                 </span>
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                <i class="fas fa-video mr-1"></i><?php echo ($slot['consultation_type'] ?? 'online') === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?>
+                                <i class="fas fa-video mr-1"></i><?php echo ($slot['consultation_type'] ?? 'online') === 'online' ? t('online') : t('in_person'); ?>
                             </p>
                             <?php if ($slot['note']): ?>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><?php echo htmlspecialchars($slot['note']); ?></p>
@@ -193,7 +194,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                         <button type="button" class="slot-select-btn px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap ml-4"
                             data-slot-id="<?php echo (int)$slot['id']; ?>"
                             data-slot-time="<?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($slot['starts_at']))); ?>">
-                            Izvēlēties
+                            <?php echo t('select'); ?>
                         </button>
                     </div>
                     <?php endforeach; ?>
@@ -201,7 +202,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
                 <?php else: ?>
                 <div class="bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/40 rounded-lg p-6 text-center">
                     <p class="text-[#095d7e] dark:text-[#ccecee] font-semibold">
-                        <i class="fas fa-calendar-times mr-2"></i>Pašlaik nav pieejamu laiku
+                        <i class="fas fa-calendar-times mr-2"></i><?php echo t('no_available_times'); ?>
                     </p>
                 </div>
                 <?php endif; ?>
@@ -209,33 +210,33 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
 
             <!-- Booking Summary -->
             <div class="booking-card">
-                <h3 class="text-2xl font-bold mb-6">Pierakstīties konsultācijai</h3>
+                <h3 class="text-2xl font-bold mb-6"><?php echo t('book_consultation'); ?></h3>
                 
                 <div class="space-y-4 mb-8 pb-8 border-b border-white/20">
                     <div>
-                        <p class="opacity-80 text-sm mb-1">Speciālists</p>
+                        <p class="opacity-80 text-sm mb-1"><?php echo t('specialist'); ?></p>
                         <p class="font-bold text-lg"><?php echo htmlspecialchars($psychologist['full_name']); ?></p>
                     </div>
                     <div>
-                        <p class="opacity-80 text-sm mb-1">Specializācija</p>
+                        <p class="opacity-80 text-sm mb-1"><?php echo t('specialization'); ?></p>
                         <p class="font-bold"><?php echo htmlspecialchars($psychologist['specialization']); ?></p>
                     </div>
                     <div>
-                        <p class="opacity-80 text-sm mb-1">Cena par konsultāciju</p>
+                        <p class="opacity-80 text-sm mb-1"><?php echo t('price_per_consultation'); ?></p>
                         <p class="text-3xl font-bold">€50</p>
                     </div>
                 </div>
 
                 <div id="bookingSummary" class="hidden mb-8">
                     <div>
-                        <p class="opacity-80 text-sm mb-1">Izvēlētais laiks</p>
+                        <p class="opacity-80 text-sm mb-1"><?php echo t('selected_time'); ?></p>
                         <p class="font-bold" id="selectedTime">-</p>
                     </div>
                 </div>
 
                 <button id="paymentBtn" type="button" data-psychologist-id="<?php echo (int)$psychologist_id; ?>"
                         class="w-full px-6 py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    Turpināt uz maksājumu
+                    <?php echo t('continue_to_payment'); ?>
                 </button>
                 
                 <p class="text-xs opacity-75 mt-4 text-center">

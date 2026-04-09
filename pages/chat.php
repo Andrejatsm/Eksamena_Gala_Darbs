@@ -1,6 +1,7 @@
 <?php
 session_start();
-$pageTitle = "Čats";
+require_once __DIR__ . '/../includes/lang.php';
+$pageTitle = t('chat_title');
 require '../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role'])) {
@@ -64,13 +65,13 @@ require '../includes/header.php';
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($chat_partner_name); ?></h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         <?php echo date('d.m.Y H:i', strtotime($appt['scheduled_at'])); ?> &middot;
-                        <?php echo $appt['consultation_type'] === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?>
+                        <?php echo $appt['consultation_type'] === 'online' ? t('online') : t('in_person'); ?>
                     </p>
                 </div>
             </div>
             <?php if ($appt['consultation_type'] === 'online' && $chat_active): ?>
                 <a href="video_call.php?appointment_id=<?php echo $appointment_id; ?>" class="button-primary px-4 py-2 text-sm">
-                    <i class="fas fa-video mr-2"></i>Videozvans
+                    <i class="fas fa-video mr-2"></i><?php echo t('video_call'); ?>
                 </a>
             <?php endif; ?>
         </div>
@@ -85,7 +86,7 @@ require '../includes/header.php';
         <!-- Message input -->
         <?php if ($chat_active): ?>
         <form id="chatForm" class="flex gap-2">
-            <input type="text" id="chatInput" maxlength="5000" placeholder="Rakstiet ziņojumu..." autocomplete="off"
+            <input type="text" id="chatInput" maxlength="5000" placeholder="<?php echo t('write_message'); ?>" autocomplete="off"
                 class="flex-1 input-control" required>
             <button type="submit" class="button-primary px-5 py-2.5 flex-shrink-0">
                 <i class="fas fa-paper-plane"></i>
@@ -93,11 +94,11 @@ require '../includes/header.php';
         </form>
         <?php elseif ($appt['status'] === 'approved'): ?>
         <div class="text-center text-amber-600 dark:text-amber-400 text-sm py-3">
-            <i class="fas fa-clock mr-1"></i> Psihologs vēl nav aktivizējis sesiju. Lūdzu, uzgaidiet.
+            <i class="fas fa-clock mr-1"></i> <?php echo t('session_not_activated'); ?>
         </div>
         <?php else: ?>
         <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-3">
-            Čats ir pieejams tikai apstiprinātiem pierakstiem.
+                        <?php echo t('chat_approved_only'); ?>
         </div>
         <?php endif; ?>
     </div>

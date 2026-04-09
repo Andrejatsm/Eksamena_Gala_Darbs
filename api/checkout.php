@@ -4,12 +4,13 @@ session_start();
 
 require __DIR__ . '/../vendor/autoload.php'; // Stripe
 require __DIR__ . '/../includes/db.php'; // Datubāzes pieslēgums
+require_once __DIR__ . '/../includes/lang.php';
 
 // Stripe API atslēga no vides mainīgā (.env fails).
 $stripeKey = getenv('STRIPE_SECRET_KEY') ?: '';
 if ($stripeKey === '') {
     http_response_code(500);
-    echo json_encode(['error' => 'Stripe nav konfigurēts.']);
+    echo json_encode(['error' => t('stripe_not_configured')]);
     exit();
 }
 \Stripe\Stripe::setApiKey($stripeKey);
@@ -41,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Pārbaudām vai slots jau ir rezervēts (cits lietotājs to nopircis)
             if ((int)$slot['is_booked'] === 1) {
                 http_response_code(409);
-                echo json_encode(['error' => 'Šis laika slots jau ir rezervēts.']);
+                echo json_encode(['error' => t('slot_already_booked')]);
                 exit();
             }
             // Pārbaudām vai šis pats lietotājs jau ir pierakstījies uz šo laiku
@@ -56,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $dupStmt->close();
             if ($dupExists) {
                 http_response_code(409);
-                echo json_encode(['error' => 'Jūs jau esat pierakstīts uz šo laiku.']);
+                echo json_encode(['error' => t('already_booked_time')]);
                 exit();
             }
             $_SESSION['booking_slot_id'] = $slot_id;
@@ -64,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['booking_consultation_type'] = $slot['consultation_type'] ?? 'online';
         } else {
             http_response_code(400);
-            echo json_encode(['error' => 'Nederīgs laika slots']);
+            echo json_encode(['error' => t('invalid_slot')]);
             exit();
         }
         $stmt->close();
@@ -89,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($psychologist_account_id <= 0) {
         http_response_code(400);
-        echo json_encode(['error' => 'Neizdevās noteikt psihologu šim maksājumam.']);
+        echo json_encode(['error' => t('psych_not_determined')]);
         exit();
     }
 
@@ -112,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!filter_var($success_base_url, FILTER_VALIDATE_URL) || !filter_var($cancel_url, FILTER_VALIDATE_URL)) {
         http_response_code(400);
         echo json_encode([
-            'error' => 'Nederīgs URL',
+            'error' => t('invalid_url'),
             'success_url' => $success_url,
             'cancel_url' => $cancel_url,
         ]);
@@ -128,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     'currency' => 'eur',
                     'unit_amount' => $cena_centos,
                     'product_data' => [
-                        'name' => 'Konsultācija: ' . $psihologs_vards,
+                        'name' => t('consultation_prefix') . $psihologs_vards,
                     ],
                 ],
                 'quantity' => 1,

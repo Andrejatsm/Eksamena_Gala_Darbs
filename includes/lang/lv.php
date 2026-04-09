@@ -347,6 +347,22 @@ return [
     'all_statuses'          => 'Visi statusi',
     'status_active'         => 'Aktīvi',
     'status_disabled'       => 'Atspējoti',
+    'article_categories'    => 'Rakstu kategorijas',
+    'psych_specializations' => 'Psihologu specializācijas',
+    'status_active_label'   => 'Aktīvs',
+    'status_inactive_label' => 'Neaktīvs',
+    'deactivate'            => 'Deaktivēt',
+    'categories_visible'    => 'Šīs kategorijas redzamas psihologiem raksta izveidē.',
+    'specs_visible'         => 'Šīs opcijas redzamas psihologa reģistrācijā.',
+    'new_category'          => 'Jauna kategorija',
+    'new_specialization'    => 'Jauna specializācija',
+    'add'                   => 'Pievienot',
+    'categories_empty'      => 'Kategoriju saraksts vēl ir tukšs.',
+    'specs_empty'           => 'Specializāciju saraksts vēl ir tukšs.',
+    'loading_accounts'      => 'Ielādē kontu sarakstu...',
+    'pending_articles_count'=> 'Gaidošie raksti',
+    'no_pending_articles'   => 'Nav rakstu, kas gaidītu apstiprinājuma.',
+    'publish'               => 'Publicēt',
     'tab_users'             => 'Lietotāji',
     'tab_articles'          => 'Raksti',
     'tab_tests'             => 'Testi',
@@ -382,6 +398,13 @@ return [
     'privacy_access'        => 'Piekļuves dati: Lietotājvārds un parole (tiek glabāta šifrētā veidā).',
     'privacy_gdpr'          => 'Mēs apstrādājam datus saskaņā ar GDPR (Vispārīgā datu aizsardzības regula) prasībām un Latvijas Republikas likumdošanu.',
     'privacy_https'         => 'Visi lietotāju dati tiek pārsūtīti, izmantojot drošu HTTPS protokolu.',
+    'privacy_hash'          => 'Paroles datubāzē tiek glabātas tikai šifrētā (hash) formātā, kas nozīmē, ka pat sistēmas administratori tās nevar redzēt.',
+    'privacy_no_share'      => 'Mēs neizpaužam jūsu datus trešajām pusēm bez jūsu piekrišanas, izņemot gadījumus, kad to pieprasa likums.',
+    'privacy_stripe'        => 'Visi maksājumi par psihologu konsultācijām tiek apstrādāti, izmantojot sertificētu maksājumu apstrādātāju Stripe.',
+    'privacy_no_card'       => 'Vietne "Saprasts" neievāc, neuzglabā un neapstrādā jūsu kredītkartes vai debetkartes datus savos serveros. Visa finanšu informācija tiek ievadīta tieši Stripe drošajā vidē.',
+    'privacy_confidential'  => 'Psiholoģiskā atbalsta būtība ir uzticēšanās. Konsultāciju saturs (video zvani, čata sarakste) ir stingri konfidenciāls starp klientu un speciālistu.',
+    'privacy_cookies'       => 'Mēs izmantojam sesijas sīkdatnes (Session Cookies), lai nodrošinātu jūsu autorizāciju sistēmā (ielogāšanos). Tās ir nepieciešamas sistēmas darbībai.',
+    'privacy_footer_note'   => 'Ja jums ir jautājumi par jūsu datu apstrādi vai vēlaties pieprasīt datu dzēšanu, lūdzu, sazinieties ar mums, izmantojot sadaļu "Kontakti" lapas apakšā.',
 
     // ── Checkout / Payment ───────────────────────
     'payment_title'         => 'Maksājums',
@@ -389,6 +412,10 @@ return [
 
     // ── Published Articles ───────────────────────
     'published_articles'    => 'Publicētie raksti',
+    'published_articles_subtitle' => 'Lasiet psihologu sagatavotos rakstus par mentālo veselību, attiecībām un ikdienas labsajūtu.',
+    'back_to_articles'      => 'Atpakaļ uz rakstiem',
+    'no_published_articles' => 'Pašlaik nav publicētu rakstu.',
+    'read_full_article'     => 'Lasīt pilno rakstu',
 
     // ── JS strings (exposed via data attributes) ─
     'js_fill_fields'        => 'Lūdzu, aizpildiet visus laukus.',
@@ -420,4 +447,49 @@ return [
     'month_apr' => 'Apr', 'month_may' => 'Mai', 'month_jun' => 'Jūn',
     'month_jul' => 'Jūl', 'month_aug' => 'Aug', 'month_sep' => 'Sep',
     'month_oct' => 'Okt', 'month_nov' => 'Nov', 'month_dec' => 'Dec',
+
+    // ── Test extras ───────────────────────────────
+    'result_score_text'     => 'Jūs ieguvāt %d punktus no %d iespējamiem.',
+    'test_error'            => 'Kļūda: %s',
+
+    // ── Checkout ─────────────────────────────────
+    'stripe_not_configured' => 'Stripe nav konfigurēts.',
+    'slot_already_booked'   => 'Šis laika slots jau ir rezervēts.',
+    'already_booked_time'   => 'Jūs jau esat pierakstīts uz šo laiku.',
+    'invalid_slot'          => 'Nederīgs laika slots',
+    'psych_not_determined'  => 'Neizdevās noteikt psihologu šim maksājumam.',
+    'invalid_url'           => 'Nederīgs URL',
+    'consultation_prefix'   => 'Konsultācija: ',
+
+    // ── Success page ─────────────────────────────
+    'payment_session_missing'=> 'Trūkst maksājuma sesijas identifikators.',
+    'payment_not_confirmed' => 'Maksājums nav apstiprināts.',
+    'session_mismatch'      => 'Maksājuma sesija neatbilst ielogotajam lietotājam.',
+    'psych_from_session_error'=> 'Neizdevās noteikt psihologu no maksājuma sesijas.',
+    'stripe_confirm_error'  => 'Neizdevās apstiprināt Stripe maksājumu: ',
+    'thanks'                => 'Paldies!',
+    'payment_confirm_failed'=> 'Neizdevās apstiprināt maksājumu',
+    'payment_received'      => 'Maksājums saņemts veiksmīgi.',
+    'booking_not_created'   => 'Pieraksts netika izveidots.',
+    'consultation_confirmed'=> 'Jūsu konsultācija ir apstiprināta:',
+    'time_label'            => 'Laiks:',
+    'duration_label'        => 'Ilgums:',
+    'duration_1h'           => '1 stunda',
+    'booking_registered'    => 'Jūsu pieteikums konsultācijai ir reģistrēts sistēmā.',
+    'email_sent_to'         => 'Apstiprinājums nosūtīts uz e-pastu: ',
+    'email_send_error'      => 'Neizdevās automātiski nosūtīt e-pastu. Lūdzu, pārbaudiet SMTP/PHP mail konfigurāciju.',
+    'payment_error_default' => 'Maksājuma apstiprinājums nav pieejams.',
+    'back_to_system'        => 'Atgriezties sistēmā',
+
+    // ── Email strings ────────────────────────────
+    'email_subject'              => 'Saprasts: Maksajuma apstiprinajums',
+    'email_consultation_online'  => 'Tiesaistes konsultacija',
+    'email_consultation_in_person'=> 'Klatienes konsultacija',
+    'email_time_tbd'             => 'Laiks tiks precizets',
+    'email_greeting'             => 'Sveiki, %s!',
+    'email_payment_ok'           => 'Maksajums ir sanemts veiksmigi.',
+    'email_type_line'            => 'Konsultacijas veids: %s',
+    'email_time_line'            => 'Konsultacijas laiks: %s',
+    'email_contact_line'         => 'Ja vajadzigas izmainas, ludzu sazinieties ar specialistu platforma.',
+    'email_regards'              => "Ar cienu,\nSaprasts komanda",
 ];

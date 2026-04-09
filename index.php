@@ -1,4 +1,5 @@
 ﻿<?php
+require_once __DIR__ . '/includes/lang.php';
 $pageTitle = t('site_title');
 $pageStyles = ['home.css'];
 require 'includes/db.php';

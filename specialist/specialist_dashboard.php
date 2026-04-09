@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../includes/lang.php';
 require '../includes/db.php';
 
 // Pārbaude vai ir psihologs
@@ -58,7 +59,7 @@ $stmt->bind_param("i", $psihologs_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$pageTitle = "Speciālista Panelis";
+$pageTitle = t('specialist_panel');
 require '../includes/header.php';
 ?>
 
@@ -69,15 +70,15 @@ require '../includes/header.php';
         <div class="mb-12">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                 <div>
-                    <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Sveiki, <?php echo htmlspecialchars($_SESSION['display_name'] ?? ''); ?>!</h1>
-                    <p class="text-xl text-gray-600 dark:text-gray-400 mt-2">Pārvaldiet savu praksi un klientus efektīvi</p>
+                    <h1 class="text-4xl font-bold text-gray-900 dark:text-white"><?php echo t('welcome', htmlspecialchars($_SESSION['display_name'] ?? '')); ?></h1>
+                    <p class="text-xl text-gray-600 dark:text-gray-400 mt-2"><?php echo t('manage_practice'); ?></p>
                 </div>
                 <div class="flex gap-3">
                     <a href="../pages/articles.php" class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primaryHover transition shadow-lg">
-                        <i class="fas fa-plus mr-2"></i>Rakstīt rakstu
+                        <i class="fas fa-plus mr-2"></i><?php echo t('write_article'); ?>
                     </a>
                     <a href="../pages/availability.php" class="px-6 py-3 bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition">
-                        <i class="fas fa-calendar-plus mr-2"></i>Pievienot laiku
+                        <i class="fas fa-calendar-plus mr-2"></i><?php echo t('add_time_btn'); ?>
                     </a>
                 </div>
             </div>
@@ -115,7 +116,7 @@ require '../includes/header.php';
             <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Kopā pieraksti</p>
+                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase"><?php echo t('total_appointments'); ?></p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['total_appointments']; ?></p>
                     </div>
                     <div class="stat-icon">
@@ -127,7 +128,7 @@ require '../includes/header.php';
             <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Gaida apstiprinājumu</p>
+                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase"><?php echo t('pending_count'); ?></p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['pending_appointments']; ?></p>
                     </div>
                     <div class="stat-icon">
@@ -139,7 +140,7 @@ require '../includes/header.php';
             <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Apstiprināti</p>
+                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase"><?php echo t('approved_count'); ?></p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['approved_appointments']; ?></p>
                     </div>
                     <div class="stat-icon">
@@ -151,7 +152,7 @@ require '../includes/header.php';
             <div class="stat-card">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">Raksti</p>
+                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase"><?php echo t('articles_count'); ?></p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1"><?php echo $stats['total_articles']; ?></p>
                     </div>
                     <div class="stat-icon">
@@ -164,19 +165,19 @@ require '../includes/header.php';
         <div>
             <div class="table-card">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-zinc-700">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Pierakstu pārvaldība</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">Pārskatiet un apstipriniet klientu pierakstus</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo t('appointment_management'); ?></h3>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1"><?php echo t('review_appointments'); ?></p>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                         <thead class="bg-gray-50 dark:bg-zinc-700/50">
                             <tr>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Klients</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Datums</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Veids</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Statuss</th>
-                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Darbības</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider"><?php echo t('client'); ?></th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider"><?php echo t('date'); ?></th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider"><?php echo t('type'); ?></th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider"><?php echo t('status'); ?></th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider"><?php echo t('actions'); ?></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
@@ -198,7 +199,7 @@ require '../includes/header.php';
                                             <?php echo date("d.m.Y H:i", strtotime($row['scheduled_at'] ?? $row['created_at'])); ?>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                            <?php echo $row['consultation_type'] === 'online' ? 'Tiešsaiste' : 'Klātienē'; ?>
+                                            <?php echo $row['consultation_type'] === 'online' ? t('online') : t('in_person'); ?>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <?php
@@ -209,10 +210,10 @@ require '../includes/header.php';
                                                 default => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
                                             };
                                             $statusLabel = match($row['status']) {
-                                                'pending' => 'Gaida',
-                                                'approved' => 'Apstiprināts',
-                                                'rejected' => 'Noraidīts',
-                                                'cancelled' => 'Atcelts',
+                                                'pending' => t('status_pending'),
+                                                'approved' => t('status_approved'),
+                                                'rejected' => t('status_rejected'),
+                                                'cancelled' => t('status_cancelled'),
                                                 default => ucfirst((string)$row['status']),
                                             };
                                             ?>
@@ -253,7 +254,7 @@ require '../includes/header.php';
                                                     <form method="POST" class="inline">
                                                         <input type="hidden" name="appoint_id" value="<?php echo (int)$row['id']; ?>">
                                                         <button type="submit" name="action" value="activate" class="px-3 py-1.5 bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-500/25 dark:hover:bg-amber-500/35 transition text-sm font-medium" title="Aktivizēt čatu un video">
-                                                            <i class="fas fa-bolt mr-1"></i> Aktivizēt
+                                                            <i class="fas fa-bolt mr-1"></i> <?php echo t('activate'); ?>
                                                         </button>
                                                     </form>
                                                     <?php endif; ?>
@@ -269,8 +270,8 @@ require '../includes/header.php';
                                     <td colspan="5" class="px-6 py-12 text-center">
                                         <div class="flex flex-col items-center">
                                             <i class="fas fa-calendar-times text-4xl text-gray-400 dark:text-gray-600 mb-4"></i>
-                                            <p class="text-gray-500 dark:text-gray-400 text-lg">Jums pagaidām nav pierakstu</p>
-                                            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Jauni pieraksti parādīsies šeit</p>
+                                            <p class="text-gray-500 dark:text-gray-400 text-lg"><?php echo t('no_appointments_yet'); ?></p>
+                                            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1"><?php echo t('new_appointments_here'); ?></p>
                                         </div>
                                     </td>
                                 </tr>

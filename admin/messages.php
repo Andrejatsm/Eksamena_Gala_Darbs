@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../includes/lang.php';
 require __DIR__ . '/../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -20,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_message_id']))
     $stmt = $conn->prepare('DELETE FROM contact_messages WHERE id = ?');
     $stmt->bind_param('i', $deleteId);
     if ($stmt->execute()) {
-        $_SESSION['admin_messages_success'] = 'Ziņojums dzēsts.';
+        $_SESSION['admin_messages_success'] = t('message_deleted');
     } else {
-        $_SESSION['admin_messages_error'] = 'Neizdevās dzēst ziņojumu.';
+        $_SESSION['admin_messages_error'] = t('message_delete_error');
     }
     $stmt->close();
 
@@ -85,15 +86,15 @@ while ($row = $result->fetch_assoc()) {
 }
 $listStmt->close();
 
-$pageTitle = 'Admina ziņojumi';
+$pageTitle = t('admin_messages');
 require __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="min-h-screen page-surface dark:bg-zinc-900">
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Saziņas ziņojumi</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-2">Šeit redzami visi ziņojumi no footer pogas “Sazināties”.</p>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo t('contact_messages'); ?></h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2"><?php echo t('contact_messages_desc'); ?></p>
         </div>
 
         <?php if ($flashSuccess !== ''): ?>
@@ -113,11 +114,11 @@ require __DIR__ . '/../includes/header.php';
                 <form method="GET" class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
                     <div class="w-full sm:max-w-xl">
                         <label class="sr-only" for="msgSearch">Meklēt</label>
-                        <input id="msgSearch" type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="input-control" placeholder="Meklēt pēc vārda, e-pasta, tēmas vai ziņas teksta...">
+                        <input id="msgSearch" type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="input-control" placeholder="<?php echo t('search_messages_placeholder'); ?>">
                     </div>
                     <div class="flex gap-2">
-                        <button type="submit" class="button-primary">Meklēt</button>
-                        <a href="messages.php" class="button-secondary">Notīrīt</a>
+                        <button type="submit" class="button-primary"><?php echo t('search'); ?></button>
+                        <a href="messages.php" class="button-secondary"><?php echo t('clear'); ?></a>
                     </div>
                 </form>
             </div>
@@ -126,16 +127,16 @@ require __DIR__ . '/../includes/header.php';
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                     <thead class="bg-gray-50 dark:bg-zinc-900/60">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Sūtītājs</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Ziņa</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Saņemts</th>
-                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Darbība</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"><?php echo t('sender'); ?></th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"><?php echo t('message'); ?></th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"><?php echo t('received'); ?></th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"><?php echo t('action'); ?></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                         <?php if (empty($messages)): ?>
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-600 dark:text-gray-400">Nav atrasts neviens ziņojums.</td>
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-600 dark:text-gray-400"><?php echo t('no_messages_found'); ?></td>
                         </tr>
                         <?php else: ?>
                         <?php foreach ($messages as $msg): ?>
@@ -152,7 +153,7 @@ require __DIR__ . '/../includes/header.php';
                                 <form method="POST" class="inline" data-confirm-delete="Vai tiešām dzēst šo ziņojumu?">
                                     <input type="hidden" name="delete_message_id" value="<?php echo (int)$msg['id']; ?>">
                                     <button type="submit" class="px-3 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] dark:bg-[#095d7e] dark:hover:bg-[#074e6b] transition text-sm font-semibold">
-                                        <i class="fas fa-trash mr-1"></i>Dzēst
+                                        <i class="fas fa-trash mr-1"></i><?php echo t('delete'); ?>
                                     </button>
                                 </form>
                             </td>
@@ -164,7 +165,7 @@ require __DIR__ . '/../includes/header.php';
             </div>
 
             <div class="px-4 py-4 border-t border-gray-200 dark:border-zinc-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <p class="text-sm text-gray-600 dark:text-gray-400">Atrasti <?php echo (int)$totalRows; ?> ziņojumi</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400"><?php echo t('messages_found', (int)$totalRows); ?></p>
                 <div class="flex flex-wrap items-center gap-2">
                     <?php
                     $buildPageUrl = static function (int $targetPage, string $searchValue): string {
@@ -179,15 +180,15 @@ require __DIR__ . '/../includes/header.php';
                     };
                     ?>
                     <?php if ($page <= 1): ?>
-                        <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+                        <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i><?php echo t('previous'); ?></span>
                     <?php else: ?>
-                        <a href="<?php echo htmlspecialchars($buildPageUrl(max(1, $page - 1), $search)); ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+                        <a href="<?php echo htmlspecialchars($buildPageUrl(max(1, $page - 1), $search)); ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i><?php echo t('previous'); ?></a>
                     <?php endif; ?>
-                    <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $totalPages; ?></span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400 px-2"><?php echo t('page_of', $page, $totalPages); ?></span>
                     <?php if ($page >= $totalPages): ?>
-                        <span class="pagination-btn-disabled">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+                        <span class="pagination-btn-disabled"><?php echo t('next'); ?><i class="fas fa-chevron-right ml-1"></i></span>
                     <?php else: ?>
-                        <a href="<?php echo htmlspecialchars($buildPageUrl(min($totalPages, $page + 1), $search)); ?>" class="pagination-btn">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+                        <a href="<?php echo htmlspecialchars($buildPageUrl(min($totalPages, $page + 1), $search)); ?>" class="pagination-btn"><?php echo t('next'); ?><i class="fas fa-chevron-right ml-1"></i></a>
                     <?php endif; ?>
                 </div>
             </div>
