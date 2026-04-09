@@ -2,6 +2,7 @@
 session_start();
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 
 \Stripe\Stripe::setApiKey('sk_test_51S7XQt3b1XY7a31CCbstqHPSNYoEFGXr5zcqQaaB5t25CYs3mFuYzOl1GB9jQ0Hzh7MJC8Gc1XneHycmqUYbqn5O00hVcvezVP');
 
@@ -10,17 +11,17 @@ function send_payment_confirmation_email(string $toEmail, string $userName, ?str
         return false;
     }
 
-    $subject = 'Saprasts: Maksajuma apstiprinajums';
-    $consultationLabel = $consultationType === 'online' ? 'Tiesaistes konsultacija' : 'Klatienes konsultacija';
-    $timeText = $scheduledAt ? date('d.m.Y H:i', strtotime($scheduledAt)) : 'Laiks tiks precizets';
-    $safeName = trim($userName) !== '' ? $userName : 'Klient';
+    $subject = t('email_subject');
+    $consultationLabel = $consultationType === 'online' ? t('email_consultation_online') : t('email_consultation_in_person');
+    $timeText = $scheduledAt ? date('d.m.Y H:i', strtotime($scheduledAt)) : t('email_time_tbd');
+    $safeName = trim($userName) !== '' ? $userName : 'Client';
 
-    $body = "Sveiki, {$safeName}!\n\n"
-        . "Maksajums ir sanemts veiksmigi.\n"
-        . "Konsultacijas veids: {$consultationLabel}\n"
-        . "Konsultacijas laiks: {$timeText}\n\n"
-        . "Ja vajadzigas izmainas, ludzu sazinieties ar specialistu platforma.\n\n"
-        . "Ar cienu,\nSaprasts komanda";
+    $body = t('email_greeting', $safeName) . "\n\n"
+        . t('email_payment_ok') . "\n"
+        . t('email_type_line', $consultationLabel) . "\n"
+        . t('email_time_line', $timeText) . "\n\n"
+        . t('email_contact_line') . "\n\n"
+        . t('email_regards');
 
     $headers = [
         'MIME-Version: 1.0',
@@ -69,14 +70,14 @@ $appointment_created = false;
 $email_sent = null;
 
 if ($stripe_session_id === '') {
-    $payment_error = 'Trūkst maksājuma sesijas identifikators.';
+    $payment_error = t('payment_session_missing');
 } else {
     try {
         $checkout_session = \Stripe\Checkout\Session::retrieve($stripe_session_id);
         $metadata = (array)($checkout_session->metadata ?? []);
 
         if (($checkout_session->payment_status ?? '') !== 'paid') {
-            throw new RuntimeException('Maksājums nav apstiprināts.');
+            throw new RuntimeException(t('payment_not_confirmed'));
         }
 
         $meta_user_id = (int)($metadata['user_account_id'] ?? 0);
@@ -95,7 +96,7 @@ if ($stripe_session_id === '') {
         }
 
         if (!$session_owner_verified) {
-            throw new RuntimeException('Maksājuma sesija neatbilst ielogotajam lietotājam.');
+            throw new RuntimeException(t('session_mismatch'));
         }
 
         $psihologs_id = (int)($metadata['psychologist_account_id'] ?? 0);
@@ -117,7 +118,7 @@ if ($stripe_session_id === '') {
         }
 
         if ($psihologs_id <= 0) {
-            throw new RuntimeException('Neizdevās noteikt psihologu no maksājuma sesijas.');
+            throw new RuntimeException(t('psych_from_session_error'));
         }
 
         $consultation_raw = (string)($metadata['consultation_type'] ?? ($_SESSION['booking_consultation_type'] ?? 'online'));
@@ -136,7 +137,7 @@ if ($stripe_session_id === '') {
         $payment_verified = true;
         unset($_SESSION['last_checkout_session_id']);
     } catch (Throwable $e) {
-        $payment_error = 'Neizdevās apstiprināt Stripe maksājumu: ' . $e->getMessage();
+        $payment_error = t('stripe_confirm_error') . $e->getMessage();
     }
 }
 
@@ -192,7 +193,7 @@ if ($payment_verified && $appointment_created && filter_var($user_email, FILTER_
     $email_sent = send_payment_confirmation_email($user_email, $user_name, $scheduled_at, $consultation_type);
 }
 
-$pageTitle = "Maksājums veiksmīgs";
+$pageTitle = t('payment_title');
 require __DIR__ . '/../includes/header.php'; 
 ?>
 
@@ -204,47 +205,47 @@ require __DIR__ . '/../includes/header.php';
         </div>
 
         <?php if ($payment_verified): ?>
-        <h1 class="text-3xl font-extrabold text-[#14967f] dark:text-[#e2fcd6] mb-2">Paldies!</h1>
+        <h1 class="text-3xl font-extrabold text-[#14967f] dark:text-[#e2fcd6] mb-2"><?php echo t('thanks'); ?></h1>
         <?php else: ?>
-        <h1 class="text-3xl font-extrabold text-[#095d7e] dark:text-[#ccecee] mb-2">Neizdevās apstiprināt maksājumu</h1>
+        <h1 class="text-3xl font-extrabold text-[#095d7e] dark:text-[#ccecee] mb-2"><?php echo t('payment_confirm_failed'); ?></h1>
         <?php endif; ?>
         
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            <?php echo $payment_verified ? 'Maksājums saņemts veiksmīgi.' : 'Pieraksts netika izveidots.'; ?>
+            <?php echo $payment_verified ? t('payment_received') : t('booking_not_created'); ?>
         </h3>
         
         <?php if ($scheduled_at): ?>
         <div class="bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/40 rounded-lg p-4 mb-6">
-            <h4 class="font-bold text-[#095d7e] dark:text-[#ccecee] mb-2">Jūsu konsultācija ir apstiprināta:</h4>
+            <h4 class="font-bold text-[#095d7e] dark:text-[#ccecee] mb-2"><?php echo t('consultation_confirmed'); ?></h4>
             <p class="text-[#095d7e] dark:text-[#ccecee]">
-                <strong>Laiks:</strong> <?php echo date('d.m.Y H:i', strtotime($scheduled_at)); ?><br>
-                <strong>Veids:</strong> <?php echo $consultation_type === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?><br>
-                <strong>Ilgums:</strong> 1 stunda
+                <strong><?php echo t('time_label'); ?></strong> <?php echo date('d.m.Y H:i', strtotime($scheduled_at)); ?><br>
+                <strong><?php echo t('type') . ':'; ?></strong> <?php echo $consultation_type === 'online' ? t('online') : t('in_person'); ?><br>
+                <strong><?php echo t('duration_label'); ?></strong> <?php echo t('duration_1h'); ?>
             </p>
         </div>
         <?php endif; ?>
         
         <?php if ($payment_verified): ?>
         <p class="text-gray-600 dark:text-gray-300 mb-8">
-            Jūsu pieteikums konsultācijai ir reģistrēts sistēmā.
+            <?php echo t('booking_registered'); ?>
         </p>
         <?php if ($appointment_created && $email_sent === true): ?>
         <p class="text-sm text-[#14967f] dark:text-[#e2fcd6] mb-6">
-            Apstiprinājums nosūtīts uz e-pastu: <strong><?php echo htmlspecialchars($user_email); ?></strong>.
+            <?php echo t('email_sent_to'); ?><strong><?php echo htmlspecialchars($user_email); ?></strong>.
         </p>
         <?php elseif ($appointment_created && $email_sent === false): ?>
         <p class="text-sm text-[#095d7e] dark:text-[#ccecee] mb-6">
-            Neizdevās automātiski nosūtīt e-pastu. Lūdzu, pārbaudiet SMTP/PHP mail konfigurāciju.
+            <?php echo t('email_send_error'); ?>
         </p>
         <?php endif; ?>
         <?php else: ?>
         <p class="text-[#095d7e] dark:text-[#ccecee] mb-8">
-            <?php echo htmlspecialchars($payment_error ?: 'Maksājuma apstiprinājums nav pieejams.'); ?>
+            <?php echo htmlspecialchars($payment_error ?: t('payment_error_default')); ?>
         </p>
         <?php endif; ?>
         
         <a href="../pages/dashboard.php" class="button-primary w-full">
-            Atgriezties sistēmā
+            <?php echo t('back_to_system'); ?>
         </a>
     </div>
 </div>

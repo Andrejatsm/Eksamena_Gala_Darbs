@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../includes/lang.php';
 require '../includes/db.php';
 
 // Check admin access BEFORE including header.php to prevent headers already sent error
@@ -8,7 +9,7 @@ if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 
     exit();
 }
 
-$pageTitle = "Admin panelis";
+$pageTitle = t('admin_panel');
 
 $success_msg = '';
 $error_msg = '';
@@ -98,25 +99,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt->close();
 
             $conn->commit();
-            $success_msg = "Psihologs apstiprināts sekmīgi!";
+            $success_msg = t('psych_approved');
         } catch (Throwable $e) {
             $conn->rollback();
-            $error_msg = "Neizdevās apstiprināt psihologa profilu.";
+            $error_msg = t('psych_approve_error');
         }
     } elseif ($action === 'reject_psych') {
         $stmt = $conn->prepare("UPDATE accounts SET status = 'rejected' WHERE id = ?");
         $stmt->bind_param("i", $account_id);
         if ($stmt->execute()) {
-            $success_msg = "Psihologu profils noraidīts.";
+            $success_msg = t('psych_rejected');
         }
         $stmt->close();
     } elseif ($action === 'delete_user') {
         $stmt = $conn->prepare("DELETE FROM accounts WHERE id = ? AND role = 'user'");
         $stmt->bind_param("i", $account_id);
         if ($stmt->execute() && $stmt->affected_rows > 0) {
-            $success_msg = "Lietotāja konts izdzēsts.";
+            $success_msg = t('account_deleted');
         } else {
-            $error_msg = "Neizdevās izdzēst lietotāja kontu.";
+            $error_msg = t('account_delete_error');
         }
         $stmt->close();
     } elseif ($action === 'delete_article') {
@@ -124,58 +125,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $stmt = $conn->prepare("DELETE FROM articles WHERE id = ? AND psychologist_account_id = ?");
         $stmt->bind_param("ii", $article_id, $account_id);
         if ($stmt->execute()) {
-            $success_msg = "Raksts izdzēsts sekmīgi.";
+            $success_msg = t('article_deleted_admin');
         }
     } elseif ($action === 'approve_article') {
         $article_id = intval($_POST['article_id'] ?? 0);
         $stmt = $conn->prepare("UPDATE articles SET is_published = 1 WHERE id = ?");
         $stmt->bind_param("i", $article_id);
         if ($stmt->execute()) {
-            $success_msg = "Raksts apstiprināts un publicēts.";
+            $success_msg = t('article_approved');
         }
     } elseif ($action === 'approve_test' || $action === 'publish_test') {
         $test_id = intval($_POST['test_id'] ?? 0);
         $stmt = $conn->prepare("UPDATE tests SET status = 'published' WHERE id = ?");
         $stmt->bind_param("i", $test_id);
         if ($stmt->execute()) {
-            $success_msg = "Tests publicēts sekmīgi.";
+            $success_msg = t('test_published');
         }
     } elseif ($action === 'decline_test') {
         $test_id = intval($_POST['test_id'] ?? 0);
         $stmt = $conn->prepare("UPDATE tests SET status = 'archived' WHERE id = ?");
         $stmt->bind_param("i", $test_id);
         if ($stmt->execute()) {
-            $success_msg = "Tests noraidīts.";
+            $success_msg = t('test_rejected');
         }
     } elseif ($action === 'add_article_category') {
         $name = trim($_POST['name'] ?? '');
         if ($name === '') {
-            $error_msg = "Kategorijas nosaukums nedrīkst būt tukšs.";
+            $error_msg = t('category_empty');
         } else {
             $stmt = $conn->prepare("INSERT INTO article_categories (name, is_active, sort_order) VALUES (?, 1, 999)");
             $stmt->bind_param("s", $name);
             if ($stmt->execute()) {
-                $success_msg = "Kategorija pievienota.";
+                $success_msg = t('category_added');
             } else {
                 $error_msg = ((int)$conn->errno === 1062)
-                    ? "Šāda kategorija jau eksistē."
-                    : "Neizdevās pievienot kategoriju.";
+                    ? t('category_exists')
+                    : t('category_add_error');
             }
             $stmt->close();
         }
     } elseif ($action === 'add_specialization') {
         $name = trim($_POST['name'] ?? '');
         if ($name === '') {
-            $error_msg = "Specializācijas nosaukums nedrīkst būt tukšs.";
+            $error_msg = t('spec_empty');
         } else {
             $stmt = $conn->prepare("INSERT INTO psychologist_specializations (name, is_active, sort_order) VALUES (?, 1, 999)");
             $stmt->bind_param("s", $name);
             if ($stmt->execute()) {
-                $success_msg = "Specializācija pievienota.";
+                $success_msg = t('spec_added');
             } else {
                 $error_msg = ((int)$conn->errno === 1062)
-                    ? "Šāda specializācija jau eksistē."
-                    : "Neizdevās pievienot specializāciju.";
+                    ? t('spec_exists')
+                    : t('spec_add_error');
             }
             $stmt->close();
         }
@@ -193,15 +194,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
 
         if ($table === null || $lookup_id <= 0) {
-            $error_msg = "Nederīgs ieraksts statusa maiņai.";
+            $error_msg = t('record_invalid');
         } else {
             $sql = "UPDATE {$table} SET is_active = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ii", $new_status, $lookup_id);
             if ($stmt->execute()) {
-                $success_msg = $new_status === 1 ? "Ieraksts aktivizēts." : "Ieraksts deaktivizēts.";
+                $success_msg = $new_status === 1 ? t('record_activated') : t('record_deactivated');
             } else {
-                $error_msg = "Neizdevās mainīt ieraksta statusu.";
+                $error_msg = t('record_status_error');
             }
             $stmt->close();
         }
@@ -283,8 +284,8 @@ require '../includes/header.php';
         <div class="mb-12">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                 <div>
-                    <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Sveiki, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'Administrators'); ?>!</h1>
-                    <p class="text-xl text-gray-600 dark:text-gray-400 mt-2">Pārvaldi platformu, speciālistus, rakstus un testus efektīvi</p>
+                    <h1 class="text-4xl font-bold text-gray-900 dark:text-white"><?php echo t('welcome', htmlspecialchars($_SESSION['display_name'] ?? 'Administrators')); ?></h1>
+                    <p class="text-xl text-gray-600 dark:text-gray-400 mt-2"><?php echo t('manage_platform'); ?></p>
                 </div>
             </div>
         </div>
@@ -293,8 +294,8 @@ require '../includes/header.php';
             <div class="xl:col-span-2 bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
                 <div class="flex items-start justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Platformas pārskats</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Ātrs skats uz lietotāju, psihologu un satura proporcijām.</p>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo t('platform_overview'); ?></h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><?php echo t('overview_subtitle'); ?></p>
                     </div>
                 </div>
                 <div class="h-80">
@@ -303,30 +304,30 @@ require '../includes/header.php';
             </div>
 
             <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-zinc-700">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Kopsavilkums</h2>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4"><?php echo t('summary'); ?></h2>
                 <div class="space-y-4 text-sm">
                     <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
-                        <span class="text-gray-600 dark:text-gray-400">Aktīvie lietotāji</span>
+                        <span class="text-gray-600 dark:text-gray-400"><?php echo t('active_users'); ?></span>
                         <strong class="text-gray-900 dark:text-white" data-stat-key="users"><?php echo $stats['total_users']; ?></strong>
                     </div>
                     <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
-                        <span class="text-gray-600 dark:text-gray-400">Aktīvie psihologi</span>
+                        <span class="text-gray-600 dark:text-gray-400"><?php echo t('active_psychologists'); ?></span>
                         <strong class="text-gray-900 dark:text-white" data-stat-key="psychologists"><?php echo $stats['total_psychologists']; ?></strong>
                     </div>
                     <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
-                        <span class="text-gray-600 dark:text-gray-400">Gaidošie psihologi</span>
+                        <span class="text-gray-600 dark:text-gray-400"><?php echo t('pending_psychologists'); ?></span>
                         <strong class="text-gray-900 dark:text-white" data-stat-key="pendingPsychologists"><?php echo $stats['pending_psychologists']; ?></strong>
                     </div>
                     <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
-                        <span class="text-gray-600 dark:text-gray-400">Aktīvie pieraksti</span>
+                        <span class="text-gray-600 dark:text-gray-400"><?php echo t('active_appointments'); ?></span>
                         <strong class="text-gray-900 dark:text-white" data-stat-key="appointments"><?php echo $stats['total_appointments']; ?></strong>
                     </div>
                     <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-700">
-                        <span class="text-gray-600 dark:text-gray-400">Gaidošie raksti</span>
+                        <span class="text-gray-600 dark:text-gray-400"><?php echo t('pending_articles'); ?></span>
                         <strong class="text-gray-900 dark:text-white" data-stat-key="articles"><?php echo $stats['pending_articles']; ?></strong>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Publicētie testi</span>
+                        <span class="text-gray-600 dark:text-gray-400"><?php echo t('published_tests'); ?></span>
                         <strong class="text-gray-900 dark:text-white" data-stat-key="tests"><?php echo $stats['published_tests']; ?></strong>
                     </div>
                 </div>
@@ -337,16 +338,16 @@ require '../includes/header.php';
         <div class="mb-8">
             <nav class="flex space-x-1 bg-gray-100 dark:bg-zinc-800 p-1 rounded-xl">
                 <button data-tab="psychologists" class="tab-btn flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-sm">
-                    <i class="fas fa-users mr-2"></i>Lietotāji
+                    <i class="fas fa-users mr-2"></i><?php echo t('tab_users'); ?>
                 </button>
                 <button data-tab="articles" class="tab-btn flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    <i class="fas fa-newspaper mr-2"></i>Raksti
+                    <i class="fas fa-newspaper mr-2"></i><?php echo t('tab_articles'); ?>
                 </button>
                 <button data-tab="tests" class="tab-btn flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    <i class="fas fa-clipboard-list mr-2"></i>Testi
+                    <i class="fas fa-clipboard-list mr-2"></i><?php echo t('tab_tests'); ?>
                 </button>
                 <button data-tab="lookups" class="tab-btn flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    <i class="fas fa-sliders mr-2"></i>Iestatījumi
+                    <i class="fas fa-sliders mr-2"></i><?php echo t('tab_settings'); ?>
                 </button>
             </nav>
         </div>
@@ -357,25 +358,25 @@ require '../includes/header.php';
                 <div class="bg-white dark:bg-zinc-800 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-zinc-700">
                     <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Kontu pārvaldība</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Vienots saraksts psihologiem un lietotājiem ar filtriem, meklēšanu un darbībām bez lapas pārlādes.</p>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo t('account_management'); ?></h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><?php echo t('account_mgmt_subtitle'); ?></p>
                         </div>
                         <div class="flex flex-col lg:flex-row gap-3 w-full xl:w-auto">
-                            <input type="text" id="adminAccountSearch" class="input-control min-w-[260px]" placeholder="Meklēt pēc vārda, e-pasta, specializācijas...">
+                            <input type="text" id="adminAccountSearch" class="input-control min-w-[260px]" placeholder="<?php echo t('search'); ?>...">
                             <select id="adminRoleFilter" class="input-control min-w-[180px]">
-                                <option value="all">Visas lomas</option>
-                                <option value="psychologist">Psihologi</option>
-                                <option value="user">Lietotāji</option>
+                                <option value="all"><?php echo t('all_roles'); ?></option>
+                                <option value="psychologist"><?php echo t('psychologists'); ?></option>
+                                <option value="user"><?php echo t('users'); ?></option>
                             </select>
                             <select id="adminStatusFilter" class="input-control min-w-[180px]">
-                                <option value="all">Visi statusi</option>
-                                <option value="pending">Gaida apstiprinājumu</option>
-                                <option value="active">Aktīvi</option>
-                                <option value="rejected">Noraidīti</option>
-                                <option value="disabled">Atspējoti</option>
+                                <option value="all"><?php echo t('all_statuses'); ?></option>
+                                <option value="pending"><?php echo t('status_pending'); ?></option>
+                                <option value="active"><?php echo t('status_active'); ?></option>
+                                <option value="rejected"><?php echo t('status_rejected'); ?></option>
+                                <option value="disabled"><?php echo t('status_disabled'); ?></option>
                             </select>
                             <button type="button" id="adminAccountsReset" class="px-4 py-2 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition font-semibold whitespace-nowrap">
-                                Notīrīt
+                                <?php echo t('clear'); ?>
                             </button>
                         </div>
                     </div>
@@ -384,7 +385,7 @@ require '../includes/header.php';
                 <div id="adminAccountsContainer" class="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
                     <div class="px-6 py-12 text-center text-gray-600 dark:text-gray-400">
                         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
-                        <p>Ielādē kontu sarakstu...</p>
+                        <p><?php echo t('loading_accounts'); ?></p>
                     </div>
                 </div>
             </div>
@@ -408,7 +409,7 @@ require '../includes/header.php';
                     ");
                     
                     if ($result->num_rows === 0) {
-                        echo '<p class="text-gray-600 dark:text-gray-400">Nav rakstu, kas gaidītu apstiprinājuma.</p>';
+                        echo '<p class="text-gray-600 dark:text-gray-400">' . t('no_articles_yet') . '</p>';
                     } else {
                         while ($article = $result->fetch_assoc()):
                         ?>
@@ -432,7 +433,7 @@ require '../includes/header.php';
                                         data-title="<?php echo htmlspecialchars($article['title']); ?>"
                                         data-author="<?php echo htmlspecialchars($article['full_name']); ?>"
                                         data-content="<?php echo htmlspecialchars($article['content']); ?>">
-                                    <i class="fas fa-book-open mr-2"></i>Lasīt pilnu rakstu
+                                    <i class="fas fa-book-open mr-2"></i><?php echo t('read_full_article'); ?>
                                 </button>
                             </div>
                         </div>
@@ -447,7 +448,7 @@ require '../includes/header.php';
         <!-- TESTS TAB -->
         <div id="tests" class="tab-content hidden">
             <div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Testu moderācija</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4"><?php echo t('test_moderation'); ?></h3>
                 
                 <div class="grid grid-cols-1 gap-4">
                     <?php
@@ -466,10 +467,10 @@ require '../includes/header.php';
                             default => 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
                         };
                         $status_label = match($test['status']) {
-                            'pending_review' => 'Gaida pārskatīšanu',
-                            'published' => 'Publicēts',
-                            'archived' => 'Noraidīts',
-                            'draft' => 'Melnraksts',
+                            'pending_review' => t('status_review'),
+                            'published' => t('status_published'),
+                            'archived' => t('status_rejected'),
+                            'draft' => t('status_draft'),
                             default => ucfirst(str_replace('_', ' ', $test['status']))
                         };
                     ?>
@@ -511,12 +512,12 @@ require '../includes/header.php';
         <div id="lookups" class="tab-content hidden">
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 border border-gray-200 dark:border-zinc-700">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Rakstu kategorijas</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">Šīs kategorijas redzamas psihologiem raksta izveidē.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1"><?php echo t('article_categories'); ?></h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-5"><?php echo t('categories_visible'); ?></p>
 
                     <form method="POST" class="flex gap-2 mb-5">
                         <input type="hidden" name="action" value="add_article_category">
-                        <input type="text" name="name" required maxlength="120" class="input-control" placeholder="Jauna kategorija">
+                        <input type="text" name="name" required maxlength="120" class="input-control" placeholder="<?php echo t('new_category'); ?>">
                         <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap">
                             <i class="fas fa-plus mr-1"></i>Pievienot
                         </button>
@@ -530,7 +531,7 @@ require '../includes/header.php';
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="px-2 py-1 text-xs rounded-full <?php echo ((int)$cat['is_active'] === 1) ? 'bg-primary/15 text-primary' : 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-300'; ?>">
-                                        <?php echo ((int)$cat['is_active'] === 1) ? 'Aktīvs' : 'Neaktīvs'; ?>
+                                        <?php echo ((int)$cat['is_active'] === 1) ? t('status_active_label') : t('status_inactive_label'); ?>
                                     </span>
                                     <form method="POST" class="inline">
                                         <input type="hidden" name="action" value="toggle_lookup_status">
@@ -538,7 +539,7 @@ require '../includes/header.php';
                                         <input type="hidden" name="lookup_id" value="<?php echo (int)$cat['id']; ?>">
                                         <input type="hidden" name="new_status" value="<?php echo ((int)$cat['is_active'] === 1) ? '0' : '1'; ?>">
                                         <button type="submit" class="px-3 py-1 text-xs rounded-lg <?php echo ((int)$cat['is_active'] === 1) ? 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] hover:bg-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee] dark:hover:bg-[#095d7e]/20' : 'bg-[#e2fcd6] text-[#14967f] hover:bg-[#ccecee] dark:bg-[#14967f]/20 dark:text-[#e2fcd6] dark:hover:bg-[#14967f]/30'; ?> transition">
-                                            <?php echo ((int)$cat['is_active'] === 1) ? 'Deaktivēt' : 'Aktivizēt'; ?>
+                                            <?php echo ((int)$cat['is_active'] === 1) ? t('deactivate') : t('activate'); ?>
                                         </button>
                                     </form>
                                 </div>
@@ -546,18 +547,18 @@ require '../includes/header.php';
                         <?php endforeach; ?>
 
                         <?php if (empty($lookup_categories)): ?>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Kategoriju saraksts vēl ir tukšs.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400"><?php echo t('categories_empty'); ?></p>
                         <?php endif; ?>
                     </div>
                 </div>
 
                 <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 border border-gray-200 dark:border-zinc-700">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Psihologu specializācijas</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">Šīs opcijas redzamas psihologa reģistrācijā.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1"><?php echo t('psych_specializations'); ?></h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-5"><?php echo t('specs_visible'); ?></p>
 
                     <form method="POST" class="flex gap-2 mb-5">
                         <input type="hidden" name="action" value="add_specialization">
-                        <input type="text" name="name" required maxlength="120" class="input-control" placeholder="Jauna specializācija">
+                        <input type="text" name="name" required maxlength="120" class="input-control" placeholder="<?php echo t('new_specialization'); ?>">
                         <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap">
                             <i class="fas fa-plus mr-1"></i>Pievienot
                         </button>
@@ -571,7 +572,7 @@ require '../includes/header.php';
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="px-2 py-1 text-xs rounded-full <?php echo ((int)$spec['is_active'] === 1) ? 'bg-primary/15 text-primary' : 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-300'; ?>">
-                                        <?php echo ((int)$spec['is_active'] === 1) ? 'Aktīvs' : 'Neaktīvs'; ?>
+                                        <?php echo ((int)$spec['is_active'] === 1) ? t('status_active_label') : t('status_inactive_label'); ?>
                                     </span>
                                     <form method="POST" class="inline">
                                         <input type="hidden" name="action" value="toggle_lookup_status">
@@ -579,7 +580,7 @@ require '../includes/header.php';
                                         <input type="hidden" name="lookup_id" value="<?php echo (int)$spec['id']; ?>">
                                         <input type="hidden" name="new_status" value="<?php echo ((int)$spec['is_active'] === 1) ? '0' : '1'; ?>">
                                         <button type="submit" class="px-3 py-1 text-xs rounded-lg <?php echo ((int)$spec['is_active'] === 1) ? 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] hover:bg-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee] dark:hover:bg-[#095d7e]/20' : 'bg-[#e2fcd6] text-[#14967f] hover:bg-[#ccecee] dark:bg-[#14967f]/20 dark:text-[#e2fcd6] dark:hover:bg-[#14967f]/30'; ?> transition">
-                                            <?php echo ((int)$spec['is_active'] === 1) ? 'Deaktivēt' : 'Aktivizēt'; ?>
+                                            <?php echo ((int)$spec['is_active'] === 1) ? t('deactivate') : t('activate'); ?>
                                         </button>
                                     </form>
                                 </div>
@@ -587,7 +588,7 @@ require '../includes/header.php';
                         <?php endforeach; ?>
 
                         <?php if (empty($lookup_specs)): ?>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Specializāciju saraksts vēl ir tukšs.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400"><?php echo t('specs_empty'); ?></p>
                         <?php endif; ?>
                     </div>
                 </div>

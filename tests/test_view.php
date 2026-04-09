@@ -1,6 +1,7 @@
 <?php
 session_start();
-$pageTitle = "Tests";
+require_once __DIR__ . '/../includes/lang.php';
+$pageTitle = t('tests_title');
 require '../includes/db.php';
 
 if (empty($_GET['test_id'])) {
@@ -12,7 +13,7 @@ $test_id = (int)$_GET['test_id'];
 $is_logged_in = isset($_SESSION['account_id'], $_SESSION['role']);
 $is_user_logged_in = isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user';
 $is_admin_or_psych_logged_in = $is_logged_in && in_array($_SESSION['role'], ['admin', 'psychologist'], true);
-$logged_in_role_label = ($_SESSION['role'] ?? '') === 'admin' ? 'administrators' : 'psihologs';
+$logged_in_role_label = ($_SESSION['role'] ?? '') === 'admin' ? t('role_admin') : t('role_psychologist');
 $account_id = $is_user_logged_in ? (int)$_SESSION['account_id'] : 0;
 
 // Get test
@@ -49,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_test'])) {
     }
 
     $max_score = count($questions) * 5;
-    $result_text = "Jūs ieguvāt " . $score . " punktus no " . $max_score . " iespējamiem.";
+    $result_text = t('result_score_text', $score, $max_score);
 
     if ($is_user_logged_in) {
         $conn->begin_transaction();
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_test'])) {
             exit();
         } catch(Exception $e) {
             $conn->rollback();
-            echo "Kļūda: " . $e->getMessage();
+            echo t('test_error', $e->getMessage());
         }
     } else {
         $_SESSION['guest_test_result'] = [
@@ -97,7 +98,7 @@ require '../includes/header.php';
 <div class="page-shell-narrow page-surface">
     <div class="page-heading">
         <a href="<?php echo $is_logged_in ? 'tests.php' : '../index.php#self-tests'; ?>" class="text-primary hover:text-primaryHover text-sm font-medium flex items-center gap-1 mb-4">
-            <i class="fas fa-arrow-left"></i> Atpakaļ uz testiem
+            <i class="fas fa-arrow-left"></i> <?php echo t('back_to_tests'); ?>
         </a>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($test['title']); ?></h1>
         <p class="text-gray-500 dark:text-gray-400 mt-2"><?php echo htmlspecialchars($test['description']); ?></p>
@@ -106,13 +107,13 @@ require '../includes/header.php';
     <?php if ($is_admin_or_psych_logged_in): ?>
     <div class="alert-info mb-6">
         <p class="text-sm font-semibold text-[#095d7e] dark:text-[#ccecee]">
-            <i class="fas fa-info-circle mr-2"></i>Tu esi ielogojies kā <?php echo htmlspecialchars($logged_in_role_label); ?>. Testu vari pildīt, bet rezultāts netiks saglabāts.
+            <i class="fas fa-info-circle mr-2"></i><?php echo t('test_warning_admin', $logged_in_role_label); ?>
         </p>
     </div>
     <?php elseif (!$is_user_logged_in): ?>
     <div class="alert-info mb-6">
         <p class="text-sm font-semibold text-[#095d7e] dark:text-[#ccecee]">
-            <i class="fas fa-info-circle mr-2"></i>Viesu režīms: testu vari pildīt bez ielogošanās, bet rezultāts tiks atvērts pēc ielogošanās/reģistrācijas.
+            <i class="fas fa-info-circle mr-2"></i><?php echo t('test_guest_warning'); ?>
         </p>
     </div>
     <?php endif; ?>
@@ -127,7 +128,10 @@ require '../includes/header.php';
                     <?php for($i = 1; $i <= 5; $i++): ?>
                         <label class="flex items-center">
                             <input type="radio" name="answer_<?php echo $q['id']; ?>" value="<?php echo $i; ?>" required class="text-primary focus:ring-primary">
-                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300"><?php echo $i . ' - ' . ($i == 1 ? 'Pilnīgi nepiekrītu' : ($i == 2 ? 'Daļēji nepiekrītu' : ($i == 3 ? 'Neitrāli' : ($i == 4 ? 'Daļēji piekrītu' : 'Pilnīgi piekrītu')))); ?></span>
+                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300"><?php
+                                $labels = [1 => t('strongly_disagree'), 2 => t('disagree'), 3 => t('neutral'), 4 => t('agree'), 5 => t('strongly_agree')];
+                                echo $i . ' - ' . $labels[$i];
+                            ?></span>
                         </label>
                     <?php endfor; ?>
                 </div>
@@ -136,10 +140,10 @@ require '../includes/header.php';
 
         <div class="pt-6 flex gap-3">
             <button type="submit" name="submit_test" class="button-primary flex-1">
-                Iesniedz atbildes
+                <?php echo t('submit_answers'); ?>
             </button>
             <a href="<?php echo $is_logged_in ? 'tests.php' : '../index.php#self-tests'; ?>" class="button-secondary flex-1">
-                Atcelt
+                <?php echo t('cancel'); ?>
             </a>
         </div>
     </form>

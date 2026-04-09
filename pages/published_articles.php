@@ -1,6 +1,7 @@
 <?php
 session_start();
-$pageTitle = 'Publicētie raksti';
+require_once __DIR__ . '/../includes/lang.php';
+$pageTitle = t('published_articles');
 $pageStyles = ['content.css'];
 require '../includes/db.php';
 require '../includes/header.php';
@@ -56,7 +57,7 @@ if ($article_id === 0) {
     <?php if ($article_id > 0): ?>
     <div class="page-heading">
         <a href="published_articles.php" class="button-link-icon mb-4">
-            <i class="fas fa-arrow-left"></i>Atpakaļ uz rakstiem
+            <i class="fas fa-arrow-left"></i><?php echo t('back_to_articles'); ?>
         </a>
         <h1 class="page-title"><?php echo htmlspecialchars($article['title']); ?></h1>
         <p class="page-subtitle">
@@ -76,8 +77,8 @@ if ($article_id === 0) {
     </article>
     <?php else: ?>
     <div class="page-heading">
-        <h1 class="page-title">Publicētie raksti</h1>
-        <p class="page-subtitle">Lasiet psihologu sagatavotos rakstus par mentālo veselību, attiecībām un ikdienas labsajūtu.</p>
+        <h1 class="page-title"><?php echo t('published_articles'); ?></h1>
+        <p class="page-subtitle"><?php echo t('published_articles_subtitle'); ?></p>
     </div>
 
     <div class="layout-grid-2 articles-grid">
@@ -95,13 +96,13 @@ if ($article_id === 0) {
             <p class="text-gray-600 dark:text-gray-400 mb-5 flex-grow">
                 <?php echo htmlspecialchars(strip_tags(mb_substr($article['content'], 0, 220))); ?>...
             </p>
-            <a href="published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary">Lasīt pilno rakstu</a>
+            <a href="published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary"><?php echo t('read_full_article'); ?></a>
         </article>
         <?php endforeach; ?>
 
         <?php if (empty($articles)): ?>
         <div class="empty-card col-span-full">
-            <p class="text-gray-500 dark:text-gray-400">Pašlaik nav publicētu rakstu.</p>
+            <p class="text-gray-500 dark:text-gray-400"><?php echo t('no_published_articles'); ?></p>
         </div>
         <?php endif; ?>
     </div>
@@ -111,15 +112,15 @@ if ($article_id === 0) {
         $buildUrl = fn($p) => '?' . http_build_query(array_filter(['page' => $p > 1 ? $p : null]));
         ?>
         <?php if ($page > 1): ?>
-            <a href="<?php echo htmlspecialchars($buildUrl($page - 1)); ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+            <a href="<?php echo htmlspecialchars($buildUrl($page - 1)); ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i><?php echo t('previous'); ?></a>
         <?php else: ?>
-            <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+            <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i><?php echo t('previous'); ?></span>
         <?php endif; ?>
-        <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
+        <span class="text-sm text-gray-600 dark:text-gray-400 px-2"><?php echo t('page_of', $page, $total_pages); ?></span>
         <?php if ($page < $total_pages): ?>
-            <a href="<?php echo htmlspecialchars($buildUrl($page + 1)); ?>" class="pagination-btn">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+            <a href="<?php echo htmlspecialchars($buildUrl($page + 1)); ?>" class="pagination-btn"><?php echo t('next'); ?><i class="fas fa-chevron-right ml-1"></i></a>
         <?php else: ?>
-            <span class="pagination-btn-disabled">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+            <span class="pagination-btn-disabled"><?php echo t('next'); ?><i class="fas fa-chevron-right ml-1"></i></span>
         <?php endif; ?>
     </div>
     <?php endif; ?>    <?php endif; ?>

@@ -90,21 +90,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                     <a href="<?php echo htmlspecialchars($pathPrefix); ?>index.php" class="text-2xl font-bold text-primary tracking-wide hover:opacity-80 transition">Saprasts</a>
                 </div>
 
-                <div class="hidden md:flex space-x-6 items-center">
-                    
-                    <!-- Language switcher -->
-                    <?php $otherLang = currentLang() === 'lv' ? 'en' : 'lv'; ?>
-                    <a href="?lang=<?php echo $otherLang; ?>" class="text-xs font-bold px-2 py-1 rounded border border-[#ccecee] dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-primary dark:hover:border-primary transition uppercase tracking-wider"><?php echo strtoupper($otherLang); ?></a>
-
-                    <div class="flex items-center mr-2">
-                        <label for="theme-toggle" class="flex items-center cursor-pointer relative">
-                            <input type="checkbox" id="theme-toggle" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                            <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                <i class="fas fa-moon"></i>
-                            </span>
-                        </label>
-                    </div>
+                <div class="hidden md:flex space-x-4 items-center">
 
                     <?php if ($is_logged_in): ?>
                         <!-- Notifikāciju zvaniņš -->
@@ -186,10 +172,27 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                         </a>
                                     </li>
                                 </ul>
+                                <!-- Dark mode & Language inside dropdown -->
+                                <?php $otherLang = currentLang() === 'lv' ? 'en' : 'lv'; ?>
+                                <div class="border-t border-[#ccecee] dark:border-zinc-700 px-4 py-3 flex items-center justify-between">
+                                    <label for="theme-toggle" class="flex items-center cursor-pointer relative">
+                                        <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                                        <span class="ml-2 text-sm text-gray-600 dark:text-gray-400"><i class="fas fa-moon"></i></span>
+                                    </label>
+                                    <a href="?lang=<?php echo $otherLang; ?>" class="text-xs font-bold px-2 py-1 rounded border border-[#ccecee] dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:text-primary hover:border-primary transition uppercase tracking-wider"><?php echo strtoupper($otherLang); ?></a>
+                                </div>
                             </div>
                         </div>
 
                     <?php else: ?>
+                        <?php $otherLang = currentLang() === 'lv' ? 'en' : 'lv'; ?>
+                        <a href="?lang=<?php echo $otherLang; ?>" class="text-xs font-bold px-2 py-1 rounded border border-[#ccecee] dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:text-primary hover:border-primary transition uppercase tracking-wider"><?php echo strtoupper($otherLang); ?></a>
+                        <label for="theme-toggle" class="flex items-center cursor-pointer relative">
+                            <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400"><i class="fas fa-moon"></i></span>
+                        </label>
                         <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/login.php" class="text-gray-700 dark:text-gray-300 hover:text-primary transition font-medium"><?php echo t('login'); ?></a>
                     <?php endif; ?>
                 </div>

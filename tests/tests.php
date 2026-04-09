@@ -1,6 +1,7 @@
 <?php
 session_start();
-$pageTitle = "Pašnovērtējuma testi";
+require_once __DIR__ . '/../includes/lang.php';
+$pageTitle = t('tests_title');
 require '../includes/db.php';
 
 require '../includes/header.php';
@@ -11,7 +12,7 @@ $account_id = isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['ro
 $show_attempts = $account_id > 0;
 $is_admin_or_psych_logged_in = isset($_SESSION['account_id'], $_SESSION['role'])
     && in_array($_SESSION['role'], ['admin', 'psychologist'], true);
-$logged_in_role_label = ($_SESSION['role'] ?? '') === 'admin' ? 'administrators' : 'psihologs';
+$logged_in_role_label = ($_SESSION['role'] ?? '') === 'admin' ? t('role_admin') : t('role_psychologist');
 
 // Get all published tests
 $sql = "SELECT id, title, description FROM tests WHERE status = 'published' ORDER BY created_at DESC";
@@ -40,17 +41,17 @@ if ($show_attempts) {
 
 <div class="page-shell-wide page-surface">
     <div class="page-heading">
-        <h1 class="page-title">Pašnovērtējuma testi</h1>
-        <p class="page-subtitle">Aizpildiet testus, lai labāk izprastu savu emocionālo stāvokli.</p>
+        <h1 class="page-title"><?php echo t('tests_title'); ?></h1>
+        <p class="page-subtitle"><?php echo t('tests_subtitle'); ?></p>
     </div>
 
     <?php if ($is_admin_or_psych_logged_in): ?>
     <div class="alert-warning">
-        Tu esi ielogojies kā <?php echo htmlspecialchars($logged_in_role_label); ?>. Testu vari pildīt, bet šī konta rezultāti netiks saglabāti.
+        <?php echo t('test_warning_admin', $logged_in_role_label); ?>
     </div>
     <?php elseif (!$show_attempts): ?>
     <div class="alert-info">
-        Testus vari pildīt bez ielogošanās. Lai saglabātu un apskatītu rezultātus, pēc testa beigām vajadzēs ielogoties vai reģistrēties.
+        <?php echo t('test_info_anonymous'); ?>
     </div>
     <?php endif; ?>
 
@@ -58,21 +59,21 @@ if ($show_attempts) {
         <?php foreach($tests as $test): ?>
             <div class="panel-card flex flex-col">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2"><?php echo htmlspecialchars($test['title']); ?></h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 flex-grow"><?php echo htmlspecialchars($test['description'] ?? 'Nav apraksta.'); ?></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 flex-grow"><?php echo htmlspecialchars($test['description'] ?? t('no_description')); ?></p>
                 
                 <?php if(isset($attempts[$test['id']])): ?>
                     <div class="alert-info mb-4 p-3">
                         <p class="text-sm font-medium text-[#095d7e] dark:text-[#ccecee]">
-                            <i class="fas fa-check-circle"></i> Jūs jau esat pabeidzis šo testu
+                            <i class="fas fa-check-circle"></i> <?php echo t('test_completed'); ?>
                         </p>
                         <p class="text-xs text-[#14967f] dark:text-[#e2fcd6] mt-1">
-                            Pēdējais rezultāts: <?php echo $attempts[$test['id']][0]['total_score']; ?> punkti
+                            <?php echo t('last_result', $attempts[$test['id']][0]['total_score']); ?>
                         </p>
                     </div>
                 <?php endif; ?>
                 
                 <a href="test_view.php?test_id=<?php echo $test['id']; ?>" class="button-primary text-sm">
-                    <?php echo isset($attempts[$test['id']]) ? 'Atkārtot testu' : 'Sākt testu'; ?>
+                    <?php echo isset($attempts[$test['id']]) ? t('retake_test') : t('start_test'); ?>
                 </a>
             </div>
         <?php endforeach; ?>
@@ -80,7 +81,7 @@ if ($show_attempts) {
 
     <?php if(empty($tests)): ?>
         <div class="empty-card">
-            <p class="text-gray-500 dark:text-gray-400">Pašlaik nav pieejamu testu.</p>
+            <p class="text-gray-500 dark:text-gray-400"><?php echo t('no_tests_available'); ?></p>
         </div>
     <?php endif; ?>
 </div>
