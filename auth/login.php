@@ -66,13 +66,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         if (!password_verify($parole, $row['password_hash'])) {
-            $error = "Nepareiza parole!";
+            $error = t('wrong_password');
         } elseif ($row['status'] !== 'active') {
             $error = match($row['status']) {
-                'pending' => 'Jūsu profils vēl nav apstiprināts.',
-                'rejected' => 'Jūsu pieteikums tika noraidīts.',
-                'disabled' => 'Profils ir deaktivizēts.',
-                default => 'Nav atļauts ielogoties.',
+                'pending' => t('profile_not_approved'),
+                'rejected' => t('application_rejected'),
+                'disabled' => t('profile_deactivated'),
+                default => t('login_not_allowed'),
             };
         } else {
             $accountId = (int)$row['id'];
@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     } else {
-        $error = "Lietotājs nav atrasts!";
+        $error = t('user_not_found');
     }
     $stmt->close();
 }
@@ -107,10 +107,10 @@ require '../includes/header.php';
     <div class="auth-card stack-md">
         <div>
             <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                Ielogoties
+                <?php echo t('login_title'); ?>
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                Vai <a href="register.php" class="font-medium text-primary hover:text-primaryHover transition">izveidot jaunu profilu</a>
+                <?php echo t('or'); ?> <a href="register.php" class="font-medium text-primary hover:text-primaryHover transition"><?php echo t('create_new_profile'); ?></a>
             </p>
         </div>
 
@@ -122,7 +122,7 @@ require '../includes/header.php';
 
         <?php if(isset($_GET['success'])): ?>
             <div class="bg-[#e2fcd6] dark:bg-[#14967f]/20 border border-[#14967f]/30 text-[#14967f] dark:text-[#e2fcd6] px-4 py-3 rounded-lg text-sm text-center">
-                Reģistrācija veiksmīga! Lūdzu, ielogojieties.
+                <?php echo t('registration_success'); ?>
             </div>
         <?php endif; ?>
 
@@ -132,17 +132,17 @@ require '../includes/header.php';
             <?php endif; ?>
             <div class="space-y-4">
                 <div>
-                    <label for="lietotajvards" class="field-label">Lietotājvārds</label>
-                    <input id="lietotajvards" name="lietotajvards" type="text" required class="input-control" placeholder="Ievadiet lietotājvārdu">
+                    <label for="lietotajvards" class="field-label"><?php echo t('username'); ?></label>
+                    <input id="lietotajvards" name="lietotajvards" type="text" required class="input-control" placeholder="<?php echo t('enter_username'); ?>">
                 </div>
                 <div>
-                    <label for="parole" class="field-label">Parole</label>
+                    <label for="parole" class="field-label"><?php echo t('password'); ?></label>
                     <input id="parole" name="parole" type="password" required class="input-control" placeholder="••••••••">
                 </div>
             </div>
 
             <button type="submit" class="button-primary w-full">
-                Ielogoties
+                <?php echo t('login'); ?>
             </button>
         </form>
     </div>

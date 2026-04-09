@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(() => {
                 psychologistsContainer.innerHTML = `
                     <div class="col-span-full text-center py-12 text-red-600 dark:text-red-400 bg-white dark:bg-zinc-800 rounded-xl border border-dashed border-red-200 dark:border-red-900/40">
-                        Neizdevās ielādēt psihologu sarakstu.
+                        ${(window.LANG || {}).load_error || 'Neizdevās ielādēt psihologu sarakstu.'}
                     </div>
                 `;
                 paginationControls.innerHTML = '';
@@ -76,9 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnTeal = 'pagination-btn';
         const btnTealDisabled = 'pagination-btn-disabled';
 
-        paginationHTML += `<button class="${prevDisabled ? btnTealDisabled : btnTeal}" data-page="${currentPage - 1}" ${prevDisabled ? 'disabled' : ''}><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</button>`;
-        paginationHTML += `<span class="px-2 py-1.5 text-sm text-gray-600 dark:text-gray-400">Lapa ${currentPage} no ${totalPages}</span>`;
-        paginationHTML += `<button class="${nextDisabled ? btnTealDisabled : btnTeal}" data-page="${currentPage + 1}" ${nextDisabled ? 'disabled' : ''}>Nākamā<i class="fas fa-chevron-right ml-1"></i></button>`;
+        var L = window.LANG || {};
+        paginationHTML += `<button class="${prevDisabled ? btnTealDisabled : btnTeal}" data-page="${currentPage - 1}" ${prevDisabled ? 'disabled' : ''}><i class="fas fa-chevron-left mr-1"></i>${L.previous || 'Iepriekšējā'}</button>`;
+        paginationHTML += `<span class="px-2 py-1.5 text-sm text-gray-600 dark:text-gray-400">${(L.page_of || 'Lapa %d no %d').replace('%d', currentPage).replace('%d', totalPages)}</span>`;
+        paginationHTML += `<button class="${nextDisabled ? btnTealDisabled : btnTeal}" data-page="${currentPage + 1}" ${nextDisabled ? 'disabled' : ''}>${L.next || 'Nākamā'}<i class="fas fa-chevron-right ml-1"></i></button>`;
         paginationControls.innerHTML = paginationHTML;
 
         paginationControls.querySelectorAll('button:not([disabled])').forEach((btn) => {

@@ -1,6 +1,6 @@
 <?php
 session_start();
-$pageTitle = "Mani pieraksti";
+$pageTitle = t('appointments_title');
 require '../includes/db.php';
 
 if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 'user') {
@@ -19,10 +19,10 @@ $status_classes = [
     'rescheduled' => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
 ];
 $status_labels = [
-    'pending' => 'Gaida apstiprinājumu',
-    'approved' => 'Apstiprināts',
-    'cancelled' => 'Atcelts',
-    'rescheduled' => 'Pārcelts',
+    'pending' => t('status_pending'),
+    'approved' => t('status_approved'),
+    'cancelled' => t('status_cancelled'),
+    'rescheduled' => t('status_rescheduled'),
 ];
 
 // Apstrādājam pieraksta atcelšanu vai pārcelšanu
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
                 $freeStmt->execute();
                 $freeStmt->close();
             }
-            $message = "Pieraksts atcelts.";
+            $message = t('appointment_cancelled');
 
             if ($isAjax) {
                 header('Content-Type: application/json');
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
             $stmt->bind_param("ssii", $new_time, $status, $appointment_id, $account_id);
             $stmt->execute();
             $stmt->close();
-            $message = "Pieraksts pārcelts uz " . date('d.m.Y H:i', strtotime($new_time)) . ".";
+            $message = t('appointment_rescheduled', date('d.m.Y H:i', strtotime($new_time)));
 
             if ($isAjax) {
                 header('Content-Type: application/json');
@@ -106,8 +106,8 @@ $stmt->close();
 
 <div class="page-shell page-surface">
     <div class="page-heading">
-        <h1 class="page-title">Mani pieraksti</h1>
-        <p class="page-subtitle">Skatiet un pārvaldiet savus pierakstus.</p>
+        <h1 class="page-title"><?php echo t('appointments_title'); ?></h1>
+        <p class="page-subtitle"><?php echo t('appointments_subtitle'); ?></p>
     </div>
 
     <?php if(!empty($message)): ?>
@@ -126,7 +126,7 @@ $stmt->close();
                             <i class="fas fa-calendar"></i> <?php echo date('d.m.Y H:i', strtotime($appt['scheduled_at'])); ?>
                         </p>
                         <p class="text-sm text-gray-600 dark:text-gray-400">
-                            <i class="fas fa-video"></i> <?php echo $appt['consultation_type'] === 'online' ? 'Tiešsaistē' : 'Klātienē'; ?>
+                            <i class="fas fa-video"></i> <?php echo $appt['consultation_type'] === 'online' ? t('online') : t('in_person'); ?>
                         </p>
                         <span class="inline-block mt-2 px-2 py-1 text-xs rounded-full <?php echo $status_classes[$appt['status']] ?? 'bg-gray-100 text-gray-800'; ?>">
                             <?php echo $status_labels[$appt['status']] ?? ucfirst((string)$appt['status']); ?>
@@ -136,17 +136,17 @@ $stmt->close();
                             <?php if(!empty($appt['chat_activated_at'])): ?>
                             <div class="flex gap-2 mt-3">
                                 <a href="chat.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition text-sm font-medium">
-                                    <i class="fas fa-comments"></i> Čats
+                                    <i class="fas fa-comments"></i> <?php echo t('chat'); ?>
                                 </a>
                                 <?php if($appt['consultation_type'] === 'online'): ?>
                                 <a href="video_call.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium">
-                                    <i class="fas fa-video"></i> Videozvans
+                                    <i class="fas fa-video"></i> <?php echo t('video_call'); ?>
                                 </a>
                                 <?php endif; ?>
                             </div>
                             <?php else: ?>
                             <p class="text-xs text-amber-600 dark:text-amber-400 mt-3">
-                                <i class="fas fa-clock mr-1"></i> Gaida aktivizāciju no psihologa
+                                <i class="fas fa-clock mr-1"></i> <?php echo t('waiting_activation'); ?>
                             </p>
                             <?php endif; ?>
                         <?php endif; ?>
@@ -155,12 +155,12 @@ $stmt->close();
                     <?php if($appt['status'] === 'pending' || $appt['status'] === 'approved'): ?>
                         <div class="flex gap-2">
                             <button type="button" class="open-reschedule-btn text-[#095d7e] hover:text-[#14967f] dark:text-[#ccecee] hover:bg-[#ccecee]/30 dark:hover:bg-[#095d7e]/20 px-3 py-2 rounded-lg transition text-sm" data-appointment-id="<?php echo (int)$appt['id']; ?>">
-                                <i class="fas fa-calendar-alt"></i> Pārcelt
+                                <i class="fas fa-calendar-alt"></i> <?php echo t('reschedule'); ?>
                             </button>
                             <form method="POST" class="inline">
                                 <input type="hidden" name="appointment_id" value="<?php echo $appt['id']; ?>">
                                 <button type="submit" name="action" value="cancel" class="cancel-appt-btn text-[#095d7e] hover:text-[#14967f] dark:text-[#ccecee] hover:bg-[#ccecee]/30 dark:hover:bg-[#095d7e]/20 px-3 py-2 rounded-lg transition text-sm">
-                                    <i class="fas fa-trash"></i> Atcelt
+                                    <i class="fas fa-trash"></i> <?php echo t('cancel'); ?>
                                 </button>
                             </form>
                         </div>
@@ -172,9 +172,9 @@ $stmt->close();
 
     <?php if(empty($appointments)): ?>
         <div class="empty-card">
-            <p class="text-gray-500 dark:text-gray-400 mb-4">Jums nav nekādu pierakstu.</p>
+            <p class="text-gray-500 dark:text-gray-400 mb-4"><?php echo t('no_appointments'); ?></p>
             <a href="dashboard.php" class="button-primary">
-                Atrast speciālistu
+                <?php echo t('find_specialist'); ?>
             </a>
         </div>
     <?php endif; ?>
@@ -182,15 +182,15 @@ $stmt->close();
     <?php if ($total_pages > 1): ?>
     <div class="flex justify-center items-center gap-2 mt-6">
         <?php if ($page > 1): ?>
-            <a href="?page=<?php echo $page - 1; ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+            <a href="?page=<?php echo $page - 1; ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i><?php echo t('previous'); ?></a>
         <?php else: ?>
-            <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+            <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i><?php echo t('previous'); ?></span>
         <?php endif; ?>
-        <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
+        <span class="text-sm text-gray-600 dark:text-gray-400 px-2"><?php echo t('page_of', $page, $total_pages); ?></span>
         <?php if ($page < $total_pages): ?>
-            <a href="?page=<?php echo $page + 1; ?>" class="pagination-btn">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+            <a href="?page=<?php echo $page + 1; ?>" class="pagination-btn"><?php echo t('next'); ?><i class="fas fa-chevron-right ml-1"></i></a>
         <?php else: ?>
-            <span class="pagination-btn-disabled">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+            <span class="pagination-btn-disabled"><?php echo t('next'); ?><i class="fas fa-chevron-right ml-1"></i></span>
         <?php endif; ?>
     </div>
     <?php endif; ?>
@@ -203,7 +203,7 @@ $stmt->close();
         <div class="relative bg-surface dark:bg-zinc-800 rounded-2xl border border-[#ccecee] dark:border-zinc-700 shadow-2xl w-full max-w-md">
             <div class="px-6 pt-6 pb-4">
                 <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Pārcelt pierakstu</h3>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo t('reschedule_title'); ?></h3>
                     <button id="closeRescheduleModalBtn" type="button" class="text-gray-400 hover:text-[#095d7e] dark:hover:text-[#ccecee] transition p-1">
                         <i class="fas fa-times fa-lg"></i>
                     </button>
@@ -212,12 +212,12 @@ $stmt->close();
                     <input type="hidden" name="appointment_id" id="modal_appointment_id">
                     <input type="hidden" name="action" value="reschedule">
                     <div class="mb-4">
-                        <label for="new_time" class="field-label">Jaunais laiks</label>
+                        <label for="new_time" class="field-label"><?php echo t('new_time'); ?></label>
                         <input type="datetime-local" name="new_time" id="new_time" required class="input-control mt-1">
                     </div>
                     <div class="border-t border-[#ccecee] dark:border-zinc-700 -mx-6 px-6 pt-4 mt-2 flex justify-end gap-2 bg-[#f1f9ff] dark:bg-zinc-700/30 rounded-b-2xl">
-                        <button type="button" id="closeRescheduleModalBtnFooter" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
-                        <button type="submit" class="button-primary px-6 py-2">Apstiprināt jauno laiku</button>
+                        <button type="button" id="closeRescheduleModalBtnFooter" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold"><?php echo t('cancel'); ?></button>
+                        <button type="submit" class="button-primary px-6 py-2"><?php echo t('confirm_new_time'); ?></button>
                     </div>
                 </form>
             </div>

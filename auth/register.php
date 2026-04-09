@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($role === 'psychologist') {
         if ($specialization === '') {
-            $error = "Lūdzu izvēlieties specializāciju.";
+            $error = t('choose_specialization_error');
         } else {
             $specCheck = $conn->prepare("SELECT id FROM psychologist_specializations WHERE name = ? AND is_active = 1 LIMIT 1");
             $specCheck->bind_param("s", $specialization);
@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $specCheck->close();
 
             if (!$specExists) {
-                $error = "Lūdzu izvēlieties derīgu specializāciju no saraksta.";
+                $error = t('choose_valid_spec');
             }
         }
     }
@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hasLower = preg_match('/[a-zāčēģīķļņšūž]/u', $rawPassword);
     $hasSymbol = preg_match('/[^A-Za-z0-9ĀČĒĢĪĶĻŅŠŪŽāčēģīķļņšūž]/u', $rawPassword);
     if (!$hasUpper || !$hasLower || !$hasSymbol) {
-        $error = "Parolei jāietver vismaz 1 lielais burts, 1 mazais burts un 1 simbols.";
+        $error = t('password_requirements');
     } else {
         $parole = password_hash($rawPassword, PASSWORD_DEFAULT);
     }
@@ -94,19 +94,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (move_uploaded_file($_FILES['certificate']['tmp_name'], $targetFilePath)) {
                     $certificate_path = $targetFilePath;
                 } else {
-                    $error = "Kļūda augšupielādējot sertifikātu.";
+                    $error = t('cert_upload_error');
                 }
             } else {
-                $error = "Atļautie sertifikāta formāti ir: PDF, JPG, JPEG, PNG.";
+                $error = t('cert_format_error');
             }
         } else {
-            $error = "Sertifikāta augšupielāde ir obligāta psihologiem.";
+            $error = t('cert_required');
         }
     }
 
     if ($role === 'psychologist' && empty($error) && isset($_FILES['profile_image']) && (int)($_FILES['profile_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
         if ((int)$_FILES['profile_image']['error'] !== UPLOAD_ERR_OK) {
-            $error = "Kļūda augšupielādējot profila attēlu.";
+            $error = t('image_upload_error');
         } else {
             $imageUploadDir = 'uploads/profile_images/';
             if (!is_dir($imageUploadDir)) {
@@ -122,9 +122,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $allowedImageTypes = ['jpg', 'jpeg', 'png', 'webp'];
 
             if (!in_array($imageExt, $allowedImageTypes, true)) {
-                $error = "Atļautie profila attēla formāti ir: JPG, JPEG, PNG, WEBP.";
+                $error = t('image_format_error');
             } elseif (!move_uploaded_file($_FILES['profile_image']['tmp_name'], $imageTargetPath)) {
-                $error = "Kļūda saglabājot profila attēlu.";
+                $error = t('image_save_error');
             } else {
                 $profile_image_path = $imageTargetPath;
             }
@@ -139,7 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $check->store_result();
 
         if ($check->num_rows > 0) {
-            $error = "Lietotājvārds vai E-pasts jau eksistē!";
+            $error = t('username_exists');
         } else {
             $conn->begin_transaction();
             try {
@@ -184,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 exit();
             } catch (Exception $e) {
                 $conn->rollback();
-                $error = "Kļūda sistēmā: " . $e->getMessage();
+                $error = t('system_error', $e->getMessage());
             }
         }
         $check->close();
@@ -198,10 +198,10 @@ require '../includes/header.php';
     <div class="auth-card stack-md">
         <div>
             <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                Izveidot profilu
+                <?php echo t('create_profile'); ?>
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                Jau ir profils? <a href="login.php<?php echo $next !== '' ? '?next=' . rawurlencode($next) : ''; ?>" class="font-medium text-primary hover:text-primaryHover transition">Ielogoties</a>
+                <?php echo t('already_have_profile'); ?> <a href="login.php<?php echo $next !== '' ? '?next=' . rawurlencode($next) : ''; ?>" class="font-medium text-primary hover:text-primaryHover transition"><?php echo t('login'); ?></a>
             </p>
         </div>
 
@@ -218,83 +218,83 @@ require '../includes/header.php';
             <div class="space-y-4">
                 <!-- Lomas izvēle -->
                 <div>
-                    <label class="field-label mb-2">Reģistrēties kā</label>
+                    <label class="field-label mb-2"><?php echo t('register_as'); ?></label>
                     <div class="space-y-2">
                         <label class="flex items-center">
                             <input type="radio" name="role" value="user" <?php echo $role === 'user' ? 'checked' : ''; ?> class="text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Lietotājs (meklēt speciālistus)</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300"><?php echo t('register_user'); ?></span>
                         </label>
                         <label class="flex items-center">
                             <input type="radio" name="role" value="psychologist" <?php echo $role === 'psychologist' ? 'checked' : ''; ?> class="text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Psihologs (piedāvāt pakalpojumus)</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300"><?php echo t('register_psychologist'); ?></span>
                         </label>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="field-label">Vārds</label>
+                        <label class="field-label"><?php echo t('first_name'); ?></label>
                         <input type="text" name="vards" required class="input-control">
                     </div>
                     <div>
-                        <label class="field-label">Uzvārds</label>
+                        <label class="field-label"><?php echo t('last_name'); ?></label>
                         <input type="text" name="uzvards" required class="input-control">
                     </div>
                 </div>
 
                 <div>
-                    <label class="field-label">Telefons</label>
+                    <label class="field-label"><?php echo t('phone'); ?></label>
                     <input type="text" name="telefons" required class="input-control" placeholder="+371...">
                 </div>
 
                 <div>
-                    <label class="field-label">E-pasts</label>
+                    <label class="field-label"><?php echo t('email'); ?></label>
                     <input type="email" name="epasts" required class="input-control">
                 </div>
 
                 <div>
-                    <label class="field-label">Lietotājvārds</label>
+                    <label class="field-label"><?php echo t('username'); ?></label>
                     <input type="text" name="lietotajvards" required class="input-control">
                 </div>
 
                 <div>
-                    <label class="field-label">Parole</label>
+                    <label class="field-label"><?php echo t('password'); ?></label>
                     <input type="password" name="parole" required class="input-control">
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Vismaz 1 lielais burts, 1 simbols.</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><?php echo t('password_hint'); ?></p>
                 </div>
 
                 <!-- Psihologa specifiskie lauki -->
                 <div id="psychologist-fields" class="<?php echo $role === 'psychologist' ? '' : 'hidden '; ?>space-y-4">
                     <div>
-                        <label class="field-label">Specializācija</label>
+                        <label class="field-label"><?php echo t('specialization'); ?></label>
                         <select name="specialization" class="select-control">
-                            <option value="">Izvēlieties specializāciju</option>
+                            <option value=""><?php echo t('choose_specialization'); ?></option>
                             <?php foreach ($specialization_options as $spec): ?>
                                 <option value="<?php echo htmlspecialchars($spec); ?>" <?php echo (($specialization ?? '') === $spec) ? 'selected' : ''; ?>><?php echo htmlspecialchars($spec); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div>
-                        <label class="field-label">Pieredze (gadi)</label>
+                        <label class="field-label"><?php echo t('experience_years'); ?></label>
                         <input type="number" name="experience_years" min="0" max="50" class="input-control">
                     </div>
                     <div>
-                        <label class="field-label">Apraksts</label>
-                        <textarea name="description" rows="3" class="textarea-control" placeholder="Īss apraksts par sevi un pakalpojumiem"></textarea>
+                        <label class="field-label"><?php echo t('description'); ?></label>
+                        <textarea name="description" rows="3" class="textarea-control" placeholder="<?php echo t('description_placeholder'); ?>"></textarea>
                     </div>
                     <div>
-                        <label class="field-label">Sertifikāts (obligāts: PDF, JPG, PNG)</label>
+                        <label class="field-label"><?php echo t('certificate_label'); ?></label>
                         <input type="file" name="certificate" accept=".pdf,.jpg,.jpeg,.png" class="input-control">
                     </div>
                     <div>
-                        <label class="field-label">Profila attēls (neobligāts: JPG, PNG, WEBP)</label>
+                        <label class="field-label"><?php echo t('profile_image_label'); ?></label>
                         <input type="file" name="profile_image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="input-control">
                     </div>
                 </div>
             </div>
 
             <button type="submit" class="button-primary w-full">
-                Reģistrēties
+                <?php echo t('register_btn'); ?>
             </button>
         </form>
     </div>
