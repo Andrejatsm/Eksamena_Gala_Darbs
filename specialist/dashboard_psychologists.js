@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevDisabled = currentPage <= 1;
         const nextDisabled = currentPage >= totalPages;
 
-        const btnTeal = 'px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition';
-        const btnTealDisabled = 'px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed';
+        const btnTeal = 'pagination-btn';
+        const btnTealDisabled = 'pagination-btn-disabled';
 
         paginationHTML += `<button class="${prevDisabled ? btnTealDisabled : btnTeal}" data-page="${currentPage - 1}" ${prevDisabled ? 'disabled' : ''}><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</button>`;
         paginationHTML += `<span class="px-2 py-1.5 text-sm text-gray-600 dark:text-gray-400">Lapa ${currentPage} no ${totalPages}</span>`;

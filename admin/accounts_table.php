@@ -108,12 +108,12 @@ $dataStmt->close();
 
 $makePageButton = static function (int $targetPage, string $label, bool $isActive = false, bool $disabled = false) use (&$page, &$totalPages): string {
     if ($label === 'Iepriekšējā') {
-        if ($disabled) return '<span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>';
-        return '<button type="button" data-admin-page="' . $targetPage . '" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</button>';
+        if ($disabled) return '<span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>';
+        return '<button type="button" data-admin-page="' . $targetPage . '" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</button>';
     }
     if ($label === 'Nākamā') {
-        if ($disabled) return '<span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>';
-        return '<button type="button" data-admin-page="' . $targetPage . '" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></button>';
+        if ($disabled) return '<span class="pagination-btn-disabled">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>';
+        return '<button type="button" data-admin-page="' . $targetPage . '" class="pagination-btn">Nākamā<i class="fas fa-chevron-right ml-1"></i></button>';
     }
     // page number — skip, replaced by "Lapa X no Y" text
     return '';

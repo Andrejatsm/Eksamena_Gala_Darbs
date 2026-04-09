@@ -260,17 +260,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Confirm before deleting an article in the modal
     document.querySelectorAll('.confirm-delete-article').forEach((btn) => {
-        btn.closest('form')?.addEventListener('submit', (e) => {
-            if (!window.confirm('Vai tiešām dzēst šo rakstu?')) e.preventDefault();
+        const form = btn.closest('form');
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+            if (form._confirmed) return;
+            e.preventDefault();
+            SaprastsConfirm.show('Vai tiešām dzēst šo rakstu?', { okText: 'Dzēst', type: 'danger' }).then((confirmed) => {
+                if (confirmed) {
+                    form._confirmed = true;
+                    form.submit();
+                }
+            });
         });
     });
 
     // Confirm for forms with data-confirm-delete attribute (e.g. decline_test)
     document.querySelectorAll('form[data-confirm-delete]').forEach((form) => {
         form.addEventListener('submit', (e) => {
-            if (!window.confirm(form.dataset.confirmDelete || 'Vai tiešām turpināt?')) {
-                e.preventDefault();
-            }
+            if (form._confirmed) return;
+            e.preventDefault();
+            SaprastsConfirm.show(form.dataset.confirmDelete || 'Vai tiešām turpināt?', { okText: 'Apstiprināt', type: 'danger' }).then((confirmed) => {
+                if (confirmed) {
+                    form._confirmed = true;
+                    form.submit();
+                }
+            });
         });
     });
 
@@ -348,7 +362,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const action = actionBtn.dataset.accountAction || '';
                 const accountId = actionBtn.dataset.accountId || '';
                 const confirmMessage = actionBtn.dataset.confirm || '';
-                if (confirmMessage && !window.confirm(confirmMessage)) {
+                if (confirmMessage) {
+                    SaprastsConfirm.show(confirmMessage, { okText: 'Apstiprināt', type: 'danger' }).then((confirmed) => {
+                        if (confirmed) runAccountAction(action, accountId);
+                    });
                     return;
                 }
                 runAccountAction(action, accountId);
@@ -363,14 +380,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (psychModalRejectBtn) {
         psychModalRejectBtn.addEventListener('click', () => {
-            if (!window.confirm('Vai tiešām noraidīt šo profilu?')) return;
-            runAccountAction('reject_psych', psychModalRejectBtn.dataset.accountId || '');
+            SaprastsConfirm.show('Vai tiešām noraidīt šo profilu?', { okText: 'Noraidīt', type: 'danger' }).then((confirmed) => {
+                if (confirmed) runAccountAction('reject_psych', psychModalRejectBtn.dataset.accountId || '');
+            });
         });
     }
     if (psychModalDeleteBtn) {
         psychModalDeleteBtn.addEventListener('click', () => {
-            if (!window.confirm('Vai tiešām dzēst šo psihologa kontu?')) return;
-            runAccountAction('delete_psych', psychModalDeleteBtn.dataset.accountId || '');
+            SaprastsConfirm.show('Vai tiešām dzēst šo psihologa kontu?', { okText: 'Dzēst', type: 'danger' }).then((confirmed) => {
+                if (confirmed) runAccountAction('delete_psych', psychModalDeleteBtn.dataset.accountId || '');
+            });
         });
     }
 

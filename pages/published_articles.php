@@ -82,7 +82,7 @@ if ($article_id === 0) {
 
     <div class="layout-grid-2 articles-grid">
         <?php foreach ($articles as $article): ?>
-        <article class="panel-card flex flex-col article-tile">
+        <article class="panel-card flex flex-col article-tile hover:shadow-lg transition">
             <?php if (!empty($article['category'])): ?>
             <p class="text-sm text-primary font-semibold mb-3"><?php echo htmlspecialchars($article['category']); ?></p>
             <?php endif; ?>
@@ -111,15 +111,15 @@ if ($article_id === 0) {
         $buildUrl = fn($p) => '?' . http_build_query(array_filter(['page' => $p > 1 ? $p : null]));
         ?>
         <?php if ($page > 1): ?>
-            <a href="<?php echo htmlspecialchars($buildUrl($page - 1)); ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+            <a href="<?php echo htmlspecialchars($buildUrl($page - 1)); ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
         <?php else: ?>
-            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+            <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
         <?php endif; ?>
         <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
         <?php if ($page < $total_pages): ?>
-            <a href="<?php echo htmlspecialchars($buildUrl($page + 1)); ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+            <a href="<?php echo htmlspecialchars($buildUrl($page + 1)); ?>" class="pagination-btn">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
         <?php else: ?>
-            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+            <span class="pagination-btn-disabled">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
         <?php endif; ?>
     </div>
     <?php endif; ?>    <?php endif; ?>

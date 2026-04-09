@@ -181,15 +181,15 @@ $stmt->close();
     <?php if ($total_pages > 1): ?>
     <div class="flex justify-center items-center gap-2 mt-6">
         <?php if ($page > 1): ?>
-            <a href="?page=<?php echo $page - 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
+            <a href="?page=<?php echo $page - 1; ?>" class="pagination-btn"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</a>
         <?php else: ?>
-            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
+            <span class="pagination-btn-disabled"><i class="fas fa-chevron-left mr-1"></i>Iepriekšējā</span>
         <?php endif; ?>
         <span class="text-sm text-gray-600 dark:text-gray-400 px-2">Lapa <?php echo $page; ?> no <?php echo $total_pages; ?></span>
         <?php if ($page < $total_pages): ?>
-            <a href="?page=<?php echo $page + 1; ?>" class="px-3 py-1.5 rounded-lg bg-[#ccecee] text-[#095d7e] hover:bg-[#b8dde0] font-semibold text-sm transition">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
+            <a href="?page=<?php echo $page + 1; ?>" class="pagination-btn">Nākamā<i class="fas fa-chevron-right ml-1"></i></a>
         <?php else: ?>
-            <span class="px-3 py-1.5 rounded-lg bg-[#ccecee]/40 text-[#095d7e]/40 font-semibold text-sm cursor-not-allowed">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
+            <span class="pagination-btn-disabled">Nākamā<i class="fas fa-chevron-right ml-1"></i></span>
         <?php endif; ?>
     </div>
     <?php endif; ?>

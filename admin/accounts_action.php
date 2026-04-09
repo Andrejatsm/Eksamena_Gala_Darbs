@@ -30,13 +30,21 @@ $buildStats = static function (mysqli $conn) use ($countQuery): array {
     ];
 };
 
-$hasLinkedAppointments = static function (mysqli $conn, int $accountId, string $role) use ($countQuery): bool {
+$hasLinkedAppointments = static function (mysqli $conn, int $accountId, string $role): bool {
     if ($role === 'psychologist') {
-        return $countQuery($conn, "SELECT COUNT(*) AS count FROM appointments WHERE psychologist_account_id = " . $accountId) > 0;
+        $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM appointments WHERE psychologist_account_id = ?");
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        return ((int)($result['count'] ?? 0)) > 0;
     }
 
     if ($role === 'user') {
-        return $countQuery($conn, "SELECT COUNT(*) AS count FROM appointments WHERE user_account_id = " . $accountId) > 0;
+        $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM appointments WHERE user_account_id = ?");
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        return ((int)($result['count'] ?? 0)) > 0;
     }
 
     return false;

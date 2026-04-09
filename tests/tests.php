@@ -56,7 +56,7 @@ if ($show_attempts) {
 
     <div class="layout-grid-2">
         <?php foreach($tests as $test): ?>
-            <div class="panel-card hover:shadow-lg transition flex flex-col">
+            <div class="panel-card flex flex-col">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2"><?php echo htmlspecialchars($test['title']); ?></h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 flex-grow"><?php echo htmlspecialchars($test['description'] ?? 'Nav apraksta.'); ?></p>
                 

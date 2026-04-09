@@ -5,8 +5,14 @@ session_start();
 require __DIR__ . '/../vendor/autoload.php'; // Stripe
 require __DIR__ . '/../includes/db.php'; // Datubāzes pieslēgums
 
-// Tavi Stripe atslēgas iestatījumi
-\Stripe\Stripe::setApiKey('sk_test_51S7XQt3b1XY7a31CCbstqHPSNYoEFGXr5zcqQaaB5t25CYs3mFuYzOl1GB9jQ0Hzh7MJC8Gc1XneHycmqUYbqn5O00hVcvezVP');
+// Stripe API atslēga no vides mainīgā (.env fails).
+$stripeKey = getenv('STRIPE_SECRET_KEY') ?: '';
+if ($stripeKey === '') {
+    http_response_code(500);
+    echo json_encode(['error' => 'Stripe nav konfigurēts.']);
+    exit();
+}
+\Stripe\Stripe::setApiKey($stripeKey);
 
 header('Content-Type: application/json');
 

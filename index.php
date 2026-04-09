@@ -35,7 +35,7 @@ if ($articles_result) {
 <main class="pt-0">
     
     <!-- Ievada sadaļa -->
-    <section class="relative min-h-screen flex items-center px-6 overflow-hidden bg-white dark:bg-zinc-900">
+    <section class="relative min-h-screen flex items-center px-6 overflow-hidden bg-surface dark:bg-zinc-900">
         <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent dark:from-primary/10"></div>
         
         <div class="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center relative z-10">
@@ -73,7 +73,7 @@ if ($articles_result) {
     </section>
 
     <!-- Kā tas darbojas sadaļa -->
-    <section id="how-it-works" class="py-24 bg-gray-50 dark:bg-zinc-800/50 px-6">
+    <section id="how-it-works" class="py-24 bg-white dark:bg-zinc-800/50 px-6">
         <div class="max-w-7xl mx-auto">
             <div class="mb-16">
                 <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Kā tas darbojas</h2>
@@ -82,7 +82,7 @@ if ($articles_result) {
             
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- 1. solis -->
-                <div class="p-8 bg-white dark:bg-zinc-800 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 dark:border-zinc-700">
+                <div class="p-8 bg-surface dark:bg-zinc-800 rounded-2xl border border-gray-100 dark:border-zinc-700">
                     <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
                         <i class="fas fa-search text-2xl text-primary"></i>
                     </div>
@@ -92,7 +92,7 @@ if ($articles_result) {
                 </div>
                 
                 <!-- 2. solis -->
-                <div class="p-8 bg-white dark:bg-zinc-800 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 dark:border-zinc-700">
+                <div class="p-8 bg-surface dark:bg-zinc-800 rounded-2xl border border-gray-100 dark:border-zinc-700">
                     <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
                         <i class="fas fa-calendar text-2xl text-primary"></i>
                     </div>
@@ -102,7 +102,7 @@ if ($articles_result) {
                 </div>
                 
                 <!-- 3. solis -->
-                <div class="p-8 bg-white dark:bg-zinc-800 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 dark:border-zinc-700">
+                <div class="p-8 bg-surface dark:bg-zinc-800 rounded-2xl border border-gray-100 dark:border-zinc-700">
                     <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
                         <i class="fas fa-comments text-2xl text-primary"></i>
                     </div>

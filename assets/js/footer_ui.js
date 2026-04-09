@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const message = messageEl.value.trim();
 
             if (!email || !message) {
-                alert('Lūdzu, aizpildiet visus laukus.');
+                SaprastsToast.warning('Lūdzu, aizpildiet visus laukus.');
                 return;
             }
 
@@ -57,13 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
             })
                 .then((res) => res.json())
                 .then((data) => {
-                    alert(data.message);
+                    SaprastsToast.success(data.message);
                     closeContactModal();
                     emailEl.value = '';
                     messageEl.value = '';
                 })
                 .catch(() => {
-                    alert('Kļūda sūtot ziņu.');
+                    SaprastsToast.error('Kļūda sūtot ziņu.');
                 });
         });
     }

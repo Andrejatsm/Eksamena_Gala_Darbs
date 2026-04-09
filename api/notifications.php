@@ -26,7 +26,7 @@ if ($role === 'user' || $role === 'psychologist') {
         ? "p.full_name AS partner_name"
         : "ap.user_name_snapshot AS partner_name";
 
-    $sql = "SELECT ap.id, ap.scheduled_at, ap.consultation_type, {$namePart}
+    $sql = "SELECT ap.id, ap.scheduled_at, ap.consultation_type, ap.chat_activated_at, {$namePart}
             FROM appointments ap {$joinPart}
             WHERE ap.{$col} = ? AND ap.status = 'approved'
               AND ap.scheduled_at BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 MINUTE)
@@ -43,6 +43,7 @@ if ($role === 'user' || $role === 'psychologist') {
             'scheduled_at' => $row['scheduled_at'],
             'consultation_type' => $row['consultation_type'],
             'partner_name' => $row['partner_name'] ?? '',
+            'chat_active' => !empty($row['chat_activated_at']),
         ];
     }
     $stmt->close();

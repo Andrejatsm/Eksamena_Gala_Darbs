@@ -4,14 +4,47 @@
     var prefix = document.body.dataset.pathPrefix || '';
     var apiUrl = prefix + 'api/notifications.php';
 
-    // Izveido atgādinājuma banneri zem navigācijas
-    var nav = document.querySelector('nav');
-    if (!nav) return;
+    // Zvaniņa elementi
+    var bellBtn = document.getElementById('notification-bell-btn');
+    var bellBadge = document.getElementById('notification-bell-badge');
+    var dropdown = document.getElementById('notification-dropdown');
+    var notifList = document.getElementById('notification-list');
+    var countLabel = document.getElementById('notification-count-label');
+    var mobileBellBtn = document.getElementById('mobile-notification-btn');
+    var mobileBadge = document.getElementById('mobile-notification-badge');
 
-    var banner = document.createElement('div');
-    banner.id = 'reminder-banner';
-    banner.className = 'hidden';
-    nav.insertAdjacentElement('afterend', banner);
+    // Ja nav zvaniņa (nav ielogojies) — izejam
+    if (!bellBtn) return;
+
+    var isDropdownOpen = false;
+
+    // Toggle dropdown
+    bellBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        isDropdownOpen = !isDropdownOpen;
+        dropdown.classList.toggle('hidden', !isDropdownOpen);
+    });
+
+    // Mobile bell opens dropdown too (shows toast summary)
+    if (mobileBellBtn) {
+        mobileBellBtn.addEventListener('click', function () {
+            // Scroll to top and open desktop dropdown if visible, else show toast
+            if (dropdown) {
+                isDropdownOpen = true;
+                dropdown.classList.remove('hidden');
+                var wrapper = document.getElementById('notification-bell-wrapper');
+                if (wrapper) wrapper.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+
+    // Aizvērt dropdown, klikšķinot ārpusē
+    document.addEventListener('click', function (e) {
+        if (isDropdownOpen && !dropdown.contains(e.target) && e.target !== bellBtn) {
+            isDropdownOpen = false;
+            dropdown.classList.add('hidden');
+        }
+    });
 
     function minutesUntil(scheduledAt) {
         return Math.round((new Date(scheduledAt.replace(' ', 'T')) - new Date()) / 60000);
@@ -20,42 +53,111 @@
     function formatTime(scheduledAt) {
         var diff = minutesUntil(scheduledAt);
         if (diff <= 0) return 'sākas tagad!';
-        if (diff === 1) return 'sākas pēc 1 minūtes';
-        return 'sākas pēc ' + diff + ' minūtēm';
+        if (diff === 1) return 'pēc 1 min';
+        return 'pēc ' + diff + ' min';
     }
 
-    function updateBanner(upcoming) {
-        if (!upcoming || upcoming.length === 0) {
-            banner.classList.add('hidden');
-            banner.innerHTML = '';
-            return;
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function updateBellBadge(total) {
+        if (total > 0) {
+            bellBadge.textContent = total > 99 ? '99+' : total;
+            bellBadge.classList.remove('hidden');
+            if (mobileBadge) {
+                mobileBadge.textContent = total > 99 ? '99+' : total;
+                mobileBadge.classList.remove('hidden');
+            }
+        } else {
+            bellBadge.classList.add('hidden');
+            if (mobileBadge) mobileBadge.classList.add('hidden');
+        }
+    }
+
+    function renderNotifications(upcoming, unreadTotal, byAppointment) {
+        var items = [];
+        var totalBadge = 0;
+
+        // Gaidāmās sesijas
+        if (upcoming && upcoming.length > 0) {
+            upcoming.forEach(function (appt) {
+                var timeStr = formatTime(appt.scheduled_at);
+                var icon = appt.consultation_type === 'online' ? 'fa-video text-blue-500' : 'fa-map-marker-alt text-green-500';
+                var name = appt.partner_name || '';
+                var chatLink = appt.chat_active ? ' <a href="' + prefix + 'pages/chat.php?appointment_id=' + appt.id + '" class="text-primary hover:underline text-xs ml-1">Čats</a>' : '';
+
+                items.push(
+                    '<div class="px-4 py-3 border-b border-gray-50 dark:border-zinc-700/50 hover:bg-gray-50 dark:hover:bg-zinc-700/30 transition">' +
+                        '<div class="flex items-start gap-3">' +
+                            '<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">' +
+                                '<i class="fas ' + icon + ' text-xs"></i>' +
+                            '</div>' +
+                            '<div class="flex-1 min-w-0">' +
+                                '<p class="text-sm font-medium text-gray-900 dark:text-white truncate">' + escapeHtml(name) + '</p>' +
+                                '<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' +
+                                    '<i class="fas fa-clock mr-1"></i>' + escapeHtml(timeStr) + chatLink +
+                                '</p>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>'
+                );
+                totalBadge++;
+            });
         }
 
-        var items = upcoming.map(function (appt) {
-            var timeStr = formatTime(appt.scheduled_at);
-            var icon = appt.consultation_type === 'online' ? 'fa-video' : 'fa-map-marker-alt';
-            var name = appt.partner_name || '';
-            return '<div class="flex items-center gap-2 text-sm">' +
-                '<i class="fas ' + icon + '"></i>' +
-                '<span><strong>' + escapeHtml(name) + '</strong> — ' + escapeHtml(timeStr) + '</span>' +
-                '</div>';
-        }).join('');
+        // Nelasītās čata ziņas
+        if (byAppointment) {
+            Object.keys(byAppointment).forEach(function (apptId) {
+                var count = byAppointment[apptId];
+                if (count > 0) {
+                    items.push(
+                        '<div class="px-4 py-3 border-b border-gray-50 dark:border-zinc-700/50 hover:bg-gray-50 dark:hover:bg-zinc-700/30 transition">' +
+                            '<div class="flex items-start gap-3">' +
+                                '<div class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0 mt-0.5">' +
+                                    '<i class="fas fa-comment-dots text-red-500 text-xs"></i>' +
+                                '</div>' +
+                                '<div class="flex-1 min-w-0">' +
+                                    '<p class="text-sm font-medium text-gray-900 dark:text-white">' + count + ' nelasīta(s) ziņa(s)</p>' +
+                                    '<a href="' + prefix + 'pages/chat.php?appointment_id=' + apptId + '" class="text-xs text-primary hover:underline">Atvērt čatu</a>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>'
+                    );
+                    totalBadge += count;
+                }
+            });
+        }
 
-        banner.innerHTML =
-            '<div class="bg-primary/10 dark:bg-primary/20 border-b border-primary/20 py-3 px-4">' +
-                '<div class="max-w-7xl mx-auto flex items-center gap-4 flex-wrap">' +
-                    '<div class="flex items-center gap-2 text-primary font-semibold text-sm">' +
-                        '<i class="fas fa-bell animate-pulse"></i> Atgādinājums' +
+        if (items.length === 0) {
+            notifList.innerHTML =
+                '<div class="px-4 py-8 text-center">' +
+                    '<div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center mx-auto mb-3">' +
+                        '<i class="fas fa-bell-slash text-gray-400 dark:text-gray-500"></i>' +
                     '</div>' +
-                    '<div class="flex flex-wrap gap-4 text-gray-700 dark:text-gray-300">' + items + '</div>' +
-                '</div>' +
-            '</div>';
-        banner.classList.remove('hidden');
+                    '<p class="text-sm text-gray-500 dark:text-gray-400">Nav jaunu paziņojumu</p>' +
+                '</div>';
+        } else {
+            notifList.innerHTML = items.join('');
+        }
+
+        if (countLabel) {
+            countLabel.textContent = items.length > 0 ? items.length + ' paziņojum(i)' : '';
+        }
+
+        updateBellBadge(totalBadge);
+
+        // Atjaunojam arī badge uz appointment saitēm lapā
+        updatePageBadges(unreadTotal, byAppointment);
     }
 
-    function updateUnreadBadges(unreadTotal, byAppointment) {
+    function updatePageBadges(unreadTotal, byAppointment) {
         // Pierakstu saite navigācijā
         document.querySelectorAll('a[href*="appointments.php"]').forEach(function (link) {
+            // Neaiztiekam zvaniņa dropdown saites
+            if (link.closest('#notification-dropdown')) return;
             var badge = link.querySelector('.unread-badge');
             if (unreadTotal > 0) {
                 if (!badge) {
@@ -70,38 +172,38 @@
         });
 
         // Katras konsultācijas čata poga
-        document.querySelectorAll('a[href*="chat.php?appointment_id="]').forEach(function (link) {
-            var match = link.href.match(/appointment_id=(\d+)/);
-            if (!match) return;
-            var apptId = parseInt(match[1], 10);
-            var count = byAppointment[apptId] || 0;
+        if (byAppointment) {
+            document.querySelectorAll('a[href*="chat.php?appointment_id="]').forEach(function (link) {
+                if (link.closest('#notification-dropdown')) return;
+                var match = link.href.match(/appointment_id=(\d+)/);
+                if (!match) return;
+                var apptId = parseInt(match[1], 10);
+                var count = byAppointment[apptId] || 0;
 
-            var badge = link.querySelector('.chat-unread-badge');
-            if (count > 0) {
-                if (!badge) {
-                    badge = document.createElement('span');
-                    badge.className = 'chat-unread-badge ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full';
-                    link.appendChild(badge);
+                var badge = link.querySelector('.chat-unread-badge');
+                if (count > 0) {
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'chat-unread-badge ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full';
+                        link.appendChild(badge);
+                    }
+                    badge.textContent = count;
+                } else if (badge) {
+                    badge.remove();
                 }
-                badge.textContent = count;
-            } else if (badge) {
-                badge.remove();
-            }
-        });
-    }
-
-    function escapeHtml(str) {
-        var div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
+            });
+        }
     }
 
     function fetchNotifications() {
         fetch(apiUrl, { credentials: 'same-origin' })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                updateBanner(data.upcoming || []);
-                updateUnreadBadges(data.unread_total || 0, data.unread_by_appointment || {});
+                renderNotifications(
+                    data.upcoming || [],
+                    data.unread_total || 0,
+                    data.unread_by_appointment || {}
+                );
             })
             .catch(function () { /* tīkla kļūda – ignorē */ });
     }

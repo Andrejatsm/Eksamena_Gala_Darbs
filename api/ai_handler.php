@@ -268,8 +268,8 @@ $preferredModeInstruction = $preferredMode === 'answer'
     ? 'Servera heuristika norāda, ka lietotāja ziņojums ir pietiekami konkrēts. Primāri atbildi režīmā [MODE:answer]. Uz [MODE:clarify] pārej tikai tad, ja ziņojums tiešām nav interpretējams bez papildu jautājuma.'
     : 'Servera heuristika norāda, ka lietotāja ziņojums ir pārāk īss, emocionāls vai neskaidrs. Primāri atbildi režīmā [MODE:clarify].';
 
-// Gemini API atslēga no vides mainīgā, ar esošo fallback savietojamībai.
-$apiKey = getenv('GEMINI_API_KEY') ?: 'your_api_key_here';
+// Gemini API atslēga no vides mainīgā (.env fails).
+$apiKey = getenv('GEMINI_API_KEY') ?: '';
 
 $pagesText = implode("\n", $relevantPages);
 $authLine = $isLoggedIn ? "Jā" : "Nē";
@@ -349,7 +349,7 @@ $data = [
     "generationConfig" => [
         "temperature" => 0.35,
         "topP" => 0.9,
-        "maxOutputTokens" => 700
+        "maxOutputTokens" => 2048
     ],
     "safetySettings" => [
         ["category" => "HARM_CATEGORY_HARASSMENT", "threshold" => "BLOCK_NONE"],
