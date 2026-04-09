@@ -11,42 +11,42 @@ require '../includes/header.php';
 
 <div class="flex-grow ui-container py-10">
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h3 class="text-3xl font-bold text-gray-900 dark:text-white">Pieejamie psihologi</h3>
+        <h3 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo t('available_psychologists'); ?></h3>
         <div class="relative w-full md:w-1/3">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <i class="fas fa-search text-gray-400"></i>
             </span>
-            <input type="text" id="searchInput" class="ui-input pl-10" placeholder="Meklēt speciālistu...">
+            <input type="text" id="searchInput" class="ui-input pl-10" placeholder="<?php echo t('search_specialist'); ?>">
         </div>
     </div>
 
     <div id="filterBar" class="flex flex-wrap gap-3 mb-8 items-end">
         <div class="w-full sm:w-auto">
-            <label for="filterSpecialization" class="field-label">Specializācija</label>
+            <label for="filterSpecialization" class="field-label"><?php echo t('specialization'); ?></label>
             <select id="filterSpecialization" class="select-control text-sm py-2">
-                <option value="">Visas</option>
+                <option value=""><?php echo t('all_specializations'); ?></option>
             </select>
         </div>
         <div class="w-full sm:w-auto">
-            <label for="filterConsultation" class="field-label">Konsultācijas veids</label>
+            <label for="filterConsultation" class="field-label"><?php echo t('consultation_type'); ?></label>
             <select id="filterConsultation" class="select-control text-sm py-2">
-                <option value="">Visi</option>
-                <option value="online">Tiešsaistē</option>
-                <option value="in_person">Klātienē</option>
+                <option value=""><?php echo t('all_types'); ?></option>
+                <option value="online"><?php echo t('online'); ?></option>
+                <option value="in_person"><?php echo t('in_person'); ?></option>
             </select>
         </div>
         <div class="w-full sm:w-auto">
-            <label for="filterExperience" class="field-label">Pieredze (min. gadi)</label>
+            <label for="filterExperience" class="field-label"><?php echo t('experience_min'); ?></label>
             <select id="filterExperience" class="select-control text-sm py-2">
-                <option value="">Jebkura</option>
-                <option value="1">1+ gads</option>
-                <option value="3">3+ gadi</option>
-                <option value="5">5+ gadi</option>
-                <option value="10">10+ gadi</option>
+                <option value=""><?php echo t('any_experience'); ?></option>
+                <option value="1"><?php echo t('years_1'); ?></option>
+                <option value="3"><?php echo t('years_3'); ?></option>
+                <option value="5"><?php echo t('years_5'); ?></option>
+                <option value="10"><?php echo t('years_10'); ?></option>
             </select>
         </div>
         <button type="button" id="clearFiltersBtn" class="button-secondary text-sm py-2 px-4 h-[2.5rem]">
-            <i class="fas fa-times mr-1"></i> Notīrīt
+            <i class="fas fa-times mr-1"></i> <?php echo t('clear'); ?>
         </button>
     </div>
     

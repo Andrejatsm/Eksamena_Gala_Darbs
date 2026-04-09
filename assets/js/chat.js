@@ -62,7 +62,7 @@
                     messagesContainer.innerHTML = `
                         <div class="chat-waiting-msg flex flex-col items-center justify-center h-full text-amber-500 dark:text-amber-400">
                             <i class="fas fa-clock text-4xl mb-3"></i>
-                            <p class="text-sm text-center">Psihologs vēl nav aktivizējis sesiju.</p>
+                            <p class="text-sm text-center">${(window.LANG || {}).session_not_active || 'Psihologs vēl nav aktivizējis sesiju.'}</p>
                         </div>`;
                 }
                 return;
@@ -94,7 +94,7 @@
                 messagesContainer.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
                         <i class="fas fa-comments text-4xl mb-3"></i>
-                        <p class="text-sm">Vēl nav ziņojumu. Sāciet sarunu!</p>
+                        <p class="text-sm">${(window.LANG || {}).no_messages || 'Vēl nav ziņojumu. Sāciet sarunu!'}</p>
                     </div>`;
             }
         } catch (e) {

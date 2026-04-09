@@ -7,6 +7,9 @@ $scriptDir = trim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''))
 $depth = $scriptDir === '' ? 0 : substr_count($scriptDir, '/') + 1;
 $pathPrefix = str_repeat('../', $depth);
 
+// Load translation system
+require_once __DIR__ . '/lang.php';
+
 // Nosakām, kurš ir ielogojies (vienota autorizācija: account_id + role)
 $user_name = '';
 $user_role = '';
@@ -18,23 +21,23 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     $user_name = $_SESSION['display_name'] ?? '';
     $role = $_SESSION['role'];
     if ($role === 'admin') {
-        $user_role = 'Administrators';
+        $user_role = t('role_admin');
         $dashboard_link = $pathPrefix . 'admin/admin_dashboard.php';
     } elseif ($role === 'psychologist') {
-        $user_role = 'Psihologs';
+        $user_role = t('role_psychologist');
         $dashboard_link = $pathPrefix . 'specialist/specialist_dashboard.php';
     } else {
-        $user_role = 'Lietotājs';
+        $user_role = t('role_user');
         $dashboard_link = $pathPrefix . 'pages/dashboard.php';
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="lv" class="scroll-smooth">
+<html lang="<?php echo currentLang(); ?>" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle ?? 'Saprasts - Psihologu pieteikumi'; ?></title>
+    <title><?php echo $pageTitle ?? t('site_title'); ?></title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -89,6 +92,10 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
 
                 <div class="hidden md:flex space-x-6 items-center">
                     
+                    <!-- Language switcher -->
+                    <?php $otherLang = currentLang() === 'lv' ? 'en' : 'lv'; ?>
+                    <a href="?lang=<?php echo $otherLang; ?>" class="text-xs font-bold px-2 py-1 rounded border border-[#ccecee] dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:text-primary hover:border-primary dark:hover:text-primary dark:hover:border-primary transition uppercase tracking-wider"><?php echo strtoupper($otherLang); ?></a>
+
                     <div class="flex items-center mr-2">
                         <label for="theme-toggle" class="flex items-center cursor-pointer relative">
                             <input type="checkbox" id="theme-toggle" class="sr-only peer">
@@ -102,18 +109,18 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                     <?php if ($is_logged_in): ?>
                         <!-- Notifikāciju zvaniņš -->
                         <div class="relative" id="notification-bell-wrapper">
-                            <button type="button" id="notification-bell-btn" class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800" aria-label="Paziņojumi">
+                            <button type="button" id="notification-bell-btn" class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800" aria-label="<?php echo t('notifications'); ?>">
                                 <i class="fas fa-bell text-lg"></i>
                                 <span id="notification-bell-badge" class="hidden absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full"></span>
                             </button>
                             <div id="notification-dropdown" class="hidden absolute right-0 z-50 mt-2 w-80 bg-white dark:bg-zinc-800 rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
                                 <div class="px-4 py-3 border-b border-gray-100 dark:border-zinc-700 flex items-center justify-between">
-                                    <h4 class="font-bold text-sm text-gray-900 dark:text-white">Paziņojumi</h4>
+                                    <h4 class="font-bold text-sm text-gray-900 dark:text-white"><?php echo t('notifications'); ?></h4>
                                     <span id="notification-count-label" class="text-xs text-gray-500 dark:text-gray-400"></span>
                                 </div>
                                 <div id="notification-list" class="max-h-80 overflow-y-auto">
                                     <div class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                                        Nav jaunu paziņojumu
+                                        <?php echo t('no_new_notifications'); ?>
                                     </div>
                                 </div>
                             </div>
@@ -121,7 +128,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
 
                         <div class="relative ml-3">
                             <button type="button" class="flex text-sm bg-gray-100 dark:bg-zinc-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-zinc-600 p-2 items-center gap-2 transition hover:bg-gray-200 dark:hover:bg-zinc-700" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown">
-                                <span class="sr-only">Atvērt lietotāja izvēlni</span>
+                                <span class="sr-only"><?php echo t('open_user_menu'); ?></span>
                                 <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
                                     <i class="fas fa-user"></i>
                                 </div>
@@ -139,14 +146,14 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                 <ul class="py-2" aria-labelledby="user-menu-button">
                                     <li>
                                         <a href="<?php echo $dashboard_link; ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-columns w-5 text-center mr-2"></i> Panelis
+                                            <i class="fas fa-columns w-5 text-center mr-2"></i> <?php echo t('panel'); ?>
                                         </a>
                                     </li>
 
                                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                                     <li>
                                         <a href="<?php echo htmlspecialchars($pathPrefix); ?>admin/messages.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-inbox w-5 text-center mr-2"></i> Ziņojumi
+                                            <i class="fas fa-inbox w-5 text-center mr-2"></i> <?php echo t('messages'); ?>
                                         </a>
                                     </li>
                                     <?php endif; ?>
@@ -154,7 +161,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
                                     <li>
                                         <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/user_profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-user-circle w-5 text-center mr-2"></i> Mans profils
+                                            <i class="fas fa-user-circle w-5 text-center mr-2"></i> <?php echo t('my_profile'); ?>
                                         </a>
                                     </li>
                                     <?php endif; ?>
@@ -163,19 +170,19 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                                     <!-- User-only features -->
                                     <li>
                                         <a href="<?php echo htmlspecialchars($pathPrefix); ?>tests/tests.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-clipboard-list w-5 text-center mr-2"></i> Pašnovērtējuma testi
+                                            <i class="fas fa-clipboard-list w-5 text-center mr-2"></i> <?php echo t('self_tests'); ?>
                                         </a>
                                     </li>
                                     <li>
                                         <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/appointments.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-700 dark:text-gray-200 transition">
-                                            <i class="fas fa-calendar-check w-5 text-center mr-2"></i> Mani pieraksti
+                                            <i class="fas fa-calendar-check w-5 text-center mr-2"></i> <?php echo t('my_appointments'); ?>
                                         </a>
                                     </li>
                                     <?php endif; ?>
                                     
                                     <li class="border-t border-gray-100 dark:border-zinc-700">
                                         <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/logout.php" class="block px-4 py-2 text-sm text-[#095d7e] hover:bg-[#f1f9ff] dark:hover:bg-zinc-700 dark:text-[#ccecee] transition">
-                                            <i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> Iziet
+                                            <i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> <?php echo t('logout'); ?>
                                         </a>
                                     </li>
                                 </ul>
@@ -183,7 +190,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                         </div>
 
                     <?php else: ?>
-                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/login.php" class="text-gray-700 dark:text-gray-300 hover:text-primary transition font-medium">Ielogoties</a>
+                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/login.php" class="text-gray-700 dark:text-gray-300 hover:text-primary transition font-medium"><?php echo t('login'); ?></a>
                     <?php endif; ?>
                 </div>
 
@@ -212,36 +219,43 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                             </div>
                         </div>
                     </div>
-                    <a href="<?php echo $dashboard_link; ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Panelis</a>
+                    <a href="<?php echo $dashboard_link; ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800"><?php echo t('panel'); ?></a>
                     <button type="button" id="mobile-notification-btn" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">
-                        <i class="fas fa-bell w-5 text-center mr-1"></i> Paziņojumi <span id="mobile-notification-badge" class="hidden ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full"></span>
+                        <i class="fas fa-bell w-5 text-center mr-1"></i> <?php echo t('notifications'); ?> <span id="mobile-notification-badge" class="hidden ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full"></span>
                     </button>
 
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>admin/messages.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ziņojumi</a>
+                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>admin/messages.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800"><?php echo t('messages'); ?></a>
                     <?php endif; ?>
                     
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] !== 'admin'): ?>
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mans profils</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/user_profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800"><?php echo t('my_profile'); ?></a>
                     <?php endif; ?>
                     
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>tests/tests.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Pašnovērtējuma testi</a>
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Mani pieraksti</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>tests/tests.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800"><?php echo t('self_tests'); ?></a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/appointments.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800"><?php echo t('my_appointments'); ?></a>
                       <?php endif; ?>
                     
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-[#095d7e] dark:text-[#ccecee] hover:bg-[#f1f9ff] dark:hover:bg-zinc-800">Iziet</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-[#095d7e] dark:text-[#ccecee] hover:bg-[#f1f9ff] dark:hover:bg-zinc-800"><?php echo t('logout'); ?></a>
                  <?php else: ?>
-                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/login.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800">Ielogoties</a>
+                          <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/login.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-50 dark:hover:bg-zinc-800"><?php echo t('login'); ?></a>
                  <?php endif; ?>
 
                  <div class="pt-4 border-t border-gray-200 dark:border-zinc-700 mt-2">
                     <div class="flex items-center justify-between px-3 py-2">
-                        <span class="text-gray-700 dark:text-gray-300 font-medium">Tumšais režīms</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium"><?php echo t('dark_mode'); ?></span>
                         <label for="theme-toggle-mobile" class="inline-flex relative items-center cursor-pointer">
                             <input type="checkbox" id="theme-toggle-mobile" class="sr-only peer">
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                         </label>
+                    </div>
+                    <div class="flex items-center justify-between px-3 py-2">
+                        <span class="text-gray-700 dark:text-gray-300 font-medium">Language</span>
+                        <div class="flex gap-1">
+                            <a href="?lang=lv" class="px-2 py-1 text-xs font-bold rounded border <?php echo currentLang() === 'lv' ? 'bg-primary text-white border-primary' : 'border-[#ccecee] dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:text-primary hover:border-primary'; ?> transition">LV</a>
+                            <a href="?lang=en" class="px-2 py-1 text-xs font-bold rounded border <?php echo currentLang() === 'en' ? 'bg-primary text-white border-primary' : 'border-[#ccecee] dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:text-primary hover:border-primary'; ?> transition">EN</a>
+                        </div>
                     </div>
                  </div>
             </div>

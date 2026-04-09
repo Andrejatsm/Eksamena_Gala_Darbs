@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const message = messageEl.value.trim();
 
             if (!email || !message) {
-                SaprastsToast.warning('Lūdzu, aizpildiet visus laukus.');
+                SaprastsToast.warning((window.LANG || {}).fill_fields || 'Lūdzu, aizpildiet visus laukus.');
                 return;
             }
 
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     messageEl.value = '';
                 })
                 .catch(() => {
-                    SaprastsToast.error('Kļūda sūtot ziņu.');
+                    SaprastsToast.error((window.LANG || {}).send_error || 'Kļūda sūtot ziņu.');
                 });
         });
     }
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const loadingDiv = document.createElement('div');
             loadingDiv.id = loadingId;
             loadingDiv.className = 'flex justify-start mt-2';
-            loadingDiv.innerHTML = '<div class="bg-white dark:bg-zinc-700 text-gray-500 rounded-2xl rounded-tl-sm py-3 px-4 max-w-[85%] text-sm shadow-sm border border-gray-100 dark:border-zinc-600"><i class="fas fa-circle-notch fa-spin"></i> Domā...</div>';
+            loadingDiv.innerHTML = '<div class="bg-white dark:bg-zinc-700 text-gray-500 rounded-2xl rounded-tl-sm py-3 px-4 max-w-[85%] text-sm shadow-sm border border-gray-100 dark:border-zinc-600"><i class="fas fa-circle-notch fa-spin"></i> ' + ((window.LANG || {}).thinking || 'Domā...') + '</div>';
             chatMessages.appendChild(loadingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -158,13 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loadingEl) {
                     loadingEl.remove();
                 }
-                appendMessage(data.error ? 'Kļūda: ' + data.error : data.reply);
+                appendMessage(data.error ? ((window.LANG || {}).error_prefix || 'Kļūda: ') + data.error : data.reply);
             } catch (err) {
                 const loadingEl = document.getElementById(loadingId);
                 if (loadingEl) {
                     loadingEl.remove();
                 }
-                appendMessage('Pievienojuma kļūda serverim.');
+                appendMessage((window.LANG || {}).server_error || 'Pievienojuma kļūda serverim.');
             }
 
             chatInput.disabled = false;

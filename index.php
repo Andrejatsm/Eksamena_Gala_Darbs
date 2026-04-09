@@ -1,11 +1,11 @@
 ﻿<?php
-$pageTitle = "Saprasts - Sākums";
+$pageTitle = t('site_title');
 $pageStyles = ['home.css'];
 require 'includes/db.php';
 require 'includes/header.php';
 
 $btn_link = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'pages/dashboard.php' : 'auth/login.php';
-$btn_text = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'Doties uz sistēmu' : 'Atrodi savu psihologu';
+$btn_text = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? t('go_to_system') : t('find_psychologist');
 
 $tests = [];
 $tests_result = $conn->query("SELECT id, title, description FROM tests WHERE status = 'published' ORDER BY created_at DESC LIMIT 3");
@@ -42,15 +42,15 @@ if ($articles_result) {
             <!-- Kreisās puses saturs -->
             <div>
                 <div class="inline-block px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary text-xs font-bold tracking-widest uppercase mb-6 border border-primary/30">
-                    Tava labsajūta ir prioritāte
+                    <?php echo t('hero_badge'); ?>
                 </div>
                 
                 <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-8">
-                    Atrodi mieru un <span class="text-primary italic">profesionālu</span> atbalstu
+                    <?php echo t('hero_heading'); ?>
                 </h1>
                 
                 <p class="text-lg text-gray-600 dark:text-gray-400 max-w-lg mb-10 leading-relaxed">
-                    Personalizēta pieeja jūsu garīgajai veselībai. Mūsu platforma savieno jūs ar sertificētiem psihologiem, lai palīdzētu pārvarēt dzīves izaicinājumus.
+                    <?php echo t('hero_text'); ?>
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4">
@@ -59,7 +59,7 @@ if ($articles_result) {
                         <i class="fas fa-arrow-right"></i>
                     </a>
                     <a href="#how-it-works" class="px-10 py-4 bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white rounded-full font-bold text-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors border border-gray-300 dark:border-zinc-700">
-                        Kā tas darbojas
+                        <?php echo t('how_it_works'); ?>
                     </a>
                 </div>
             </div>
@@ -76,8 +76,8 @@ if ($articles_result) {
     <section id="how-it-works" class="py-24 bg-white dark:bg-zinc-800/50 px-6">
         <div class="max-w-7xl mx-auto">
             <div class="mb-16">
-                <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Kā tas darbojas</h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">Trīs vienkārši soļi līdz labākai pašsajūtai un iekšējam mieram.</p>
+                <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4"><?php echo t('how_it_works'); ?></h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl"><?php echo t('three_steps_subtitle'); ?></p>
             </div>
             
             <div class="grid md:grid-cols-3 gap-8">
@@ -86,9 +86,9 @@ if ($articles_result) {
                     <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
                         <i class="fas fa-search text-2xl text-primary"></i>
                     </div>
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">1. Solis</span>
-                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Izvēlies speciālistu</h3>
-                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Pārlūko mūsu sertificēto speciālistu profilus un atrodi sev piemērotāko pēc specializācijas un pieredzes.</p>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">1. <?php echo t('step'); ?></span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white"><?php echo t('step1_title'); ?></h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo t('step1_text'); ?></p>
                 </div>
                 
                 <!-- 2. solis -->
@@ -96,9 +96,9 @@ if ($articles_result) {
                     <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
                         <i class="fas fa-calendar text-2xl text-primary"></i>
                     </div>
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">2. Solis</span>
-                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Piesaki vizīti</h3>
-                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Izvēlies ērtāko laiku tiešsaistes vai klātienes konsultācijai un rezervē to dažu sekunžu laikā.</p>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">2. <?php echo t('step'); ?></span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white"><?php echo t('step2_title'); ?></h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo t('step2_text'); ?></p>
                 </div>
                 
                 <!-- 3. solis -->
@@ -106,9 +106,9 @@ if ($articles_result) {
                     <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
                         <i class="fas fa-comments text-2xl text-primary"></i>
                     </div>
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">3. Solis</span>
-                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Sāc sarunu</h3>
-                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Saņem profesionālu atbalstu drošā un konfidenciālā vidē, lai kur tu atrastos.</p>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">3. <?php echo t('step'); ?></span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white"><?php echo t('step3_title'); ?></h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo t('step3_text'); ?></p>
                 </div>
             </div>
         </div>
@@ -118,9 +118,9 @@ if ($articles_result) {
     <section id="self-tests" class="home-section home-section-light">
         <div class="home-shell">
             <div class="home-section-head">
-                <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Pildi pašnovērtējuma testus jau tagad</h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl">Testus vari aizpildīt arī bez ielogošanās. Rezultātu varēsi atvērt pēc ielogošanās vai reģistrācijas.</p>
-                <a href="tests/tests.php" class="home-section-link home-section-link-button">Skatīt visus testus</a>
+                <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4"><?php echo t('tests_section_title'); ?></h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl"><?php echo t('tests_section_subtitle'); ?></p>
+                <a href="tests/tests.php" class="home-section-link home-section-link-button"><?php echo t('view_all_tests'); ?></a>
             </div>
 
             <div class="home-card-grid">
@@ -132,14 +132,14 @@ if ($articles_result) {
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2"><?php echo htmlspecialchars($test['title']); ?></h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm mb-5 flex-grow home-card-copy"><?php echo htmlspecialchars($test['description'] ?? 'Nav apraksta.'); ?></p>
                     <a href="tests/test_view.php?test_id=<?php echo (int)$test['id']; ?>" class="button-primary home-card-action">
-                        Pildīt testu
+                        <?php echo t('take_test'); ?>
                     </a>
                 </div>
                 <?php endforeach; ?>
 
                 <?php if (empty($tests)): ?>
                 <div class="empty-card col-span-full">
-                    <p class="text-gray-500 dark:text-gray-400">Pašlaik nav pieejamu testu.</p>
+                    <p class="text-gray-500 dark:text-gray-400"><?php echo t('no_tests_available'); ?></p>
                 </div>
                 <?php endif; ?>
             </div>
@@ -155,9 +155,9 @@ if ($articles_result) {
 
         <div class="home-shell relative z-10">
             <div class="home-section-head home-section-head-dark">
-                <h2 class="text-4xl font-bold text-white mb-3">Psihologu raksti un resursi</h2>
-                <p class="text-lg text-white/90 max-w-3xl">Ieskaties mūsu speciālistu publicētajos rakstos par labsajūtu, attiecībām un ikdienas mentālo veselību.</p>
-                <a href="pages/published_articles.php" class="home-link-light">Skatīt visus rakstus</a>
+                <h2 class="text-4xl font-bold text-white mb-3"><?php echo t('articles_section_title'); ?></h2>
+                <p class="text-lg text-white/90 max-w-3xl"><?php echo t('articles_section_subtitle'); ?></p>
+                <a href="pages/published_articles.php" class="home-link-light"><?php echo t('view_all_articles'); ?></a>
             </div>
 
             <div class="home-card-grid">
@@ -179,13 +179,13 @@ if ($articles_result) {
                     <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
                         <?php echo htmlspecialchars(mb_substr($article['content'], 0, 170)); ?>...
                     </p>
-                    <a href="pages/published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary home-card-action mt-6">Lasīt rakstu</a>
+                    <a href="pages/published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary home-card-action mt-6"><?php echo t('read_article'); ?></a>
                 </article>
                 <?php endforeach; ?>
 
                 <?php if (empty($articles)): ?>
                 <div class="empty-card col-span-full">
-                    <p class="text-gray-700 dark:text-gray-300">Pašlaik nav publicētu rakstu.</p>
+                    <p class="text-gray-700 dark:text-gray-300"><?php echo t('no_tests_available'); ?></p>
                 </div>
                 <?php endif; ?>
             </div>

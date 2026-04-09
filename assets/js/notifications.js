@@ -51,10 +51,11 @@
     }
 
     function formatTime(scheduledAt) {
+        var L = window.LANG || {};
         var diff = minutesUntil(scheduledAt);
-        if (diff <= 0) return 'sākas tagad!';
-        if (diff === 1) return 'pēc 1 min';
-        return 'pēc ' + diff + ' min';
+        if (diff <= 0) return L.starts_now || 'sākas tagad!';
+        if (diff === 1) return L.in_1_min || 'pēc 1 min';
+        return (L.in_x_min || 'pēc %d min').replace('%d', diff);
     }
 
     function escapeHtml(str) {
@@ -78,6 +79,7 @@
     }
 
     function renderNotifications(upcoming, unreadTotal, byAppointment) {
+        var L = window.LANG || {};
         var items = [];
         var totalBadge = 0;
 
@@ -87,7 +89,7 @@
                 var timeStr = formatTime(appt.scheduled_at);
                 var icon = appt.consultation_type === 'online' ? 'fa-video text-blue-500' : 'fa-map-marker-alt text-green-500';
                 var name = appt.partner_name || '';
-                var chatLink = appt.chat_active ? ' <a href="' + prefix + 'pages/chat.php?appointment_id=' + appt.id + '" class="text-primary hover:underline text-xs ml-1">Čats</a>' : '';
+                var chatLink = appt.chat_active ? ' <a href="' + prefix + 'pages/chat.php?appointment_id=' + appt.id + '" class="text-primary hover:underline text-xs ml-1">' + (L.open_chat || 'Čats') + '</a>' : '';
 
                 items.push(
                     '<div class="px-4 py-3 border-b border-gray-50 dark:border-zinc-700/50 hover:bg-gray-50 dark:hover:bg-zinc-700/30 transition">' +
@@ -120,8 +122,8 @@
                                     '<i class="fas fa-comment-dots text-red-500 text-xs"></i>' +
                                 '</div>' +
                                 '<div class="flex-1 min-w-0">' +
-                                    '<p class="text-sm font-medium text-gray-900 dark:text-white">' + count + ' nelasīta(s) ziņa(s)</p>' +
-                                    '<a href="' + prefix + 'pages/chat.php?appointment_id=' + apptId + '" class="text-xs text-primary hover:underline">Atvērt čatu</a>' +
+                                    '<p class="text-sm font-medium text-gray-900 dark:text-white">' + count + ' ' + (L.unread_messages || 'nelasīta(s) ziņa(s)') + '</p>' +
+                                    '<a href="' + prefix + 'pages/chat.php?appointment_id=' + apptId + '" class="text-xs text-primary hover:underline">' + (L.open_chat || 'Atvērt čatu') + '</a>' +
                                 '</div>' +
                             '</div>' +
                         '</div>'
@@ -137,14 +139,14 @@
                     '<div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center mx-auto mb-3">' +
                         '<i class="fas fa-bell-slash text-gray-400 dark:text-gray-500"></i>' +
                     '</div>' +
-                    '<p class="text-sm text-gray-500 dark:text-gray-400">Nav jaunu paziņojumu</p>' +
+                    '<p class="text-sm text-gray-500 dark:text-gray-400">' + (L.no_new_notifications || 'Nav jaunu paziņojumu') + '</p>' +
                 '</div>';
         } else {
             notifList.innerHTML = items.join('');
         }
 
         if (countLabel) {
-            countLabel.textContent = items.length > 0 ? items.length + ' paziņojum(i)' : '';
+            countLabel.textContent = items.length > 0 ? (L.notifications_count || '%d paziņojum(i)').replace('%d', items.length) : '';
         }
 
         updateBellBadge(totalBadge);
