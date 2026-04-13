@@ -1,0 +1,46 @@
+.env
+.env.*
+!.env.example
+includes/.saprasts_key
+vendor/
+
+# Local editor/deploy configs that may contain credentials
+.vscode/sftp.json
+.vscode/ftp-sync.json
+
+# Secrets and private keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Local credentials and secret dumps
+*.secret
+*.secrets
+*.credentials
+
+# Logs and debug output
+*.log
+error_log
+php_errorlog
+
+# Runtime user-generated files (potentially sensitive)
+uploads/profile_images/*
+uploads/certificates/*
+!uploads/profile_images/.gitkeep
+!uploads/certificates/.gitkeep
+
+# Database exports/backups (can contain real user data)
+database/*backup*.sql
+database/*dump*.sql
+database/*export*.sql
+database/*.sql.gz
+database/*.dump
+database/*.bak
+database/local/
+database/tmp/
