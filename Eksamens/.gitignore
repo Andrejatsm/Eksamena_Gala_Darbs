@@ -7,6 +7,26 @@ vendor/
 # Local editor/deploy configs that may contain credentials
 .vscode/sftp.json
 .vscode/ftp-sync.json
+.vscode/*.json
+.vscode/settings.json
+
+# SFTP/FTP connection managers and sync configs
+sftp-config.json
+*.sftp.json
+.ftpsync*
+.ftp*
+ftp-sync.json
+
+# Database connection configs and local logins
+config/database.php
+config/db.php
+includes/db_local.php
+includes/db.local.php
+*db_config*.php
+*database_config*.php
+.db_pass
+.db_password
+db.config.php
 
 # Secrets and private keys
 *.pem
