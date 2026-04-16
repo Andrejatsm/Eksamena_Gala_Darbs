@@ -110,10 +110,10 @@ if (!$attempt) {
         </div>
 
         <div class="flex gap-4">
-            <a href="../pages/dashboard.php" class="button-primary flex-1">
+            <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/dashboard.php" class="button-primary flex-1">
                 <?php echo t('find_specialist'); ?>
             </a>
-            <a href="tests.php" class="button-secondary flex-1">
+            <a href="<?php echo htmlspecialchars($pathPrefix); ?>tests/tests.php" class="button-secondary flex-1">
                 <?php echo t('other_tests'); ?>
             </a>
         </div>

@@ -278,7 +278,7 @@ $stmt->close();
             <button type="submit" class="button-primary flex-1">
                 <?php echo t('save_changes'); ?>
             </button>
-            <a href="dashboard.php" class="button-secondary flex-1">
+            <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/dashboard.php" class="button-secondary flex-1">
                 <?php echo t('cancel'); ?>
             </a>
         </div>

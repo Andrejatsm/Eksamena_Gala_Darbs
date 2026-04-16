@@ -32,10 +32,11 @@
 
         const nameElement = document.querySelector('[data-psychologist-name]');
         const psychologistName = nameElement ? nameElement.textContent.trim() : '';
+        const basePathPrefix = document.body.dataset.pathPrefix || '../';
 
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '../api/checkout.php';
+        form.action = `${basePathPrefix}api/checkout.php`;
 
         const fields = {
             psychologist_account_id: psychologistId,

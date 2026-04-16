@@ -3,9 +3,8 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-$scriptDir = trim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
-$depth = $scriptDir === '' ? 0 : substr_count($scriptDir, '/') + 1;
-$pathPrefix = str_repeat('../', $depth);
+require_once __DIR__ . '/config.php';
+$pathPrefix = $basePath;
 
 // Load translation system
 require_once __DIR__ . '/lang.php';

@@ -110,7 +110,7 @@ require '../includes/header.php';
                 <?php echo t('login_title'); ?>
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                <?php echo t('or'); ?> <a href="register.php" class="font-medium text-primary hover:text-primaryHover transition"><?php echo t('create_new_profile'); ?></a>
+                <?php echo t('or'); ?> <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/register.php" class="font-medium text-primary hover:text-primaryHover transition"><?php echo t('create_new_profile'); ?></a>
             </p>
         </div>
 

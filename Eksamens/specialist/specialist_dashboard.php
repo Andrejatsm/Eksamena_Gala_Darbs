@@ -14,16 +14,36 @@ $psihologs_id = (int)$_SESSION['account_id'];
 // Statusa maiņas loģika
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'], $_POST['appoint_id'])) {
     $appoint_id = (int)$_POST['appoint_id'];
+    $redirect_after = true;
 
     if ($_POST['action'] === 'activate') {
         // Psihologs aktivizē čatu/video pirms sesijas
-        $stmt = $conn->prepare(
-            "UPDATE appointments SET chat_activated_at = NOW()
-             WHERE id = ? AND psychologist_account_id = ? AND status = 'approved' AND chat_activated_at IS NULL"
-        );
-        $stmt->bind_param("ii", $appoint_id, $psihologs_id);
-        $stmt->execute();
-        $stmt->close();
+        // First verify the appointment is owned by this psychologist and is approved
+        $checkStmt = $conn->prepare("SELECT id FROM appointments WHERE id = ? AND psychologist_account_id = ? AND status = 'approved' AND chat_activated_at IS NULL");
+        $checkStmt->bind_param("ii", $appoint_id, $psihologs_id);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        $checkStmt->close();
+        
+        if ($checkResult->num_rows === 0) {
+            $_SESSION['flash_message'] = 'Pieraksts nav pieejams aktivizēšanai.';
+            $_SESSION['flash_type'] = 'error';
+        } else {
+            // Now update it
+            $updateStmt = $conn->prepare("UPDATE appointments SET chat_activated_at = NOW() WHERE id = ?");
+            $updateStmt->bind_param("i", $appoint_id);
+            $updateStmt->execute();
+            $affected = $updateStmt->affected_rows;
+            $updateStmt->close();
+            
+            if ($affected > 0) {
+                $_SESSION['flash_message'] = 'Sesija aktivizēta sekmīgi!';
+                $_SESSION['flash_type'] = 'success';
+            } else {
+                $_SESSION['flash_message'] = 'Neizdevās aktivizēt sesiju.';
+                $_SESSION['flash_type'] = 'error';
+            }
+        }
     } else {
         $status = ($_POST['action'] === 'accept') ? 'approved' : 'rejected';
 
@@ -40,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'], $_POST['appo
         $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ? AND psychologist_account_id = ?");
         $stmt->bind_param("sii", $status, $appoint_id, $psihologs_id);
         $stmt->execute();
+        $affected = $stmt->affected_rows;
         $stmt->close();
 
         // Atbrīvojam slotu, lai citi var pierakstīties
@@ -49,6 +70,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'], $_POST['appo
             $freeStmt->execute();
             $freeStmt->close();
         }
+        
+        $statusMsg = $status === 'approved' ? 'Pieraksts apstiprināts.' : 'Pieraksts noraidīts.';
+        $_SESSION['flash_message'] = $statusMsg;
+        $_SESSION['flash_type'] = 'success';
+    }
+    
+    if ($redirect_after) {
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit();
     }
 }
 
@@ -59,12 +89,25 @@ $stmt->bind_param("i", $psihologs_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
+$flash_message = $_SESSION['flash_message'] ?? '';
+$flash_type = $_SESSION['flash_type'] ?? 'success';
+if (!empty($flash_message)) {
+    unset($_SESSION['flash_message']);
+    unset($_SESSION['flash_type']);
+}
+
 $pageTitle = t('specialist_panel');
 require '../includes/header.php';
 ?>
 
 <div class="min-h-screen page-surface dark:bg-zinc-900">
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <?php if (!empty($flash_message)): ?>
+        <div class="mb-6 p-4 rounded-lg border <?php echo $flash_type === 'error' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400'; ?>">
+            <i class="fas <?php echo $flash_type === 'error' ? 'fa-triangle-exclamation' : 'fa-check-circle'; ?> mr-2"></i><?php echo htmlspecialchars($flash_message); ?>
+        </div>
+        <?php endif; ?>
 
         <!-- Header -->
         <div class="mb-12">
@@ -74,10 +117,10 @@ require '../includes/header.php';
                     <p class="text-xl text-gray-600 dark:text-gray-400 mt-2"><?php echo t('manage_practice'); ?></p>
                 </div>
                 <div class="flex gap-3">
-                    <a href="../pages/articles.php" class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primaryHover transition shadow-lg">
+                    <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/articles.php" class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primaryHover transition shadow-lg">
                         <i class="fas fa-plus mr-2"></i><?php echo t('write_article'); ?>
                     </a>
-                    <a href="../pages/availability.php" class="px-6 py-3 bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition">
+                    <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/availability.php" class="px-6 py-3 bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600 transition">
                         <i class="fas fa-calendar-plus mr-2"></i><?php echo t('add_time_btn'); ?>
                     </a>
                 </div>
@@ -241,11 +284,11 @@ require '../includes/header.php';
                                                 <?php if ($row['status'] === 'approved'): ?>
                                                     <?php if (!empty($row['chat_activated_at'])): ?>
                                                     <div class="flex justify-end gap-2">
-                                                        <a href="../pages/chat.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-primary/15 dark:bg-primary/25 text-primary rounded-lg hover:bg-primary/25 dark:hover:bg-primary/35 transition text-sm font-medium" title="Čats">
+                                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/chat.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-primary/15 dark:bg-primary/25 text-primary rounded-lg hover:bg-primary/25 dark:hover:bg-primary/35 transition text-sm font-medium" title="Čats">
                                                             <i class="fas fa-comments"></i>
                                                         </a>
                                                         <?php if ($row['consultation_type'] === 'online'): ?>
-                                                        <a href="../pages/video_call.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium" title="Videozvans">
+                                                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/video_call.php?appointment_id=<?php echo (int)$row['id']; ?>" class="px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium" title="Videozvans">
                                                             <i class="fas fa-video"></i>
                                                         </a>
                                                         <?php endif; ?>

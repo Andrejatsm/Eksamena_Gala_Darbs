@@ -89,7 +89,7 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <!-- Back button -->
-        <a href="../pages/dashboard.php" class="inline-flex items-center text-primary hover:text-primaryHover mb-8 font-semibold">
+        <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/dashboard.php" class="inline-flex items-center text-primary hover:text-primaryHover mb-8 font-semibold">
             <i class="fas fa-arrow-left mr-2"></i> <?php echo t('back_to_specialists'); ?>
         </a>
 

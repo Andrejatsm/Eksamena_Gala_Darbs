@@ -72,7 +72,7 @@ if ($show_attempts) {
                     </div>
                 <?php endif; ?>
                 
-                <a href="test_view.php?test_id=<?php echo $test['id']; ?>" class="button-primary text-sm">
+                <a href="<?php echo htmlspecialchars($pathPrefix); ?>tests/test_view.php?test_id=<?php echo $test['id']; ?>" class="button-primary text-sm">
                     <?php echo isset($attempts[$test['id']]) ? t('retake_test') : t('start_test'); ?>
                 </a>
             </div>

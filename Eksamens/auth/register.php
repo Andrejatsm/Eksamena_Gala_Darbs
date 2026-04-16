@@ -201,7 +201,7 @@ require '../includes/header.php';
                 <?php echo t('create_profile'); ?>
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                <?php echo t('already_have_profile'); ?> <a href="login.php<?php echo $next !== '' ? '?next=' . rawurlencode($next) : ''; ?>" class="font-medium text-primary hover:text-primaryHover transition"><?php echo t('login'); ?></a>
+                <?php echo t('already_have_profile'); ?> <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/login.php<?php echo $next !== '' ? '?next=' . rawurlencode($next) : ''; ?>" class="font-medium text-primary hover:text-primaryHover transition"><?php echo t('login'); ?></a>
             </p>
         </div>
 

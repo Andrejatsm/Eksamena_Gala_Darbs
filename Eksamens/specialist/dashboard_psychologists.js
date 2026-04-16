@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Get base path from body data attribute (set by header.php)
+    const basePathPrefix = document.body.dataset.pathPrefix || '../';
+    
     const searchInput = document.getElementById('searchInput');
     const psychologistsContainer = document.getElementById('psychologistsContainer');
     const paginationControls = document.getElementById('paginationControls');
@@ -25,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function buildFilterParams() {
         const params = new URLSearchParams();
-        params.set('base', '..');
+        params.set('base', basePathPrefix);
         if (currentSearch) params.set('search', currentSearch);
         params.set('page', currentPage);
         if (filterSpec && filterSpec.value) params.set('specialization', filterSpec.value);
@@ -40,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSearch = search;
         renderLoadingState();
 
-        fetch(`../api/fetch_psychologists.php?${buildFilterParams()}`)
+        fetch(`${basePathPrefix}api/fetch_psychologists.php?${buildFilterParams()}`)
             .then((response) => response.text())
             .then((data) => {
                 psychologistsContainer.innerHTML = data;
@@ -116,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ielādējam specializāciju sarakstu no API
     if (filterSpec) {
-        fetch('../api/fetch_psychologists.php?get_filters=1&base=..')
+        fetch(`${basePathPrefix}api/fetch_psychologists.php?get_filters=1&base=${basePathPrefix}`)
             .then(r => r.json())
             .then(data => {
                 (data.specializations || []).forEach(s => {

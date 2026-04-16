@@ -5,7 +5,7 @@ $pageStyles = ['home.css'];
 require 'includes/db.php';
 require 'includes/header.php';
 
-$btn_link = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? 'pages/dashboard.php' : 'auth/login.php';
+$btn_link = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? $pathPrefix . 'pages/dashboard.php' : $pathPrefix . 'auth/login.php';
 $btn_text = (isset($_SESSION['account_id'], $_SESSION['role']) && $_SESSION['role'] === 'user') ? t('go_to_system') : t('find_psychologist');
 
 $tests = [];

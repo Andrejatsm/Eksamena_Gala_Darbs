@@ -244,7 +244,7 @@ require __DIR__ . '/../includes/header.php';
         </p>
         <?php endif; ?>
         
-        <a href="../pages/dashboard.php" class="button-primary w-full">
+        <a href="<?php echo isset($pathPrefix) ? htmlspecialchars($pathPrefix) : '../'; ?>pages/dashboard.php" class="button-primary w-full">
             <?php echo t('back_to_system'); ?>
         </a>
     </div>
