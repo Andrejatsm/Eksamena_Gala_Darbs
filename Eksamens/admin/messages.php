@@ -118,7 +118,7 @@ require __DIR__ . '/../includes/header.php';
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" class="button-primary"><?php echo t('search'); ?></button>
-                        <a href="messages.php" class="button-secondary"><?php echo t('clear'); ?></a>
+                        <a href="<?php echo htmlspecialchars($pathPrefix); ?>admin/messages.php" class="button-secondary"><?php echo t('clear'); ?></a>
                     </div>
                 </form>
             </div>

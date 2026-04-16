@@ -56,7 +56,7 @@ if ($article_id === 0) {
 <div class="page-shell page-surface articles-page">
     <?php if ($article_id > 0): ?>
     <div class="page-heading">
-        <a href="published_articles.php" class="button-link-icon mb-4">
+        <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/published_articles.php" class="button-link-icon mb-4">
             <i class="fas fa-arrow-left"></i><?php echo t('back_to_articles'); ?>
         </a>
         <h1 class="page-title"><?php echo htmlspecialchars($article['title']); ?></h1>
@@ -96,7 +96,7 @@ if ($article_id === 0) {
             <p class="text-gray-600 dark:text-gray-400 mb-5 flex-grow">
                 <?php echo htmlspecialchars(strip_tags(mb_substr($article['content'], 0, 220))); ?>...
             </p>
-            <a href="published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary"><?php echo t('read_full_article'); ?></a>
+            <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/published_articles.php?id=<?php echo (int)$article['id']; ?>" class="button-primary"><?php echo t('read_full_article'); ?></a>
         </article>
         <?php endforeach; ?>
 

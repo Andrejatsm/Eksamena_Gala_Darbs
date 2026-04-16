@@ -70,7 +70,7 @@ require '../includes/header.php';
                 </div>
             </div>
             <?php if ($appt['consultation_type'] === 'online' && $chat_active): ?>
-                <a href="video_call.php?appointment_id=<?php echo $appointment_id; ?>" class="button-primary px-4 py-2 text-sm">
+                <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/video_call.php?appointment_id=<?php echo $appointment_id; ?>" class="button-primary px-4 py-2 text-sm">
                     <i class="fas fa-video mr-2"></i><?php echo t('video_call'); ?>
                 </a>
             <?php endif; ?>

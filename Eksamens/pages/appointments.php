@@ -136,11 +136,11 @@ $stmt->close();
                         <?php if($appt['status'] === 'approved'): ?>
                             <?php if(!empty($appt['chat_activated_at'])): ?>
                             <div class="flex gap-2 mt-3">
-                                <a href="chat.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition text-sm font-medium">
+                                <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/chat.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition text-sm font-medium">
                                     <i class="fas fa-comments"></i> <?php echo t('chat'); ?>
                                 </a>
                                 <?php if($appt['consultation_type'] === 'online'): ?>
-                                <a href="video_call.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium">
+                                <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/video_call.php?appointment_id=<?php echo (int)$appt['id']; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition text-sm font-medium">
                                     <i class="fas fa-video"></i> <?php echo t('video_call'); ?>
                                 </a>
                                 <?php endif; ?>
@@ -174,7 +174,7 @@ $stmt->close();
     <?php if(empty($appointments)): ?>
         <div class="empty-card">
             <p class="text-gray-500 dark:text-gray-400 mb-4"><?php echo t('no_appointments'); ?></p>
-            <a href="dashboard.php" class="button-primary">
+            <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/dashboard.php" class="button-primary">
                 <?php echo t('find_specialist'); ?>
             </a>
         </div>
