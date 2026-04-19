@@ -18,7 +18,7 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 // Verify that this user is a participant in the appointment
 function verifyParticipant(mysqli $conn, int $appointmentId, int $accountId): ?array {
     $stmt = $conn->prepare(
-        "SELECT id, user_account_id, psychologist_account_id, status, consultation_type, scheduled_at, chat_activated_at
+        "SELECT id, user_account_id, psychologist_account_id, status, consultation_type, scheduled_at, chat_activated_at, user_session_id, psychologist_session_id
          FROM appointments WHERE id = ?"
     );
     $stmt->bind_param("i", $appointmentId);
@@ -30,6 +30,24 @@ function verifyParticipant(mysqli $conn, int $appointmentId, int $accountId): ?a
     if ((int)$appt['user_account_id'] !== $accountId && (int)$appt['psychologist_account_id'] !== $accountId) return null;
 
     return $appt;
+}
+
+function ensureSessionLock(mysqli $conn, array $appt, string $sessionId, string $role): bool {
+    $column = $role === 'psychologist' ? 'psychologist_session_id' : 'user_session_id';
+    $existingSession = $appt[$column] ?? '';
+
+    if ($existingSession !== '' && $existingSession !== $sessionId) {
+        return false;
+    }
+
+    if ($existingSession === '') {
+        $stmt = $conn->prepare("UPDATE appointments SET {$column} = ? WHERE id = ? AND ({$column} IS NULL OR {$column} = '')");
+        $stmt->bind_param("si", $sessionId, $appt['id']);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    return true;
 }
 
 // Čats ir aktīvs tikai tad, kad psihologs to ir aktivizējis un sesija nav beigusies
@@ -54,6 +72,12 @@ if ($action === 'fetch' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$appt) {
         http_response_code(403);
         echo json_encode(['error' => 'Nav piekļuves.']);
+        exit();
+    }
+
+    if (!ensureSessionLock($conn, $appt, session_id(), $role)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Šī sesija ir bloķēta citai ierīcei vai pārlūkprogrammā.']);
         exit();
     }
 
@@ -123,6 +147,12 @@ if ($action === 'send' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    if (!ensureSessionLock($conn, $appt, session_id(), $role)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Šī sesija ir bloķēta citai ierīcei vai pārlūkprogrammā.']);
+        exit();
+    }
+
     // Only approved appointments can have chat
     if ($appt['status'] !== 'approved') {
         http_response_code(403);
@@ -156,6 +186,50 @@ if ($action === 'send' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             'is_mine' => true,
         ]
     ]);
+    exit();
+}
+
+// POST: End meeting early (psychologist only)
+if ($action === 'end_meeting' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $appointment_id = (int)($_POST['appointment_id'] ?? 0);
+
+    if ($appointment_id <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Nepareizs pieraksta ID.']);
+        exit();
+    }
+
+    $appt = verifyParticipant($conn, $appointment_id, $account_id);
+    if (!$appt || (int)$appt['psychologist_account_id'] !== $account_id) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Nav piekļuves.']);
+        exit();
+    }
+
+    if ($appt['status'] !== 'approved' || empty($appt['chat_activated_at'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Sesija nav aktīva.']);
+        exit();
+    }
+
+    $stmt = $conn->prepare(
+        "UPDATE appointments SET status = 'cancelled', chat_activated_at = NULL, user_session_id = NULL, psychologist_session_id = NULL WHERE id = ?"
+    );
+    $stmt->bind_param("i", $appointment_id);
+    $stmt->execute();
+    $stmt->close();
+
+    $deleteChatStmt = $conn->prepare("DELETE FROM chat_messages WHERE appointment_id = ?");
+    $deleteChatStmt->bind_param("i", $appointment_id);
+    $deleteChatStmt->execute();
+    $deleteChatStmt->close();
+
+    $deleteRoomStmt = $conn->prepare("DELETE FROM video_rooms WHERE appointment_id = ?");
+    $deleteRoomStmt->bind_param("i", $appointment_id);
+    $deleteRoomStmt->execute();
+    $deleteRoomStmt->close();
+
+    echo json_encode(['success' => true]);
     exit();
 }
 

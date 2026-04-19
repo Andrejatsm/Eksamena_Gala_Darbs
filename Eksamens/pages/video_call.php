@@ -20,7 +20,7 @@ if ($appointment_id <= 0) {
 
 // Verify access
 $stmt = $conn->prepare(
-    "SELECT a.id, a.user_account_id, a.psychologist_account_id, a.status, a.consultation_type, a.scheduled_at,
+    "SELECT a.id, a.user_account_id, a.psychologist_account_id, a.status, a.consultation_type, a.scheduled_at, a.chat_activated_at, a.user_session_id, a.psychologist_session_id,
             p.full_name AS psychologist_name,
             CONCAT(u.first_name, ' ', u.last_name) AS user_name
      FROM appointments a
@@ -40,9 +40,56 @@ if (!$appt) {
 
 $is_user = (int)$appt['user_account_id'] === $account_id;
 $is_psychologist = (int)$appt['psychologist_account_id'] === $account_id;
+$back_url = "chat.php?appointment_id=" . $appointment_id;
+
+$accessBlocked = false;
+$blockedMessage = '';
+$currentSessionId = session_id();
 
 if (!$is_user && !$is_psychologist) {
     header("Location: " . ($role === 'psychologist' ? '../specialist/specialist_dashboard.php' : 'appointments.php'));
+    exit();
+}
+
+if ($is_user) {
+    $existingSession = $appt['user_session_id'] ?? '';
+    if ($existingSession !== '' && $existingSession !== $currentSessionId) {
+        $accessBlocked = true;
+        $blockedMessage = 'Šis pieraksts jau tiek izmantots citā pārlūkprogrammā vai ierīcē.';
+    } elseif ($existingSession === '') {
+        $lockStmt = $conn->prepare("UPDATE appointments SET user_session_id = ? WHERE id = ? AND (user_session_id IS NULL OR user_session_id = '')");
+        $lockStmt->bind_param("si", $currentSessionId, $appointment_id);
+        $lockStmt->execute();
+        $lockStmt->close();
+    }
+} else {
+    $existingSession = $appt['psychologist_session_id'] ?? '';
+    if ($existingSession !== '' && $existingSession !== $currentSessionId) {
+        $accessBlocked = true;
+        $blockedMessage = 'Šo sesiju jau atvēris cits psihologs vai pārlūkprogramma.';
+    } elseif ($existingSession === '') {
+        $lockStmt = $conn->prepare("UPDATE appointments SET psychologist_session_id = ? WHERE id = ? AND (psychologist_session_id IS NULL OR psychologist_session_id = '')");
+        $lockStmt->bind_param("si", $currentSessionId, $appointment_id);
+        $lockStmt->execute();
+        $lockStmt->close();
+    }
+}
+
+if ($accessBlocked) {
+    require '../includes/header.php';
+    ?>
+    <div class="page-shell page-surface">
+        <div class="max-w-3xl mx-auto py-12">
+            <div class="rounded-2xl bg-white dark:bg-zinc-900 border border-red-200 dark:border-red-800 p-8 text-center">
+                <i class="fas fa-lock text-4xl text-red-600 dark:text-red-400 mb-4"></i>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Piekļuve bloķēta</h1>
+                <p class="text-gray-600 dark:text-gray-400 mb-6"><?php echo htmlspecialchars($blockedMessage); ?></p>
+                <a href="<?php echo $back_url; ?>" class="button-primary px-6 py-3"><?php echo t('cancel'); ?></a>
+            </div>
+        </div>
+    </div>
+    <?php
+    require '../includes/footer.php';
     exit();
 }
 
@@ -70,9 +117,15 @@ require '../includes/header.php';
                     </p>
                 </div>
             </div>
-            <a href="<?php echo $back_url; ?>" class="button-primary px-4 py-2 text-sm bg-red-500 hover:bg-red-600" id="endCallBtn">
-                <i class="fas fa-phone-slash mr-2"></i><?php echo t('end_call'); ?>
-            </a>
+            <?php if ($is_psychologist): ?>
+                <button id="endMeetingBtn" type="button" class="button-primary px-4 py-2 text-sm bg-red-500 hover:bg-red-600">
+                    <i class="fas fa-stop-circle mr-2"></i><?php echo t('end_meeting'); ?>
+                </button>
+            <?php else: ?>
+                <a href="<?php echo $back_url; ?>" class="button-primary px-4 py-2 text-sm bg-red-500 hover:bg-red-600" id="endCallBtn">
+                    <i class="fas fa-phone-slash mr-2"></i><?php echo t('end_call'); ?>
+                </a>
+            <?php endif; ?>
         </div>
 
         <!-- Jitsi container -->
@@ -95,8 +148,31 @@ require '../includes/header.php';
         appointmentId: <?php echo $appointment_id; ?>,
         displayName: <?php echo json_encode($_SESSION['display_name'] ?? 'Lietotājs'); ?>,
         apiUrl: '../api/video_room.php',
+        endApiUrl: '../api/chat.php',
+        isPsychologist: <?php echo $is_psychologist ? 'true' : 'false'; ?>,
         jitsiDomain: 'meet.jit.si'
     };
+
+    async function endMeetingEarly() {
+        const confirmed = await SaprastsConfirm.show('<?php echo t('confirm_end_meeting'); ?>', { okText: '<?php echo t('end_meeting'); ?>', type: 'danger' });
+        if (!confirmed) return;
+
+        const formData = new FormData();
+        formData.append('action', 'end_meeting');
+        formData.append('appointment_id', window.VIDEO_CONFIG.appointmentId);
+
+        const res = await fetch(window.VIDEO_CONFIG.endApiUrl, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            window.location.href = 'chat.php?appointment_id=' + window.VIDEO_CONFIG.appointmentId + '&ended=1';
+        } else {
+            SaprastsToast.error(result.error || '<?php echo t('meeting_end_failed'); ?>');
+        }
+    }
 </script>
 <script src="../assets/js/video_call.js"></script>
 

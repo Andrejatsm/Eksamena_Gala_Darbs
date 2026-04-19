@@ -62,11 +62,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
     } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_time'])) {
             $new_time = $_POST['new_time'];
             $status = 'rescheduled';
-            $stmt = $conn->prepare("UPDATE appointments SET scheduled_at = ?, status = ? WHERE id = ? AND user_account_id = ?");
-            $stmt->bind_param("ssii", $new_time, $status, $appointment_id, $account_id);
-            $stmt->execute();
-            $stmt->close();
-            $message = t('appointment_rescheduled', date('d.m.Y H:i', strtotime($new_time)));
+
+            $getStmt = $conn->prepare("SELECT scheduled_at, psychologist_account_id FROM appointments WHERE id = ? AND user_account_id = ?");
+            $getStmt->bind_param("ii", $appointment_id, $account_id);
+            $getStmt->execute();
+            $apptRow = $getStmt->get_result()->fetch_assoc();
+            $getStmt->close();
+
+            if (!$apptRow) {
+                $message = t('appointment_not_found');
+            } else {
+                $old_time = $apptRow['scheduled_at'];
+                $psychologist_id = (int)$apptRow['psychologist_account_id'];
+
+                if ($old_time !== $new_time) {
+                    $slotStmt = $conn->prepare("SELECT id FROM availability_slots WHERE psychologist_account_id = ? AND starts_at = ? AND is_booked = 0 LIMIT 1");
+                    $slotStmt->bind_param("is", $psychologist_id, $new_time);
+                    $slotStmt->execute();
+                    $slotResult = $slotStmt->get_result();
+                    $slot = $slotResult->fetch_assoc();
+                    $slotStmt->close();
+
+                    if (!$slot) {
+                        $message = t('appointment_reschedule_failed');
+                    } else {
+                        $stmt = $conn->prepare("UPDATE appointments SET scheduled_at = ?, status = ? WHERE id = ? AND user_account_id = ?");
+                        $stmt->bind_param("ssii", $new_time, $status, $appointment_id, $account_id);
+                        $stmt->execute();
+                        $stmt->close();
+
+                        $freeStmt = $conn->prepare("UPDATE availability_slots SET is_booked = 0 WHERE psychologist_account_id = ? AND starts_at = ?");
+                        $freeStmt->bind_param("is", $psychologist_id, $old_time);
+                        $freeStmt->execute();
+                        $freeStmt->close();
+
+                        $bookStmt = $conn->prepare("UPDATE availability_slots SET is_booked = 1 WHERE id = ?");
+                        $bookStmt->bind_param("i", $slot['id']);
+                        $bookStmt->execute();
+                        $bookStmt->close();
+
+                        $message = t('appointment_rescheduled', date('d.m.Y H:i', strtotime($new_time)));
+                    }
+                } else {
+                    $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ? AND user_account_id = ?");
+                    $stmt->bind_param("sii", $status, $appointment_id, $account_id);
+                    $stmt->execute();
+                    $stmt->close();
+                    $message = t('appointment_rescheduled', date('d.m.Y H:i', strtotime($new_time)));
+                }
+            }
 
             if ($isAjax) {
                 header('Content-Type: application/json');

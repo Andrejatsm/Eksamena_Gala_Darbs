@@ -66,6 +66,28 @@ if ($chatActivatedCol instanceof mysqli_result) {
     $chatActivatedCol->free();
 }
 
+$userSessionCol = $conn->query("SHOW COLUMNS FROM appointments LIKE 'user_session_id'");
+if ($userSessionCol && $userSessionCol->num_rows === 0) {
+    $conn->query(
+        "ALTER TABLE appointments
+         ADD COLUMN user_session_id VARCHAR(128) NULL DEFAULT NULL AFTER chat_activated_at"
+    );
+}
+if ($userSessionCol instanceof mysqli_result) {
+    $userSessionCol->free();
+}
+
+$psySessionCol = $conn->query("SHOW COLUMNS FROM appointments LIKE 'psychologist_session_id'");
+if ($psySessionCol && $psySessionCol->num_rows === 0) {
+    $conn->query(
+        "ALTER TABLE appointments
+         ADD COLUMN psychologist_session_id VARCHAR(128) NULL DEFAULT NULL AFTER user_session_id"
+    );
+}
+if ($psySessionCol instanceof mysqli_result) {
+    $psySessionCol->free();
+}
+
 // ── Jaunu tabulu izveide ────────────────────────────────────────
 
 $conn->query(

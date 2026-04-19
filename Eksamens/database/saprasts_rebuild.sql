@@ -93,6 +93,8 @@ CREATE TABLE appointments (
   scheduled_at DATETIME NULL,
   consultation_type ENUM('in_person','online') NOT NULL DEFAULT 'online',
   status ENUM('pending','approved','rejected','cancelled','rescheduled') NOT NULL DEFAULT 'pending',
+  user_session_id VARCHAR(128) NULL DEFAULT NULL,
+  psychologist_session_id VARCHAR(128) NULL DEFAULT NULL,
   user_name_snapshot VARCHAR(180) NULL,
   user_email_snapshot VARCHAR(255) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -250,6 +250,7 @@ require '../includes/header.php';
                                                 'approved' => 'bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6]',
                                                 'rejected' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
                                                 'cancelled' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
+                                                'rescheduled' => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
                                                 default => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
                                             };
                                             $statusLabel = match($row['status']) {
@@ -257,6 +258,7 @@ require '../includes/header.php';
                                                 'approved' => t('status_approved'),
                                                 'rejected' => t('status_rejected'),
                                                 'cancelled' => t('status_cancelled'),
+                                                'rescheduled' => t('status_rescheduled'),
                                                 default => ucfirst((string)$row['status']),
                                             };
                                             ?>
@@ -265,7 +267,12 @@ require '../includes/header.php';
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <?php if(($row['status'] ?? '') === 'pending'): ?>
+                                            <?php
+                                                $appointmentTime = strtotime($row['scheduled_at'] ?? '');
+                                                $isFutureSession = $appointmentTime !== false && $appointmentTime >= strtotime('-2 hours');
+                                                $canActivate = ($row['status'] === 'approved' && empty($row['chat_activated_at']) && $isFutureSession);
+                                            ?>
+                                            <?php if(in_array($row['status'], ['pending', 'rescheduled'], true)): ?>
                                                 <div class="flex justify-end gap-2">
                                                     <form method="POST" class="inline">
                                                         <input type="hidden" name="appoint_id" value="<?php echo $row['id']; ?>">
@@ -293,13 +300,15 @@ require '../includes/header.php';
                                                         </a>
                                                         <?php endif; ?>
                                                     </div>
-                                                    <?php else: ?>
+                                                    <?php elseif ($canActivate): ?>
                                                     <form method="POST" class="inline">
                                                         <input type="hidden" name="appoint_id" value="<?php echo (int)$row['id']; ?>">
                                                         <button type="submit" name="action" value="activate" class="px-3 py-1.5 bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-500/25 dark:hover:bg-amber-500/35 transition text-sm font-medium" title="Aktivizēt čatu un video">
                                                             <i class="fas fa-bolt mr-1"></i> <?php echo t('activate'); ?>
                                                         </button>
                                                     </form>
+                                                    <?php else: ?>
+                                                    <span class="text-gray-500 text-sm">Sesiju nevar aktivizēt — laiks ir pagājis vai tā jau ir beigusies.</span>
                                                     <?php endif; ?>
                                                 <?php else: ?>
                                                 <span class="text-gray-400">-</span>
