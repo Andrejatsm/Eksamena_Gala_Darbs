@@ -150,29 +150,13 @@ require '../includes/header.php';
         apiUrl: '../api/video_room.php',
         endApiUrl: '../api/chat.php',
         isPsychologist: <?php echo $is_psychologist ? 'true' : 'false'; ?>,
-        jitsiDomain: 'meet.jit.si'
-    };
-
-    async function endMeetingEarly() {
-        const confirmed = await SaprastsConfirm.show('<?php echo t('confirm_end_meeting'); ?>', { okText: '<?php echo t('end_meeting'); ?>', type: 'danger' });
-        if (!confirmed) return;
-
-        const formData = new FormData();
-        formData.append('action', 'end_meeting');
-        formData.append('appointment_id', window.VIDEO_CONFIG.appointmentId);
-
-        const res = await fetch(window.VIDEO_CONFIG.endApiUrl, {
-            method: 'POST',
-            body: formData
-        });
-        const result = await res.json();
-
-        if (result.success) {
-            window.location.href = 'chat.php?appointment_id=' + window.VIDEO_CONFIG.appointmentId + '&ended=1';
-        } else {
-            SaprastsToast.error(result.error || '<?php echo t('meeting_end_failed'); ?>');
+        jitsiDomain: 'meet.jit.si',
+        endMeetingLabels: {
+            confirmMessage: '<?php echo t('confirm_end_meeting'); ?>',
+            okText: '<?php echo t('end_meeting'); ?>',
+            errorMessage: '<?php echo t('meeting_end_failed'); ?>'
         }
-    }
+    };
 </script>
 <script src="../assets/js/video_call.js"></script>
 

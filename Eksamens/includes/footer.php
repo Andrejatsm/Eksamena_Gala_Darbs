@@ -100,7 +100,6 @@ if (!isset($pathPrefix)) {
         'no_messages'        => t('js_no_messages'),
     ], JSON_UNESCAPED_UNICODE); ?>;
     </script>
-    <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/modals.js"></script>
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/script.js"></script>
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/footer_ui.js"></script>
     <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/notifications.js"></script>

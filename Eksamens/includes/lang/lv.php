@@ -224,8 +224,7 @@ return [
     'title_content_required'=> 'Nosaukums un saturs ir obligāti.',
     'article_publish_error' => 'Kļūda publicējot rakstu.',
     'article_submitted'     => 'Raksts iesniegts apstiprīšanai! Administrators to pārskatīs.',
-    'article_deleted'       => 'Raksts izdzēsts.',
-    'no_articles_yet'       => 'Jūs vēl neesat publicējis nekādus rakstus.',
+    'article_deleted'       => 'Raksts izdzēsts.',    'confirm_delete_article'=> 'Vai tiešām dzēst šo rakstu?',    'no_articles_yet'       => 'Jūs vēl neesat publicējis nekādus rakstus.',
     'published'             => 'Publicēts: ',
 
     // ── Availability ─────────────────────────────

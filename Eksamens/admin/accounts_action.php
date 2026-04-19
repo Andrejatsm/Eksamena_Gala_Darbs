@@ -33,21 +33,83 @@ $buildStats = static function (mysqli $conn) use ($countQuery): array {
 $hasLinkedAppointments = static function (mysqli $conn, int $accountId, string $role): bool {
     if ($role === 'psychologist') {
         $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM appointments WHERE psychologist_account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, pārbaudot saistītos pierakstus.');
+        }
         $stmt->bind_param('i', $accountId);
         $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
-        return ((int)($result['count'] ?? 0)) > 0;
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        return ((int)($row['count'] ?? 0)) > 0;
     }
 
     if ($role === 'user') {
         $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM appointments WHERE user_account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, pārbaudot saistītos pierakstus.');
+        }
         $stmt->bind_param('i', $accountId);
         $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
-        return ((int)($result['count'] ?? 0)) > 0;
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        return ((int)($row['count'] ?? 0)) > 0;
     }
 
     return false;
+};
+
+$cleanupLinkedData = static function (mysqli $conn, int $accountId, string $role): void {
+    if ($role === 'psychologist') {
+        $stmt = $conn->prepare("DELETE cm FROM chat_messages cm INNER JOIN appointments a ON cm.appointment_id = a.id WHERE a.psychologist_account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, tīrot psihologa čata datus.');
+        }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conn->prepare("DELETE vr FROM video_rooms vr INNER JOIN appointments a ON vr.appointment_id = a.id WHERE a.psychologist_account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, tīrot psihologa video datus.');
+        }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conn->prepare("DELETE FROM appointments WHERE psychologist_account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, dzēšot psihologa pierakstus.');
+        }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    if ($role === 'user') {
+        $stmt = $conn->prepare("DELETE cm FROM chat_messages cm INNER JOIN appointments a ON cm.appointment_id = a.id WHERE a.user_account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, tīrot lietotāja čata datus.');
+        }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conn->prepare("DELETE vr FROM video_rooms vr INNER JOIN appointments a ON vr.appointment_id = a.id WHERE a.user_account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, tīrot lietotāja video datus.');
+        }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conn->prepare("DELETE FROM appointments WHERE user_account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, dzēšot lietotāja pierakstus.');
+        }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $stmt->close();
+    }
 };
 
 $action = (string)($_POST['action'] ?? '');
@@ -93,11 +155,22 @@ try {
 
         $message = 'Psihologa profils noraidīts.';
     } elseif ($action === 'delete_psych') {
-        if ($hasLinkedAppointments($conn, $accountId, 'psychologist')) {
-            throw new RuntimeException('Psihologa kontu nevar dzēst, jo tam ir saistīti pieraksti. Vispirms jāizņem vai jāpabeidz šie ieraksti.');
+        $conn->begin_transaction();
+
+        $cleanupLinkedData($conn, $accountId, 'psychologist');
+
+        $stmt = $conn->prepare("DELETE FROM psychologist_profiles WHERE account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, dzēšot psihologa profilu.');
         }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $stmt->close();
 
         $stmt = $conn->prepare("DELETE FROM accounts WHERE id = ? AND role = 'psychologist'");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, dzēšot psihologa kontu.');
+        }
         $stmt->bind_param('i', $accountId);
         $stmt->execute();
         $deleted = $stmt->affected_rows > 0;
@@ -107,13 +180,25 @@ try {
             throw new RuntimeException('Neizdevās izdzēst psihologa kontu.');
         }
 
-        $message = 'Psihologa konts izdzēsts.';
+        $conn->commit();
+        $message = 'Psihologa konts un saistītie dati izdzēsti.';
     } elseif ($action === 'delete_user') {
-        if ($hasLinkedAppointments($conn, $accountId, 'user')) {
-            throw new RuntimeException('Lietotāja kontu nevar dzēst, jo tam ir saistīti pieraksti. Vispirms jāizņem vai jāpabeidz šie ieraksti.');
+        $conn->begin_transaction();
+
+        $cleanupLinkedData($conn, $accountId, 'user');
+
+        $stmt = $conn->prepare("DELETE FROM user_profiles WHERE account_id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, dzēšot lietotāja profilu.');
         }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $stmt->close();
 
         $stmt = $conn->prepare("DELETE FROM accounts WHERE id = ? AND role = 'user'");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda, dzēšot lietotāja kontu.');
+        }
         $stmt->bind_param('i', $accountId);
         $stmt->execute();
         $deleted = $stmt->affected_rows > 0;
@@ -123,7 +208,8 @@ try {
             throw new RuntimeException('Neizdevās izdzēst lietotāja kontu.');
         }
 
-        $message = 'Lietotāja konts izdzēsts.';
+        $conn->commit();
+        $message = 'Lietotāja konts un saistītie dati izdzēsti.';
     } else {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Neatbalstīta darbība.']);
@@ -135,6 +221,16 @@ try {
         'message' => $message,
         'stats' => $buildStats($conn),
     ]);
+} catch (RuntimeException $e) {
+    if ($conn->errno) {
+        $conn->rollback();
+    }
+
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage() ?: 'Notika kļūda. Lūdzu, pārbaudiet datus un mēģiniet vēlreiz.',
+    ]);
 } catch (Throwable $e) {
     if ($conn->errno) {
         $conn->rollback();
@@ -143,7 +239,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage() ?: 'Notika neparedzēta kļūda.',
+        'message' => 'Notika neparedzēta servera kļūda.',
     ]);
 }
 ?>

@@ -188,7 +188,7 @@ require '../includes/header.php';
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words min-w-0"><?php echo htmlspecialchars($slot['note']); ?></p>
                             <?php endif; ?>
                         </div>
-                        <form method="POST" class="inline" data-confirm-delete="<?php echo t('delete_slot_confirm'); ?>">
+                        <form method="POST" action="" class="inline" data-confirm-delete="<?php echo t('delete_slot_confirm'); ?>">
                             <input type="hidden" name="slot_id" value="<?php echo $slot['id']; ?>">
                             <button type="submit" name="delete_slot" class="button-danger-icon text-sm">
                                 <i class="fas fa-trash"></i>

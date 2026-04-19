@@ -156,29 +156,13 @@ require '../includes/header.php';
         appointmentId: <?php echo $appointment_id; ?>,
         currentUserId: <?php echo $account_id; ?>,
         apiUrl: '../api/chat.php',
-        isPsychologist: <?php echo $is_psychologist ? 'true' : 'false'; ?>
-    };
-
-    async function endMeetingEarly() {
-        const confirmed = await SaprastsConfirm.show('<?php echo t('confirm_end_meeting'); ?>', { okText: '<?php echo t('end_meeting'); ?>', type: 'danger' });
-        if (!confirmed) return;
-
-        const formData = new FormData();
-        formData.append('action', 'end_meeting');
-        formData.append('appointment_id', window.CHAT_CONFIG.appointmentId);
-
-        const res = await fetch(window.CHAT_CONFIG.apiUrl, {
-            method: 'POST',
-            body: formData
-        });
-        const result = await res.json();
-
-        if (result.success) {
-            window.location.href = 'chat.php?appointment_id=' + window.CHAT_CONFIG.appointmentId + '&ended=1';
-        } else {
-            SaprastsToast.error(result.error || '<?php echo t('meeting_end_failed'); ?>');
+        isPsychologist: <?php echo $is_psychologist ? 'true' : 'false'; ?>,
+        endMeetingLabels: {
+            confirmMessage: '<?php echo t('confirm_end_meeting'); ?>',
+            okText: '<?php echo t('end_meeting'); ?>',
+            errorMessage: '<?php echo t('meeting_end_failed'); ?>'
         }
-    }
+    };
 </script>
 <script src="../assets/js/chat.js"></script>
 <?php endif; ?>
