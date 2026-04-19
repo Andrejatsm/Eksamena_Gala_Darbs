@@ -225,6 +225,7 @@ return [
     'article_publish_error' => 'Error publishing article.',
     'article_submitted'     => 'Article submitted for review! Administrator will review it.',
     'article_deleted'       => 'Article deleted.',
+    'confirm_delete_article'=> 'Delete this article?',
     'no_articles_yet'       => 'You haven\'t published any articles yet.',
     'published'             => 'Published: ',
 

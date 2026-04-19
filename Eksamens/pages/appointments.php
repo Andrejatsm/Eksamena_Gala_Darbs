@@ -202,7 +202,7 @@ $stmt->close();
                             <button type="button" class="open-reschedule-btn text-[#095d7e] hover:text-[#14967f] dark:text-[#ccecee] hover:bg-[#ccecee]/30 dark:hover:bg-[#095d7e]/20 px-3 py-2 rounded-lg transition text-sm" data-appointment-id="<?php echo (int)$appt['id']; ?>">
                                 <i class="fas fa-calendar-alt"></i> <?php echo t('reschedule'); ?>
                             </button>
-                            <form method="POST" class="inline">
+                            <form method="POST" action="" class="inline">
                                 <input type="hidden" name="appointment_id" value="<?php echo $appt['id']; ?>">
                                 <button type="submit" name="action" value="cancel" class="cancel-appt-btn text-[#095d7e] hover:text-[#14967f] dark:text-[#ccecee] hover:bg-[#ccecee]/30 dark:hover:bg-[#095d7e]/20 px-3 py-2 rounded-lg transition text-sm">
                                     <i class="fas fa-trash"></i> <?php echo t('cancel'); ?>
@@ -253,7 +253,7 @@ $stmt->close();
                         <i class="fas fa-times fa-lg"></i>
                     </button>
                 </div>
-                <form method="POST">
+                <form method="POST" action="">
                     <input type="hidden" name="appointment_id" id="modal_appointment_id">
                     <input type="hidden" name="action" value="reschedule">
                     <div class="mb-4">

@@ -80,4 +80,40 @@
     }
 
     initCall();
+
+    const endMeetingBtn = document.getElementById('endMeetingBtn');
+    const endMeetingLabels = config.endMeetingLabels || {};
+
+    if (endMeetingBtn) {
+        endMeetingBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const confirmed = await SaprastsConfirm.show(endMeetingLabels.confirmMessage || 'Vai tiešām vēlaties pārtraukt tikšanos agrāk?', {
+                okText: endMeetingLabels.okText || 'Pārtraukt',
+                type: 'danger'
+            });
+
+            if (!confirmed) return;
+
+            const formData = new FormData();
+            formData.append('action', 'end_meeting');
+            formData.append('appointment_id', config.appointmentId);
+
+            try {
+                const res = await fetch(config.endApiUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    window.location.href = 'chat.php?appointment_id=' + config.appointmentId + '&ended=1';
+                } else {
+                    SaprastsToast.error(result.error || endMeetingLabels.errorMessage || 'Neizdevās pārtraukt tikšanos.');
+                }
+            } catch (e) {
+                SaprastsToast.error(endMeetingLabels.errorMessage || 'Neizdevās pārtraukt tikšanos.');
+            }
+        });
+    }
 })();

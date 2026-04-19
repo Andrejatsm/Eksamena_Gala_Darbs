@@ -1,4 +1,6 @@
-(() => {
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof SaprastsConfirm === 'undefined') return;
+
     // Confirm before deleting a slot (AJAX)
     document.querySelectorAll('form[data-confirm-delete]').forEach((form) => {
         form.addEventListener('submit', (e) => {
@@ -7,7 +9,8 @@
                 if (!confirmed) return;
 
                 const formData = new FormData(form);
-                fetch(form.action || window.location.href, {
+                const actionUrl = form.getAttribute('action') || window.location.href;
+                fetch(actionUrl, {
                     method: 'POST',
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
@@ -33,4 +36,4 @@
             });
         });
     });
-})();
+});

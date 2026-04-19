@@ -81,6 +81,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
     <?php endif; ?>
 </head>
 <body class="bg-surface text-gray-900 dark:bg-zinc-900 dark:text-gray-100 transition-colors duration-300" data-path-prefix="<?php echo htmlspecialchars($pathPrefix, ENT_QUOTES, 'UTF-8'); ?>">
+    <script src="<?php echo htmlspecialchars($pathPrefix); ?>assets/js/modals.js"></script>
 
     <nav class="sticky top-0 z-50 bg-[#f1f9ff]/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-[#ccecee] dark:border-zinc-800 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

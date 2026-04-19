@@ -156,4 +156,36 @@
             pollTimer = setInterval(fetchMessages, 3000);
         }
     });
+
+    window.endMeetingEarly = async function () {
+        if (!window.CHAT_CONFIG) return;
+
+        const labels = window.CHAT_CONFIG.endMeetingLabels || {};
+        const confirmed = await SaprastsConfirm.show(labels.confirmMessage || 'Vai tiešām vēlaties pārtraukt tikšanos agrāk?', {
+            okText: labels.okText || 'Pārtraukt',
+            type: 'danger'
+        });
+
+        if (!confirmed) return;
+
+        const formData = new FormData();
+        formData.append('action', 'end_meeting');
+        formData.append('appointment_id', window.CHAT_CONFIG.appointmentId);
+
+        try {
+            const res = await fetch(window.CHAT_CONFIG.apiUrl, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                window.location.href = 'chat.php?appointment_id=' + window.CHAT_CONFIG.appointmentId + '&ended=1';
+            } else {
+                SaprastsToast.error(result.error || labels.errorMessage || 'Neizdevās pārtraukt tikšanos.');
+            }
+        } catch (e) {
+            SaprastsToast.error(labels.errorMessage || 'Neizdevās pārtraukt tikšanos.');
+        }
+    };
 })();

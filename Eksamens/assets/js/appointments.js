@@ -54,7 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (btn.name && btn.value) {
                     formData.set(btn.name, btn.value);
                 }
-                fetch(form.action || window.location.href, {
+                const actionUrl = form.getAttribute('action') || window.location.href;
+                fetch(actionUrl, {
                     method: 'POST',
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
