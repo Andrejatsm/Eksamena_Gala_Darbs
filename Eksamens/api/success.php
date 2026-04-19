@@ -3,14 +3,11 @@ session_start();
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/lang.php';
+require_once __DIR__ . '/../includes/mail.php';
 
 \Stripe\Stripe::setApiKey('sk_test_51S7XQt3b1XY7a31CCbstqHPSNYoEFGXr5zcqQaaB5t25CYs3mFuYzOl1GB9jQ0Hzh7MJC8Gc1XneHycmqUYbqn5O00hVcvezVP');
 
 function send_payment_confirmation_email(string $toEmail, string $userName, ?string $scheduledAt, string $consultationType): bool {
-    if (!function_exists('mail')) {
-        return false;
-    }
-
     $subject = t('email_subject');
     $consultationLabel = $consultationType === 'online' ? t('email_consultation_online') : t('email_consultation_in_person');
     $timeText = $scheduledAt ? date('d.m.Y H:i', strtotime($scheduledAt)) : t('email_time_tbd');
@@ -23,15 +20,18 @@ function send_payment_confirmation_email(string $toEmail, string $userName, ?str
         . t('email_contact_line') . "\n\n"
         . t('email_regards');
 
+    $fromAddress = getenv('EMAIL_FROM_ADDRESS') ?: 'noreply@saprasts.local';
+    $fromName = getenv('EMAIL_FROM_NAME') ?: 'Saprasts';
+
     $headers = [
         'MIME-Version: 1.0',
         'Content-type: text/plain; charset=UTF-8',
-        'From: Saprasts <noreply@saprasts.local>',
-        'Reply-To: noreply@saprasts.local',
+        'From: ' . $fromName . ' <' . $fromAddress . '>',
+        'Reply-To: ' . $fromAddress,
         'X-Mailer: PHP/' . phpversion(),
     ];
 
-    return @mail($toEmail, $subject, $body, implode("\r\n", $headers));
+    return send_email($toEmail, $subject, $body, $headers);
 }
 
 // Pārbaudām, vai esam ielogojušies

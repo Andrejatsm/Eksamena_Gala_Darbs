@@ -39,4 +39,9 @@ $conn->query(
      WHERE scheduled_at < DATE_SUB(NOW(), INTERVAL 2 HOUR)
        AND chat_activated_at IS NOT NULL"
 );
+// Tīrām vecos pierakstus, kas ir senāki par 30 dienām, lai saraksti neuzkrātos.
+$conn->query(
+    "DELETE FROM appointments
+     WHERE scheduled_at < DATE_SUB(NOW(), INTERVAL 30 DAY)"
+);
 ?>

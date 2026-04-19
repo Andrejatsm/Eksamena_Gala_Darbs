@@ -1,4 +1,4 @@
-(() => {
+document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('rescheduleModal');
     const appointmentInput = document.getElementById('modal_appointment_id');
     const closeRescheduleModalBtn = document.getElementById('closeRescheduleModalBtn');
@@ -81,4 +81,4 @@
             });
         });
     });
-})();
+});
