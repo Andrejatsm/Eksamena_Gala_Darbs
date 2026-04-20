@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'], $_POST['appo
 }
 
 // Iegūstam pieteikumus
-$sql = "SELECT * FROM appointments WHERE psychologist_account_id = ? ORDER BY created_at DESC";
+$sql = "SELECT * FROM appointments WHERE psychologist_account_id = ? AND scheduled_at >= DATE_SUB(NOW(), INTERVAL 1 DAY) ORDER BY created_at DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $psihologs_id);
 $stmt->execute();
@@ -256,7 +256,7 @@ require '../includes/header.php';
                                             $statusLabel = match($row['status']) {
                                                 'pending' => t('status_pending'),
                                                 'approved' => t('status_approved'),
-                                                'rejected' => t('status_rejected'),
+                                                'rejected' => t('status_cancelled'),
                                                 'cancelled' => t('status_cancelled'),
                                                 'rescheduled' => t('status_rescheduled'),
                                                 default => ucfirst((string)$row['status']),
