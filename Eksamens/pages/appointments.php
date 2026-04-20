@@ -9,19 +9,19 @@ if (!isset($_SESSION['account_id'], $_SESSION['role']) || $_SESSION['role'] !== 
     exit();
 }
 
-require '../includes/header.php';
-
 $account_id = (int)$_SESSION['account_id'];
 $message = "";
 $status_classes = [
     'pending' => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
     'approved' => 'bg-[#e2fcd6] text-[#14967f] dark:bg-[#14967f]/20 dark:text-[#e2fcd6]',
+    'rejected' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
     'cancelled' => 'bg-[#f1f9ff] text-[#095d7e] border border-[#ccecee] dark:bg-[#095d7e]/10 dark:text-[#ccecee]',
     'rescheduled' => 'bg-[#ccecee] text-[#095d7e] dark:bg-[#095d7e]/20 dark:text-[#ccecee]',
 ];
 $status_labels = [
     'pending' => t('status_pending'),
     'approved' => t('status_approved'),
+    'rejected' => t('status_cancelled'),
     'cancelled' => t('status_cancelled'),
     'rescheduled' => t('status_rescheduled'),
 ];
@@ -30,6 +30,7 @@ $status_labels = [
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_POST['action'])) {
     $appointment_id = (int)$_POST['appointment_id'];
     $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    $success = false;
     
     if ($_POST['action'] === 'cancel') {
             // Vispirms iegūstam pieraksta info, lai atbrīvotu slotu
@@ -44,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
             $stmt->bind_param("sii", $status, $appointment_id, $account_id);
             $stmt->execute();
             $stmt->close();
+            $success = true;
 
             // Atbrīvojam slotu, lai citi lietotāji var pierakstīties
             if ($apptRow && !empty($apptRow['scheduled_at'])) {
@@ -56,12 +58,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
 
             if ($isAjax) {
                 header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'message' => $message]);
+                echo json_encode(['success' => $success, 'message' => $message]);
                 exit();
             }
     } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_time'])) {
-            $new_time = $_POST['new_time'];
+            $raw_new_time = trim($_POST['new_time']);
             $status = 'rescheduled';
+            $new_time = null;
+            $new_timestamp = false;
+
+            if (($dateObj = DateTime::createFromFormat('Y-m-d\TH:i', $raw_new_time)) !== false) {
+                $new_timestamp = $dateObj->getTimestamp();
+                $new_time = $dateObj->format('Y-m-d H:i:00');
+            } elseif (($timestamp = strtotime($raw_new_time)) !== false) {
+                $new_timestamp = $timestamp;
+                $new_time = date('Y-m-d H:i:00', $timestamp);
+            }
 
             $getStmt = $conn->prepare("SELECT scheduled_at, psychologist_account_id FROM appointments WHERE id = ? AND user_account_id = ?");
             $getStmt->bind_param("ii", $appointment_id, $account_id);
@@ -71,6 +83,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
 
             if (!$apptRow) {
                 $message = t('appointment_not_found');
+                $success = false;
+            } elseif ($new_time === null || $new_timestamp === false) {
+                $message = t('appointment_reschedule_failed');
+                $success = false;
+            } elseif ($new_timestamp < time()) {
+                $message = t('appointment_reschedule_failed');
+                $success = false;
             } else {
                 $old_time = $apptRow['scheduled_at'];
                 $psychologist_id = (int)$apptRow['psychologist_account_id'];
@@ -85,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
 
                     if (!$slot) {
                         $message = t('appointment_reschedule_failed');
+                        $success = false;
                     } else {
                         $stmt = $conn->prepare("UPDATE appointments SET scheduled_at = ?, status = ? WHERE id = ? AND user_account_id = ?");
                         $stmt->bind_param("ssii", $new_time, $status, $appointment_id, $account_id);
@@ -102,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
                         $bookStmt->close();
 
                         $message = t('appointment_rescheduled', date('d.m.Y H:i', strtotime($new_time)));
+                        $success = true;
                     }
                 } else {
                     $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ? AND user_account_id = ?");
@@ -109,12 +130,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'], $_P
                     $stmt->execute();
                     $stmt->close();
                     $message = t('appointment_rescheduled', date('d.m.Y H:i', strtotime($new_time)));
+                    $success = true;
                 }
             }
 
             if ($isAjax) {
                 header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'message' => $message]);
+                echo json_encode(['success' => $success, 'message' => $message]);
                 exit();
             }
     }
@@ -125,7 +147,7 @@ $per_page = 8;
 $page = max(1, (int)($_GET['page'] ?? 1));
 $offset = ($page - 1) * $per_page;
 
-$count_stmt = $conn->prepare("SELECT COUNT(*) FROM appointments WHERE user_account_id = ?");
+$count_stmt = $conn->prepare("SELECT COUNT(*) FROM appointments WHERE user_account_id = ? AND scheduled_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)");
 $count_stmt->bind_param("i", $account_id);
 $count_stmt->execute();
 $total_appointments = (int)$count_stmt->get_result()->fetch_row()[0];
@@ -135,7 +157,7 @@ $page = min($page, max(1, $total_pages));
 
 $sql = "SELECT a.id, a.scheduled_at, a.consultation_type, a.status, a.chat_activated_at, p.full_name FROM appointments a 
         JOIN psychologist_profiles p ON a.psychologist_account_id = p.account_id 
-        WHERE a.user_account_id = ? 
+        WHERE a.user_account_id = ? AND a.scheduled_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)
         ORDER BY a.scheduled_at DESC
         LIMIT {$per_page} OFFSET {$offset}";
 $stmt = $conn->prepare($sql);
@@ -147,6 +169,8 @@ while($row = $result->fetch_assoc()) {
     $appointments[] = $row;
 }
 $stmt->close();
+
+require '../includes/header.php';
 ?>
 
 <div class="page-shell page-surface">
