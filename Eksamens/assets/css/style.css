@@ -614,7 +614,7 @@ body {
 }
 
 .booking-card {
-  background: linear-gradient(to bottom right, #14967f, #095d7e);
+  background: rgb(20, 150, 127);
   border-radius: 1rem;
   padding: 2rem;
   color: #fff;
