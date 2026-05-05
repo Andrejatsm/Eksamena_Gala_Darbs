@@ -284,6 +284,24 @@ body {
   color: rgb(212 212 216);
 }
 
+.quill-editor-wrap .ql-editor {
+  min-height: 20rem; /* increase this value to make it taller */
+}
+
+/* Force white background in dark mode */
+.dark .quill-editor-wrap .ql-toolbar.ql-snow {
+  border-color: rgb(209 213 219);
+  background: #fff;
+}
+.dark .quill-editor-wrap .ql-toolbar .ql-stroke { stroke: rgb(55 65 81); }
+.dark .quill-editor-wrap .ql-toolbar .ql-fill { fill: rgb(55 65 81); }
+.dark .quill-editor-wrap .ql-toolbar .ql-picker { color: rgb(55 65 81); }
+.dark .quill-editor-wrap .ql-container.ql-snow { border-color: rgb(209 213 219); }
+.dark .quill-editor-wrap .ql-editor {
+  background: #fff;
+  color: rgb(17 24 39);
+}
+
 .input-control,
 .textarea-control,
 .select-control,

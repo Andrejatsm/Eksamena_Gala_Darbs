@@ -118,7 +118,7 @@ $stmt->close();
         </div>
     <?php endif; ?>
 
-    <!-- Raksta izveides forma -->
+  <!-- Raksta izveides forma -->
     <div class="form-card mb-8">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4"><?php echo t('publish_new_article'); ?></h2>
         <form method="POST" id="article-form" class="stack-md">
@@ -139,7 +139,9 @@ $stmt->close();
             </div>
             <div>
                 <label class="field-label"><?php echo t('content'); ?></label>
-                <div id="article-editor"></div>
+                <div class="quill-editor-wrap">
+                    <div id="article-editor"></div>
+                </div>
                 <input type="hidden" name="content" id="article-content-input" value="<?php echo htmlspecialchars($article_content); ?>">
             </div>
             <div>
