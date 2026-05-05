@@ -30,7 +30,7 @@ if (!isset($pathPrefix)) {
     </button>
 
     <div id="chat-container" class="hidden fixed bottom-24 right-6 z-50 w-80 md:w-96 h-[500px] bg-white dark:bg-zinc-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-700 flex flex-col overflow-hidden transition-all duration-300">
-        <div class="bg-gradient-to-r from-primary to-primaryHover p-4 flex justify-between items-center text-white shadow-sm">
+        <div class="bg-[#14967f] p-4 flex justify-between items-center text-white shadow-sm">
             <div class="font-bold flex items-center gap-2">
                 <i class="fas fa-robot"></i> <?php echo t('ai_assistant'); ?>
             </div>
@@ -47,7 +47,7 @@ if (!isset($pathPrefix)) {
         </div>
         <div class="p-3 border-t border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 flex gap-2">
             <input type="text" id="chat-input" placeholder="<?php echo t('write_message'); ?>" class="flex-1 bg-gray-100 dark:bg-zinc-700 text-gray-900 dark:text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition placeholder-gray-400">
-            <button id="chat-send-btn" class="bg-primary hover:bg-primaryHover text-white rounded-full w-10 h-10 flex items-center justify-center transition shadow-sm transform hover:scale-110">
+            <button id="chat-send-btn" class="bg-primary hover:bg-primaryHover text-white rounded-full w-10 h-10 flex items-center justify-center">
                 <i class="fas fa-paper-plane text-sm"></i>
             </button>
         </div>

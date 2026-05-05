@@ -185,7 +185,7 @@ function detect_preferred_mode(string $message): string {
         'vientul',
         'apjucis',
         'apjukusi',
-        'izmis',
+        'izmisis',
         'pasūdzēties',
         'pasudzeties',
         'parunāt',

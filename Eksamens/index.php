@@ -55,7 +55,7 @@ if ($articles_result) {
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="<?php echo $btn_link; ?>" class="px-10 py-4 bg-[#14967f] text-white rounded-full font-bold text-lg flex items-center justify-center gap-2">
+                    <a href="<?php echo $btn_link; ?>" class="px-10 py-4 bg-[#14967f] text-white rounded-full font-bold text-lg flex items-center justify-center gap-2 hover:bg-primaryHover">
                         <?php echo $btn_text; ?>
                         <i class="fas fa-arrow-right"></i>
                     </a>
