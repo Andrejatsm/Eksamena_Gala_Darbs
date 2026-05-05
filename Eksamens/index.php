@@ -73,43 +73,43 @@ if ($articles_result) {
         </div>
     </section>
 
-    <!-- Kā tas darbojas sadaļa -->
-    <section id="how-it-works" class="py-24 bg-white dark:bg-zinc-800/50 px-6">
-        <div class="max-w-7xl mx-auto">
-            <div class="mb-16">
+<!-- Kā tas darbojas sadaļa -->
+    <section id="how-it-works" class="home-section home-section-light">
+        <div class="home-shell">
+            <div class="home-section-head">
                 <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4"><?php echo t('how_it_works'); ?></h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl"><?php echo t('three_steps_subtitle'); ?></p>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl"><?php echo t('three_steps_subtitle'); ?></p>
             </div>
             
-            <div class="grid md:grid-cols-3 gap-8">
+            <div class="home-card-grid">
                 <!-- 1. solis -->
-                <div class="p-8 bg-surface dark:bg-zinc-800 rounded-2xl border border-gray-100 dark:border-zinc-700">
-                    <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
-                        <i class="fas fa-search text-2xl text-primary"></i>
+                <div class="home-test-carda">
+                    <div class="home-test-icona">
+                        <i class="fas fa-search text-lg"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">1. <?php echo t('step'); ?></span>
-                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white"><?php echo t('step1_title'); ?></h3>
-                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo t('step1_text'); ?></p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2"><?php echo t('step1_title'); ?></h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-5 flex-grow home-card-copy"><?php echo t('step1_text'); ?></p>
                 </div>
                 
                 <!-- 2. solis -->
-                <div class="p-8 bg-surface dark:bg-zinc-800 rounded-2xl border border-gray-100 dark:border-zinc-700">
-                    <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
-                        <i class="fas fa-calendar text-2xl text-primary"></i>
+                <div class="home-test-carda">
+                    <div class="home-test-icona">
+                        <i class="fas fa-calendar text-lg"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">2. <?php echo t('step'); ?></span>
-                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white"><?php echo t('step2_title'); ?></h3>
-                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo t('step2_text'); ?></p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2"><?php echo t('step2_title'); ?></h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-5 flex-grow home-card-copy"><?php echo t('step2_text'); ?></p>
                 </div>
                 
                 <!-- 3. solis -->
-                <div class="p-8 bg-surface dark:bg-zinc-800 rounded-2xl border border-gray-100 dark:border-zinc-700">
-                    <div class="w-14 h-14 rounded-xl bg-primary/20 dark:bg-primary/30 flex items-center justify-center mb-6">
-                        <i class="fas fa-comments text-2xl text-primary"></i>
+                <div class="home-test-carda">
+                    <div class="home-test-icona">
+                        <i class="fas fa-comments text-lg"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">3. <?php echo t('step'); ?></span>
-                    <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white"><?php echo t('step3_title'); ?></h3>
-                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed"><?php echo t('step3_text'); ?></p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2"><?php echo t('step3_title'); ?></h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-5 flex-grow home-card-copy"><?php echo t('step3_text'); ?></p>
                 </div>
             </div>
         </div>
