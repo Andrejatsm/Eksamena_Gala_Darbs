@@ -255,7 +255,7 @@ $stmt->close();
             </form>
 
             <!-- Delete account -->
-            <div class="ui-card p-6 border border-red-100 dark:border-red-900/30">
+            <div class="ui-card p-6 border">
                 <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1"><?php echo t('delete_account'); ?></h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"><?php echo t('delete_warning'); ?></p>
                 <button type="button" id="openDeleteAccountModalBtn" class="px-4 py-2 bg-[#095d7e] hover:bg-[#074e6b] text-white rounded-lg transition font-semibold text-sm">

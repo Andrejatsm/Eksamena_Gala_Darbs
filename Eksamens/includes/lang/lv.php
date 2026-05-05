@@ -324,7 +324,7 @@ return [
     'reject_test'           => 'Noraidīt testu',
     'search'                => 'Meklēt',
     'read_full_article'     => 'Lasīt pilnu rakstu',
-    'delete'                => 'Likvidēt',
+    'delete'                => 'Dzēst',
     'psych_approved'        => 'Psihologs apstiprināts sekmīgi!',
     'psych_approve_error'   => 'Neizdevās apstiprināt psihologa profilu.',
     'psych_rejected'        => 'Psihologu profils noraidīts.',
