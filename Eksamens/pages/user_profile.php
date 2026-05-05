@@ -193,112 +193,143 @@ $stmt->close();
     </div>
 
     <?php if(!empty($message)): ?>
-        <div class="alert-success">
-            <?php echo $message; ?>
-        </div>
+        <div class="alert-success"><?php echo $message; ?></div>
     <?php endif; ?>
-
     <?php if(!empty($error)): ?>
-        <div class="alert-error">
-            <?php echo $error; ?>
-        </div>
+        <div class="alert-error"><?php echo $error; ?></div>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data" class="form-card stack-md">
-        <div>
-            <label class="field-label"><?php echo t('username_readonly'); ?></label>
-            <input type="text" value="<?php echo htmlspecialchars($current['username']); ?>" disabled class="input-control-disabled">
+    <div class="layout-grid-2 items-start">
+
+        <!-- Left column: Account info -->
+        <div class="flex flex-col gap-6">
+
+            <form method="POST" enctype="multipart/form-data" class="ui-card p-6 flex flex-col gap-6">
+
+                <!-- Account basics -->
+                <div>
+                    <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4"><?php echo t('account_info'); ?></h2>
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <label class="field-label"><?php echo t('username_readonly'); ?></label>
+                            <input type="text" value="<?php echo htmlspecialchars($current['username']); ?>" disabled class="input-control-disabled">
+                        </div>
+                        <div>
+                            <label class="field-label"><?php echo t('first_name'); ?></label>
+                            <input type="text" value="<?php echo htmlspecialchars($role === 'user' ? $profile['first_name'] : explode(' ', $profile['full_name'])[0]); ?>" disabled class="input-control-disabled">
+                        </div>
+                        <div>
+                            <label class="field-label"><?php echo t('email'); ?></label>
+                            <input type="email" name="email" value="<?php echo htmlspecialchars($current['email']); ?>" class="input-control">
+                        </div>
+                        <div>
+                            <label class="field-label"><?php echo t('phone'); ?></label>
+                            <input type="tel" name="phone" value="<?php echo htmlspecialchars($current['phone'] ?? ''); ?>" class="input-control">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200 dark:border-zinc-700">
+
+                <!-- Password change -->
+                <div>
+                    <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4"><?php echo t('change_password'); ?></h2>
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <label class="field-label"><?php echo t('old_password'); ?></label>
+                            <input type="password" name="old_password" class="input-control">
+                        </div>
+                        <div>
+                            <label class="field-label"><?php echo t('new_password'); ?></label>
+                            <input type="password" name="new_password" class="input-control">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><?php echo t('password_hint'); ?></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="button-primary flex-1"><?php echo t('save_changes'); ?></button>
+                    <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/dashboard.php" class="button-secondary flex-1"><?php echo t('cancel'); ?></a>
+                </div>
+
+            </form>
+
+            <!-- Delete account -->
+            <div class="ui-card p-6 border border-red-100 dark:border-red-900/30">
+                <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1"><?php echo t('delete_account'); ?></h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"><?php echo t('delete_warning'); ?></p>
+                <button type="button" id="openDeleteAccountModalBtn" class="px-4 py-2 bg-[#095d7e] hover:bg-[#074e6b] text-white rounded-lg transition font-semibold text-sm">
+                    <i class="fas fa-trash mr-2"></i><?php echo t('delete_my_account'); ?>
+                </button>
+            </div>
+
         </div>
 
-        <div>
-            <label class="field-label"><?php echo t('first_name'); ?></label>
-            <input type="text" value="<?php echo htmlspecialchars($role === 'user' ? $profile['first_name'] : explode(' ', $profile['full_name'])[0]); ?>" disabled class="input-control-disabled">
-        </div>
-
-        <div>
-            <label class="field-label"><?php echo t('email'); ?></label>
-            <input type="email" name="email" value="<?php echo htmlspecialchars($current['email']); ?>" class="input-control">
-        </div>
-
-        <div>
-            <label class="field-label"><?php echo t('phone'); ?></label>
-            <input type="tel" name="phone" value="<?php echo htmlspecialchars($current['phone'] ?? ''); ?>" class="input-control">
-        </div>
-
+        <!-- Right column: Psychologist profile (only shown for psychologists) -->
         <?php if ($role === 'psychologist'): ?>
-        <hr class="border-gray-200 dark:border-zinc-700 my-4">
+        <form method="POST" enctype="multipart/form-data" class="ui-card p-6 flex flex-col gap-6">
 
-        <div>
-            <label class="field-label"><?php echo t('specialization'); ?></label>
-            <select name="specialization" class="select-control">
-                <option value=""><?php echo t('choose_specialization'); ?></option>
-                <?php foreach ($specialization_options as $spec): ?>
-                <option value="<?php echo htmlspecialchars($spec); ?>" <?php echo (($profile['specialization'] ?? '') === $spec) ? 'selected' : ''; ?>><?php echo htmlspecialchars($spec); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+            <div>
+                <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4"><?php echo t('specialist_profile'); ?></h2>
 
-        <div>
-            <label class="field-label"><?php echo t('experience_years'); ?></label>
-            <input type="number" name="experience_years" min="0" max="50" value="<?php echo (int)($profile['experience_years'] ?? 0); ?>" class="input-control">
-        </div>
+                <!-- Profile image -->
+                <div class="flex items-center gap-4 mb-6">
+                    <?php if (!empty($profile['image_path'])): ?>
+                        <img src="<?php echo htmlspecialchars((string)$profile['image_path']); ?>" alt="<?php echo t('current_profile_image'); ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-zinc-600 flex-shrink-0">
+                    <?php else: ?>
+                        <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user text-2xl text-gray-400"></i>
+                        </div>
+                    <?php endif; ?>
+                    <div class="flex-1">
+                        <label class="field-label"><?php echo t('profile_image'); ?></label>
+                        <input type="file" name="profile_image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="input-control text-sm">
+                        <label class="mt-2 inline-flex items-center text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
+                            <input type="checkbox" name="remove_profile_image" value="1" class="mr-2">
+                            <?php echo t('remove_profile_image'); ?>
+                        </label>
+                    </div>
+                </div>
 
-        <div>
-            <label class="field-label"><?php echo t('description'); ?></label>
-            <textarea name="description" rows="4" class="textarea-control"><?php echo htmlspecialchars((string)($profile['description'] ?? '')); ?></textarea>
-        </div>
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="field-label"><?php echo t('specialization'); ?></label>
+                        <select name="specialization" class="select-control">
+                            <option value=""><?php echo t('choose_specialization'); ?></option>
+                            <?php foreach ($specialization_options as $spec): ?>
+                            <option value="<?php echo htmlspecialchars($spec); ?>" <?php echo (($profile['specialization'] ?? '') === $spec) ? 'selected' : ''; ?>><?php echo htmlspecialchars($spec); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="field-label"><?php echo t('experience_years'); ?></label>
+                        <input type="number" name="experience_years" min="0" max="50" value="<?php echo (int)($profile['experience_years'] ?? 0); ?>" class="input-control">
+                    </div>
+                    <div>
+                        <label class="field-label"><?php echo t('description'); ?></label>
+                        <textarea name="description" rows="6" class="textarea-control"><?php echo htmlspecialchars((string)($profile['description'] ?? '')); ?></textarea>
+                    </div>
+                </div>
+            </div>
 
-        <div>
-            <label class="field-label"><?php echo t('profile_image'); ?></label>
-            <?php if (!empty($profile['image_path'])): ?>
-                <img src="<?php echo htmlspecialchars((string)$profile['image_path']); ?>" alt="<?php echo t('current_profile_image'); ?>" class="w-24 h-24 rounded-full object-cover border border-gray-200 dark:border-zinc-700 mb-3">
-            <?php endif; ?>
-            <input type="file" name="profile_image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="input-control">
-            <label class="mt-2 inline-flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <input type="checkbox" name="remove_profile_image" value="1" class="mr-2">
-                <?php echo t('remove_profile_image'); ?>
-            </label>
-        </div>
+            <div class="pt-2">
+                <button type="submit" class="button-primary w-full"><?php echo t('save_changes'); ?></button>
+            </div>
+
+        </form>
+        <?php else: ?>
+            <!-- Empty right column spacer for non-psychologists so left column doesn't stretch too wide -->
+            <div></div>
         <?php endif; ?>
 
-        <hr class="border-gray-200 dark:border-zinc-700 my-4">
-
-        <div>
-            <label class="field-label"><?php echo t('old_password'); ?></label>
-            <input type="password" name="old_password" class="input-control">
-        </div>
-
-        <div>
-            <label class="field-label"><?php echo t('new_password'); ?></label>
-            <input type="password" name="new_password" class="input-control">
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><?php echo t('password_hint'); ?></p>
-        </div>
-
-        <div class="flex gap-3 pt-4">
-            <button type="submit" class="button-primary flex-1">
-                <?php echo t('save_changes'); ?>
-            </button>
-            <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/dashboard.php" class="button-secondary flex-1">
-                <?php echo t('cancel'); ?>
-            </a>
-        </div>
-    </form>
-
-    <!-- Konta dzēšana -->
-    <div class="form-card mt-6 border border-[#ccecee] dark:border-zinc-700">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-1"><?php echo t('delete_account'); ?></h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-5"><?php echo t('delete_warning'); ?></p>
-        <button type="button" id="openDeleteAccountModalBtn" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold">
-            <i class="fas fa-trash mr-2"></i><?php echo t('delete_my_account'); ?>
-        </button>
     </div>
 </div>
 
-<!-- Konta dzēšanas apstiprinājuma modālis -->
+<!-- Delete modal (unchanged) -->
 <div id="deleteAccountModal" class="hidden fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 py-8">
         <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm"></div>
-        <div class="relative bg-surface dark:bg-zinc-800 rounded-2xl border border-[#ccecee] dark:border-zinc-700 shadow-2xl w-full max-w-md">
+        <div class="relative bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 shadow-2xl w-full max-w-md">
             <div class="px-6 pt-6 pb-4">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2"><?php echo t('delete_confirm_title'); ?></h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-5"><?php echo t('delete_confirm_text'); ?></p>
@@ -306,17 +337,16 @@ $stmt->close();
                     <input type="hidden" name="action" value="delete_account">
                     <label class="field-label"><?php echo t('enter_password_confirm'); ?></label>
                     <input type="password" name="confirm_password" required class="input-control mb-5" placeholder="<?php echo t('your_password'); ?>">
-                    <div class="border-t border-[#ccecee] dark:border-zinc-700 -mx-6 px-6 pt-4 mt-2 flex justify-end gap-2 bg-[#f1f9ff] dark:bg-zinc-700/30 rounded-b-2xl">
-                        <button type="button" id="cancelDeleteAccountModalBtn" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold"><?php echo t('cancel'); ?></button>
-                        <button type="submit" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold">
-                            <i class="fas fa-trash mr-2"></i><?php echo t('yes_delete'); ?>
-                        </button>
-                    </div>
+                    <div class="border-t border-gray-200 dark:border-zinc-700 -mx-6 px-6 pt-4 mt-2 flex justify-end gap-2 bg-gray-50 dark:bg-zinc-700/30 rounded-b-2xl">
+    <button type="button" id="cancelDeleteAccountModalBtn" class="button-secondary"><?php echo t('cancel'); ?></button>
+    <button type="submit" class="px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold text-sm">
+        <i class="fas fa-trash mr-2"></i><?php echo t('yes_delete'); ?>
+    </button>
+</div>
                 </form>
             </div>
         </div>
     </div>
 </div>
 <script src="../assets/js/user_profile.js"></script>
-
 <?php require '../includes/footer.php'; ?>
