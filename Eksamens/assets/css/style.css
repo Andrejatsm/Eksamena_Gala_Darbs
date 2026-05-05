@@ -9,7 +9,7 @@
 }
 
 .primary-gradient {
-  background: linear-gradient(145deg, #14967f 0%, #095d7e 100%);
+  background: rgb(20, 150, 127);
 }
 
 /* Pagination buttons (reused across many pages) */
