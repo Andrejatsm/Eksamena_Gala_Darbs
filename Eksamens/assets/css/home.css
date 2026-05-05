@@ -15,7 +15,7 @@
 }
 
 .home-section-articles {
-  background: linear-gradient(135deg, #095d7e 0%, #14967f 55%, #ccecee 100%);
+  background: var(--color-primary);
 }
 
 .home-shell {
@@ -126,6 +126,23 @@
 }
 
 .dark .home-test-icon {
+  background: rgba(37, 99, 235, 0.2);
+  color: rgb(147 197 253);
+}
+
+.home-test-icona {
+  width: 3rem;
+  height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.9rem;
+  background: #14967f33;
+  color: #14967e;
+  margin-bottom: 1rem;
+}
+
+.dark .home-test-icona {
   background: rgba(37, 99, 235, 0.2);
   color: rgb(147 197 253);
 }
