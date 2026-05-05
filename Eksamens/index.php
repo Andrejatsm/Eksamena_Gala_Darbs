@@ -55,7 +55,7 @@ if ($articles_result) {
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="<?php echo $btn_link; ?>" class="px-10 py-4 bg-gradient-to-r from-primary to-primaryHover text-white rounded-full font-bold text-lg flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/30 transition-all transform hover:scale-105">
+                    <a href="<?php echo $btn_link; ?>" class="px-10 py-4 bg-[#14967f] text-white rounded-full font-bold text-lg flex items-center justify-center gap-2">
                         <?php echo $btn_text; ?>
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -77,8 +77,8 @@ if ($articles_result) {
     <section id="how-it-works" class="home-sectiona home-section-lighta">
         <div class="home-shell">
             <div class="home-section-head">
-                <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4"><?php echo t('how_it_works'); ?></h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl"><?php echo t('three_steps_subtitle'); ?></p>
+                <h2 class="text-4xl font-bold text-white mb-4"><?php echo t('how_it_works'); ?></h2>
+                <p class="text-lg text-white/70 max-w-3xl"><?php echo t('three_steps_subtitle'); ?></p>
             </div>
             
             <div class="home-card-grid">
