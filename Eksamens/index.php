@@ -74,7 +74,7 @@ if ($articles_result) {
     </section>
 
 <!-- Kā tas darbojas sadaļa -->
-    <section id="how-it-works" class="home-section home-section-light">
+    <section id="how-it-works" class="home-sectiona home-section-lighta">
         <div class="home-shell">
             <div class="home-section-head">
                 <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4"><?php echo t('how_it_works'); ?></h2>

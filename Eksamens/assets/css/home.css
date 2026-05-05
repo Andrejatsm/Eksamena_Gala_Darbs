@@ -87,6 +87,23 @@
 }
 
 /* Pievienota .home-test-carda, lai saglabātu struktūru un ēnas */
+.home-sectiona{
+  background: rgb(20, 150, 126);
+  position: relative;
+  overflow: hidden;
+  padding: 6rem 1.5rem;
+}
+
+.home-section-lighta {
+  background: rgb(20, 150, 126);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.dark .home-section-lighta {
+  background: rgb(20, 150, 126);
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
 .home-test-card,
 .home-test-carda, 
 .home-article-card {
@@ -103,7 +120,7 @@
   border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-/* Te varēsi likt citas krāsas jaunajai kartītei, ja nepieciešams */
+
 .home-test-carda {
   background: #fff;
   border: 1px solid rgba(15, 23, 42, 0.08);
