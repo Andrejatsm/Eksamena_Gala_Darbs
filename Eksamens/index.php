@@ -149,10 +149,6 @@ if ($articles_result) {
 
     <!-- Rakstu sadaļa -->
     <section class="home-section home-section-articles">
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl"></div>
-            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl"></div>
-        </div>
 
         <div class="home-shell relative z-10">
             <div class="home-section-head home-section-head-dark">
