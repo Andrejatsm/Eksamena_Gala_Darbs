@@ -37,7 +37,7 @@ if ($articles_result) {
     
     <!-- Ievada sadaļa -->
     <section class="relative min-h-screen flex items-center px-6 overflow-hidden bg-surface dark:bg-zinc-900">
-        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent dark:from-primary/10"></div>
+        <div class="absolute inset-0 from-primary/5 via-transparent to-transparent dark:from-primary/10"></div>
         
         <div class="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center relative z-10">
             <!-- Kreisās puses saturs -->
