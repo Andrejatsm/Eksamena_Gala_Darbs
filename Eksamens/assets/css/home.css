@@ -86,7 +86,9 @@
   }
 }
 
+/* Pievienota .home-test-carda, lai saglabātu struktūru un ēnas */
 .home-test-card,
+.home-test-carda, 
 .home-article-card {
   display: flex;
   flex-direction: column;
@@ -101,13 +103,21 @@
   border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
+/* Te varēsi likt citas krāsas jaunajai kartītei, ja nepieciešams */
+.home-test-carda {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
 .home-article-card {
   background: rgba(255, 255, 255, 0.985);
   border: 1px solid rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(10px);
 }
 
+/* Pievienota dark mode krāsa .home-test-carda kartītei */
 .dark .home-test-card,
+.dark .home-test-carda,
 .dark .home-article-card {
   background: rgb(39 39 42);
   border-color: rgba(255, 255, 255, 0.1);
@@ -137,14 +147,14 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.9rem;
-  background: #14967f33;
-  color: #14967e;
+  background: rgba(20, 150, 127, 0.2);
+  color: rgb(20, 150, 126);
   margin-bottom: 1rem;
 }
 
 .dark .home-test-icona {
-  background: rgba(37, 99, 235, 0.2);
-  color: rgb(147 197 253);
+background: rgba(20, 150, 127, 0.2);
+  color: rgb(20, 150, 126);
 }
 
 .home-card-copy {
