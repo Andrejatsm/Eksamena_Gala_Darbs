@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') !== 'delete
     }
 
     if (empty($error)) {
-        // Update account info
+        // Atjaunina konta informāciju
         if (!empty($new_password)) {
             $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE accounts SET email = ?, phone = ?, password_hash = ? WHERE id = ?");
@@ -265,7 +265,7 @@ $stmt->close();
 
         </div>
 
-        <!-- Right column: Psychologist profile (only shown for psychologists) -->
+        <!-- Right column: Psychologist profile (Šis tikkai parādās psihologam) -->
         <?php if ($role === 'psychologist'): ?>
         <form method="POST" enctype="multipart/form-data" class="ui-card p-6 flex flex-col gap-6">
 
@@ -318,14 +318,13 @@ $stmt->close();
 
         </form>
         <?php else: ?>
-            <!-- Empty right column spacer for non-psychologists so left column doesn't stretch too wide -->
+     
             <div></div>
         <?php endif; ?>
 
     </div>
 </div>
 
-<!-- Delete modal (unchanged) -->
 <div id="deleteAccountModal" class="hidden fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 py-8">
         <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm"></div>
