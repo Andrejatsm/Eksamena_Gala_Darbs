@@ -18,8 +18,6 @@ if ($conn->connect_error) {
 
 $conn->set_charset("utf8mb4");
 
-// Tabulu izveide, kolonnu pievienošana, sākuma dati
-require __DIR__ . '/migrations.php';
 
 // Automātiskā tīrīšana: dzēšam čata ziņas un video istabas priekš sesijām, kas beidzās pirms 2h
 $conn->query(
