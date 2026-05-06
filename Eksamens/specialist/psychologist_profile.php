@@ -77,7 +77,6 @@ $stmt = $conn->prepare("
     FROM availability_slots
     WHERE psychologist_account_id = ? AND starts_at > NOW() AND is_booked = 0
     ORDER BY starts_at ASC
-    LIMIT 10
 ");
 $stmt->bind_param("i", $psychologist_id);
 $stmt->execute();
@@ -168,82 +167,87 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
         </div>
         <?php endif; ?>
 
-        <!-- Available Slots & Booking -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Available Slots -->
-            <div class="lg:col-span-2">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6"><?php echo t('available_times'); ?></h2>
-                <?php if (count($available_slots) > 0): ?>
-                <div class="space-y-3">
-                    <?php foreach ($available_slots as $slot): ?>
-                    <div class="slot-row">
-                        <div>
-                            <p class="font-semibold text-gray-900 dark:text-white">
-                                <?php echo date('d. F Y', strtotime($slot['starts_at'])); ?>
-                                <span class="text-gray-600 dark:text-gray-400">
-                                    <?php echo date('H:i', strtotime($slot['starts_at'])); ?> - <?php echo date('H:i', strtotime($slot['ends_at'])); ?>
-                                </span>
-                            </p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                <i class="fas fa-video mr-1"></i><?php echo ($slot['consultation_type'] ?? 'online') === 'online' ? t('online') : t('in_person'); ?>
-                            </p>
-                            <?php if ($slot['note']): ?>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><?php echo htmlspecialchars($slot['note']); ?></p>
-                            <?php endif; ?>
-                        </div>
-                        <button type="button" class="slot-select-btn px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap ml-4"
-                            data-slot-id="<?php echo (int)$slot['id']; ?>"
-                            data-slot-time="<?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($slot['starts_at']))); ?>">
-                            <?php echo t('select'); ?>
-                        </button>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php else: ?>
-                <div class="bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/40 rounded-lg p-6 text-center">
-                    <p class="text-[#095d7e] dark:text-[#ccecee] font-semibold">
-                        <i class="fas fa-calendar-times mr-2"></i><?php echo t('no_available_times'); ?>
+<!-- Available Slots & Booking -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Available Slots -->
+    <div class="lg:col-span-2">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6"><?php echo t('available_times'); ?></h2>
+        <?php if (count($available_slots) > 0): ?>
+        <div id="slotsContainer" class="space-y-3">
+            <?php foreach ($available_slots as $slot): ?>
+            <div class="slot-row">
+                <div>
+                    <p class="font-semibold text-gray-900 dark:text-white">
+                        <?php echo date('d. F Y', strtotime($slot['starts_at'])); ?>
+                        <span class="text-gray-600 dark:text-gray-400">
+                            <?php echo date('H:i', strtotime($slot['starts_at'])); ?> - <?php echo date('H:i', strtotime($slot['ends_at'])); ?>
+                        </span>
                     </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        <i class="fas fa-video mr-1"></i><?php echo ($slot['consultation_type'] ?? 'online') === 'online' ? t('online') : t('in_person'); ?>
+                    </p>
+                    <?php if ($slot['note']): ?>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><?php echo htmlspecialchars($slot['note']); ?></p>
+                    <?php endif; ?>
                 </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Booking Summary -->
-            <div class="booking-card">
-                <h3 class="text-2xl font-bold mb-6"><?php echo t('book_consultation'); ?></h3>
-                
-                <div class="space-y-4 mb-8 pb-8 border-b border-white/20">
-                    <div>
-                        <p class="opacity-80 text-sm mb-1"><?php echo t('specialist'); ?></p>
-                        <p class="font-bold text-lg"><?php echo htmlspecialchars($psychologist['full_name']); ?></p>
-                    </div>
-                    <div>
-                        <p class="opacity-80 text-sm mb-1"><?php echo t('specialization'); ?></p>
-                        <p class="font-bold"><?php echo htmlspecialchars($psychologist['specialization']); ?></p>
-                    </div>
-                    <div>
-                        <p class="opacity-80 text-sm mb-1"><?php echo t('price_per_consultation'); ?></p>
-                        <p class="text-3xl font-bold">€50</p>
-                    </div>
-                </div>
-
-                <div id="bookingSummary" class="hidden mb-8">
-                    <div>
-                        <p class="opacity-80 text-sm mb-1"><?php echo t('selected_time'); ?></p>
-                        <p class="font-bold" id="selectedTime">-</p>
-                    </div>
-                </div>
-
-                <button id="paymentBtn" type="button" data-psychologist-id="<?php echo (int)$psychologist_id; ?>"
-                        class="w-full px-6 py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    <?php echo t('continue_to_payment'); ?>
+                <button type="button" class="slot-select-btn px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold whitespace-nowrap ml-4"
+                    data-slot-id="<?php echo (int)$slot['id']; ?>"
+                    data-slot-time="<?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($slot['starts_at']))); ?>">
+                    <?php echo t('select'); ?>
                 </button>
-                
-                <p class="text-xs opacity-75 mt-4 text-center">
-                    ✓ Draudzīga maksājuma sistēma • 🔒 Droši
-                </p>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="mt-6 flex justify-center">
+            <div class="flex items-center gap-2" id="slotPaginationControls"></div>
+        </div>
+
+        <?php else: ?>
+        <div class="bg-[#f1f9ff] dark:bg-[#095d7e]/20 border border-[#ccecee] dark:border-[#095d7e]/40 rounded-lg p-6 text-center">
+            <p class="text-[#095d7e] dark:text-[#ccecee] font-semibold">
+                <i class="fas fa-calendar-times mr-2"></i><?php echo t('no_available_times'); ?>
+            </p>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Booking Summary -->
+    <div class="booking-card">
+        <h3 class="text-2xl font-bold mb-6"><?php echo t('book_consultation'); ?></h3>
+        
+        <div class="space-y-4 mb-8 pb-8 border-b border-white/20">
+            <div>
+                <p class="opacity-80 text-sm mb-1"><?php echo t('specialist'); ?></p>
+                <p class="font-bold text-lg"><?php echo htmlspecialchars($psychologist['full_name']); ?></p>
+            </div>
+            <div>
+                <p class="opacity-80 text-sm mb-1"><?php echo t('specialization'); ?></p>
+                <p class="font-bold"><?php echo htmlspecialchars($psychologist['specialization']); ?></p>
+            </div>
+            <div>
+                <p class="opacity-80 text-sm mb-1"><?php echo t('price_per_consultation'); ?></p>
+                <p class="text-3xl font-bold">€50</p>
             </div>
         </div>
+
+        <div id="bookingSummary" class="hidden mb-8">
+            <div>
+                <p class="opacity-80 text-sm mb-1"><?php echo t('selected_time'); ?></p>
+                <p class="font-bold" id="selectedTime">-</p>
+            </div>
+        </div>
+
+        <button id="paymentBtn" type="button" data-psychologist-id="<?php echo (int)$psychologist_id; ?>"
+                class="w-full px-6 py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <?php echo t('continue_to_payment'); ?>
+        </button>
+        
+        <p class="text-xs opacity-75 mt-4 text-center">
+             Draudzīga maksājuma sistēma • Droši
+        </p>
+    </div>
+</div>
 
     </div>
 </div>
