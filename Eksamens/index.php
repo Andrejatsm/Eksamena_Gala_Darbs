@@ -78,7 +78,7 @@ if ($articles_result) {
         <div class="home-shell">
             <div class="home-section-head">
                 <h2 class="text-4xl font-bold text-white mb-4"><?php echo t('how_it_works'); ?></h2>
-                <p class="text-lg text-white/70 max-w-3xl"><?php echo t('three_steps_subtitle'); ?></p>
+                <p class="text-lg text-white/90 max-w-3xl"><?php echo t('three_steps_subtitle'); ?></p>
             </div>
             
             <div class="home-card-grid">

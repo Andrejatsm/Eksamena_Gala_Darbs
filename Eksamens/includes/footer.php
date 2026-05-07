@@ -25,7 +25,7 @@ if (!isset($pathPrefix)) {
         </div>
     </footer>
 
-    <button id="chat-toggle-btn" class="fixed bottom-6 right-6 z-50 bg-primary hover:bg-primaryHover text-white p-4 rounded-full shadow-lg transition-all transform hover:scale-110 flex items-center justify-center w-14 h-14">
+    <button id="chat-toggle-btn" class="fixed bottom-6 right-6 z-50 bg-[#095d7e] hover:bg-primaryHover text-white p-4 rounded-full shadow-lg transition-all transform hover:scale-110 flex items-center justify-center w-14 h-14">
         <i class="fas fa-comment-dots text-2xl"></i>
     </button>
 
