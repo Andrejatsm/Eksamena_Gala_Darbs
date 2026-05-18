@@ -73,18 +73,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_availability'])) {
 // Apstrādājam pieejamības slota dzēšanu
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_slot'])) {
     $slot_id = (int)$_POST['slot_id'];
-    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     $stmt = $conn->prepare("DELETE FROM availability_slots WHERE id = ? AND psychologist_account_id = ?");
     $stmt->bind_param("ii", $slot_id, $account_id);
     $stmt->execute();
     $stmt->close();
 
-    if ($isAjax) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'message' => t('slot_deleted')]);
-        exit();
-    }
     $_SESSION['availability_flash_success'] = t('slot_deleted');
+    header('Location: availability.php');
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_old_slots'])) {
+    $stmt = $conn->prepare("DELETE FROM availability_slots WHERE psychologist_account_id = ? AND ends_at < NOW()");
+    $stmt->bind_param("i", $account_id);
+    $stmt->execute();
+    $deletedCount = $stmt->affected_rows;
+    $stmt->close();
+
+    if ($deletedCount > 0) {
+        $_SESSION['availability_flash_success'] = "Izdzēsti $deletedCount vecie laiki.";
+    } else {
+        $_SESSION['availability_flash_success'] = "Nav vecu laiku, ko dzēst.";
+    }
+
     header('Location: availability.php');
     exit();
 }
@@ -126,6 +137,17 @@ require '../includes/header.php';
             <?php echo $message; ?>
         </div>
     <?php endif; ?>
+
+    <div class="mb-6 flex flex-wrap gap-3 items-center">
+        <a href="availability.php" class="button-secondary inline-flex items-center gap-2">
+            <i class="fas fa-refresh"></i> <?php echo t('refresh'); ?>
+        </a>
+        <form method="POST" action="" class="inline" data-confirm-delete="Vai tiešām vēlaties izdzēst visus pagājušos laika slotus?">
+            <button type="submit" name="delete_old_slots" class="button-secondary inline-flex items-center gap-2">
+                <i class="fas fa-trash-alt"></i> Dzēst vecos laikus
+            </button>
+        </form>
+    </div>
 
     <?php if(!empty($error)): ?>
         <div class="alert-error">
@@ -190,7 +212,8 @@ require '../includes/header.php';
                         </div>
                         <form method="POST" action="" class="inline" data-confirm-delete="<?php echo t('delete_slot_confirm'); ?>">
                             <input type="hidden" name="slot_id" value="<?php echo $slot['id']; ?>">
-                            <button type="submit" name="delete_slot" class="button-danger-icon text-sm">
+                            <input type="hidden" name="delete_slot" value="1">
+                            <button type="submit" class="button-danger-icon text-sm">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>

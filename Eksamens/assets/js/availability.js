@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     confirmForms.forEach(function (form) {
         form.addEventListener('submit', function (e) {
+            if (form._confirmed) {
+                form._confirmed = false;
+                return;
+            }
+
             e.preventDefault();
 
             if (typeof SaprastsConfirm === 'undefined') {
@@ -16,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 type: 'danger'
             }).then(function (confirmed) {
                 if (!confirmed) return;
+                form._confirmed = true;
                 form.submit();
             });
         });
