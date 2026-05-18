@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_slot'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_old_slots'])) {
-    $stmt = $conn->prepare("DELETE FROM availability_slots WHERE psychologist_account_id = ? AND ends_at < NOW()");
+    $stmt = $conn->prepare("DELETE FROM availability_slots WHERE psychologist_account_id = ? AND DATE(ends_at) < CURDATE()");
     $stmt->bind_param("i", $account_id);
     $stmt->execute();
     $deletedCount = $stmt->affected_rows;
@@ -127,9 +127,17 @@ require '../includes/header.php';
 ?>
 
 <div class="page-shell page-surface">
-    <div class="page-heading">
-        <h1 class="page-title"><?php echo t('availability_title'); ?></h1>
-        <p class="page-subtitle"><?php echo t('availability_subtitle'); ?></p>
+    <div class="page-heading flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="page-title"><?php echo t('availability_title'); ?></h1>
+            <p class="page-subtitle"><?php echo t('availability_subtitle'); ?></p>
+        </div>
+        <form method="POST" action="" class="inline" data-confirm-delete="Vai tiešām vēlaties izdzēst visus pagājušos laika slotus?">
+            <input type="hidden" name="delete_old_slots" value="1">
+            <button type="submit" class="button-secondary p-2 rounded-full" title="Dzēst vecos slotus">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </form>
     </div>
 
     <?php if(!empty($message)): ?>
@@ -137,17 +145,6 @@ require '../includes/header.php';
             <?php echo $message; ?>
         </div>
     <?php endif; ?>
-
-    <div class="mb-6 flex flex-wrap gap-3 items-center">
-        <a href="availability.php" class="button-secondary inline-flex items-center gap-2">
-            <i class="fas fa-refresh"></i> <?php echo t('refresh'); ?>
-        </a>
-        <form method="POST" action="" class="inline" data-confirm-delete="Vai tiešām vēlaties izdzēst visus pagājušos laika slotus?">
-            <button type="submit" name="delete_old_slots" class="button-secondary inline-flex items-center gap-2">
-                <i class="fas fa-trash-alt"></i> Dzēst vecos laikus
-            </button>
-        </form>
-    </div>
 
     <?php if(!empty($error)): ?>
         <div class="alert-error">

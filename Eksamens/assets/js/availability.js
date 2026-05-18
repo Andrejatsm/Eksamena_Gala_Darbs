@@ -10,9 +10,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             e.preventDefault();
+            form._submitter = e.submitter || null;
 
             if (typeof SaprastsConfirm === 'undefined') {
-                form.submit();
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit(form._submitter);
+                } else {
+                    form.submit();
+                }
                 return;
             }
 
@@ -22,7 +27,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }).then(function (confirmed) {
                 if (!confirmed) return;
                 form._confirmed = true;
-                form.submit();
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit(form._submitter);
+                } else {
+                    form.submit();
+                }
             });
         });
     });
