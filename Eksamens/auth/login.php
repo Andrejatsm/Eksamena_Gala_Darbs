@@ -141,6 +141,12 @@ require '../includes/header.php';
                 </div>
             </div>
 
+            <div class="text-right">
+                <a href="<?php echo htmlspecialchars($pathPrefix); ?>auth/forgot_password.php" class="text-sm font-medium text-primary hover:text-primaryHover transition">
+                    <?php echo t('forgot_password'); ?>
+                </a>
+            </div>
+
             <button type="submit" class="button-primary w-full">
                 <?php echo t('login'); ?>
             </button>
