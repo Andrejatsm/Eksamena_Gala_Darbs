@@ -97,10 +97,22 @@ $available_slots = $slots_result->fetch_all(MYSQLI_ASSOC);
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Profile Info -->
                 <div>
-                            <?php if (!empty($psychologist['image_path'])): ?>
-                        <img src="<?php echo htmlspecialchars($psychologist['image_path']); ?>"
+                            <?php 
+                                $psiImagePath = '';
+                                if (!empty($psychologist['image_path'])) {
+                                    $psiImagePath = strpos($psychologist['image_path'], '../') === 0 ? $psychologist['image_path'] : '../' . $psychologist['image_path'];
+                                }
+                            ?>
+                            <?php if (!empty($psiImagePath)): ?>
+                        <img src="<?php echo htmlspecialchars($psiImagePath); ?>"
                              alt="<?php echo htmlspecialchars($psychologist['full_name']); ?>"
-                             class="w-32 h-32 rounded-full object-cover mx-auto mb-4 shadow-lg border-4 border-primary/30">
+                             class="w-32 h-32 rounded-full object-cover mx-auto mb-4 shadow-lg border-4 border-primary/30"
+                             onerror="this.style.display='none'; document.getElementById('psiAvatarFallback').style.display='flex';">
+                        <div id="psiAvatarFallback" class="hidden w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-primary/30">
+                            <div class="text-5xl font-bold text-primary">
+                                <?php echo strtoupper(substr($psychologist['full_name'], 0, 1)); ?>
+                            </div>
+                        </div>
                         <?php else: ?>
                         <div class="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-primary/30">
                             <div class="text-5xl font-bold text-primary">

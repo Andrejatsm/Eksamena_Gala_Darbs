@@ -214,34 +214,37 @@ $stmt->close();
                             <label class="field-label"><?php echo t('username_readonly'); ?></label>
                             <input type="text" value="<?php echo htmlspecialchars($current['username']); ?>" disabled class="input-control-disabled">
                         </div>
-                        <div>
-                            <label class="field-label"><?php echo t('first_name'); ?></label>
-                            <input type="text" value="<?php echo htmlspecialchars($role === 'user' ? $profile['first_name'] : explode(' ', $profile['full_name'])[0]); ?>" disabled class="input-control-disabled">
-                        </div>
-                        <div>
-                            <label class="field-label"><?php echo t('email'); ?></label>
-                            <input type="email" name="email" value="<?php echo htmlspecialchars($current['email']); ?>" class="input-control">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="field-label"><?php echo t('first_name'); ?></label>
+                                <input type="text" value="<?php echo htmlspecialchars($role === 'user' ? $profile['first_name'] : explode(' ', $profile['full_name'])[0]); ?>" disabled class="input-control-disabled">
+                            </div>
+                            <div>
+                                <label class="field-label"><?php echo t('email'); ?></label>
+                                <input type="email" name="email" value="<?php echo htmlspecialchars($current['email']); ?>" required class="input-control">
+                            </div>
                         </div>
                         <div>
                             <label class="field-label"><?php echo t('phone'); ?></label>
-                            <input type="tel" name="phone" value="<?php echo htmlspecialchars($current['phone'] ?? ''); ?>" class="input-control">
+                            <input type="tel" name="phone" value="<?php echo htmlspecialchars($current['phone'] ?? ''); ?>" placeholder="<?php echo t('enter_phone'); ?>" class="input-control">
                         </div>
                     </div>
                 </div>
 
                 <hr class="border-gray-200 dark:border-zinc-700">
 
-                <!-- Password change -->
+                <!-- Password change section -->
                 <div>
-                    <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4"><?php echo t('change_password'); ?></h2>
+                    <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4"><?php echo t('security'); ?></h2>
                     <div class="flex flex-col gap-4">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2"><?php echo t('leave_blank_no_change'); ?></p>
                         <div>
-                            <label class="field-label"><?php echo t('old_password'); ?></label>
-                            <input type="password" name="old_password" class="input-control">
+                            <label class="field-label"><?php echo t('current_password'); ?></label>
+                            <input type="password" name="old_password" placeholder="••••••••" class="input-control">
                         </div>
                         <div>
                             <label class="field-label"><?php echo t('new_password'); ?></label>
-                            <input type="password" name="new_password" class="input-control">
+                            <input type="password" name="new_password" placeholder="••••••••" class="input-control">
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><?php echo t('password_hint'); ?></p>
                         </div>
                     </div>
@@ -249,16 +252,16 @@ $stmt->close();
 
                 <div class="flex gap-3 pt-2">
                     <button type="submit" class="button-primary flex-1"><?php echo t('save_changes'); ?></button>
-                    <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/dashboard.php" class="button-secondary flex-1"><?php echo t('cancel'); ?></a>
+                    <a href="<?php echo htmlspecialchars($pathPrefix); ?>pages/dashboard.php" class="button-secondary flex-1 text-center"><?php echo t('cancel'); ?></a>
                 </div>
 
             </form>
 
             <!-- Delete account -->
-            <div class="ui-card p-6 border">
-                <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1"><?php echo t('delete_account'); ?></h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"><?php echo t('delete_warning'); ?></p>
-                <button type="button" id="openDeleteAccountModalBtn" class="px-4 py-2 bg-[#095d7e] hover:bg-[#074e6b] text-white rounded-lg transition font-semibold text-sm">
+            <div class="ui-card p-6 border border-red-200/50 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/10">
+                <h2 class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400 mb-2"><?php echo t('delete_account'); ?></h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4"><?php echo t('delete_warning'); ?></p>
+                <button type="button" id="openDeleteAccountModalBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-semibold text-sm">
                     <i class="fas fa-trash mr-2"></i><?php echo t('delete_my_account'); ?>
                 </button>
             </div>
@@ -274,13 +277,24 @@ $stmt->close();
 
                 <!-- Profile image -->
                 <div class="flex items-center gap-4 mb-6">
-                    <?php if (!empty($profile['image_path'])): ?>
-                        <img src="<?php echo htmlspecialchars((string)$profile['image_path']); ?>" alt="<?php echo t('current_profile_image'); ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-zinc-600 flex-shrink-0">
-                    <?php else: ?>
-                        <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-user text-2xl text-gray-400"></i>
-                        </div>
-                    <?php endif; ?>
+                    <?php 
+                        $imagePath = '';
+                        if (!empty($profile['image_path'])) {
+                            $imagePath = strpos($profile['image_path'], '../') === 0 ? $profile['image_path'] : '../' . $profile['image_path'];
+                        }
+                    ?>
+                    <div class="relative">
+                        <?php if (!empty($imagePath)): ?>
+                            <img src="<?php echo htmlspecialchars($imagePath); ?>" alt="<?php echo t('current_profile_image'); ?>" class="w-24 h-24 rounded-full object-cover border-3 border-primary/20 flex-shrink-0" onerror="this.style.display='none'; document.getElementById('fallbackAvatar').style.display='flex';">
+                            <div id="fallbackAvatar" class="hidden w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-3 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-3xl text-primary/40"></i>
+                            </div>
+                        <?php else: ?>
+                            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-3 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-3xl text-primary/40"></i>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     <div class="flex-1">
                         <label class="field-label"><?php echo t('profile_image'); ?></label>
                         <input type="file" name="profile_image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="input-control text-sm">

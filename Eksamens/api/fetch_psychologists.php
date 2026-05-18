@@ -139,8 +139,13 @@ if (empty($psihologi)) {
         ?>
         <a href="<?php echo htmlspecialchars($basePath); ?>specialist/psychologist_profile.php?id=<?php echo (int)$psi['account_id']; ?>" class="group bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full transform hover:-translate-y-1 block">
             <div class="relative h-64 overflow-hidden">
-                <?php if ($psi['image_path'] !== ''): ?>
-                <img src="<?php echo htmlspecialchars($basePath . $psi['image_path']); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500" alt="Psihologs">
+                <?php if (!empty($psi['image_path'])): ?>
+                <img src="<?php echo htmlspecialchars($basePath . $psi['image_path']); ?>" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500" alt="<?php echo htmlspecialchars($psi['full_name']); ?>" onerror="this.style.display='none'; document.getElementById('psiCardFallback-<?php echo (int)$psi['account_id']; ?>').style.display='flex';">
+                <div id="psiCardFallback-<?php echo (int)$psi['account_id']; ?>" class="hidden w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                    <div class="w-24 h-24 rounded-full bg-white/80 text-primary text-3xl font-bold flex items-center justify-center shadow-lg">
+                        <?php echo htmlspecialchars($initials); ?>
+                    </div>
+                </div>
                 <?php else: ?>
                 <div class="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                     <div class="w-24 h-24 rounded-full bg-white/80 text-primary text-3xl font-bold flex items-center justify-center shadow-lg">
