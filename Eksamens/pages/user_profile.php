@@ -52,39 +52,64 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') === 'delete
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') !== 'delete_account') {
-    $new_email = trim($_POST['email'] ?? '');
-    $new_phone = trim($_POST['phone'] ?? '');
-    $new_password = $_POST['new_password'] ?? '';
-    $old_password = $_POST['old_password'] ?? '';
-    $new_specialization = trim($_POST['specialization'] ?? '');
-    $new_experience_years = min(50, max(0, (int)($_POST['experience_years'] ?? 0)));
-    $new_description = trim($_POST['description'] ?? '');
-    $remove_profile_image = isset($_POST['remove_profile_image']);
+$action = $_POST['action'] ?? '';
 
-    // Get current account info
-    $stmt = $conn->prepare("SELECT password_hash FROM accounts WHERE id = ?");
-    $stmt->bind_param("i", $account_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $account = $result->fetch_assoc();
-    $stmt->close();
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $action !== 'delete_account') {
+    if ($action === 'update_account') {
+        $new_email = trim($_POST['email'] ?? '');
+        $new_phone = trim($_POST['phone'] ?? '');
+        $new_password = $_POST['new_password'] ?? '';
+        $old_password = $_POST['old_password'] ?? '';
 
-    // Validate old password if changing password
-    if (!empty($new_password) && !password_verify($old_password, $account['password_hash'])) {
-        $error = t('old_password_wrong');
-    } elseif (!empty($new_password)) {
-        // Validate new password strength
-        $hasUpper = preg_match('/[A-ZĀČĒĢĪĶĻŅŠŪŽ]/u', $new_password);
-        $hasLower = preg_match('/[a-zāčēģīķļņšūž]/u', $new_password);
-        $hasSymbol = preg_match('/[^A-Za-z0-9ĀČĒĢĪĶĻŅŠŪŽāčēģīķļņšūž]/u', $new_password);
-        if (!$hasUpper || !$hasLower || !$hasSymbol) {
-            $error = t('password_requirements');
+        // Get current account info
+        $stmt = $conn->prepare("SELECT password_hash FROM accounts WHERE id = ?");
+        $stmt->bind_param("i", $account_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $account = $result->fetch_assoc();
+        $stmt->close();
+
+        // Validate old password if changing password
+        if (!empty($new_password) && !password_verify($old_password, $account['password_hash'])) {
+            $error = t('old_password_wrong');
+        } elseif (!empty($new_password)) {
+            // Validate new password strength
+            $hasUpper = preg_match('/[A-ZĀČĒĢĪĶĻŅŠŪŽ]/u', $new_password);
+            $hasLower = preg_match('/[a-zāčēģīķļņšūž]/u', $new_password);
+            $hasSymbol = preg_match('/[^A-Za-z0-9ĀČĒĢĪĶĻŅŠŪŽāčēģīķļņšūž]/u', $new_password);
+            if (!$hasUpper || !$hasLower || !$hasSymbol) {
+                $error = t('password_requirements');
+            }
+        }
+
+        if (empty($error)) {
+            if (!empty($new_password)) {
+                $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
+                $stmt = $conn->prepare("UPDATE accounts SET email = ?, phone = ?, password_hash = ? WHERE id = ?");
+                $stmt->bind_param("sssi", $new_email, $new_phone, $password_hash, $account_id);
+            } else {
+                $stmt = $conn->prepare("UPDATE accounts SET email = ?, phone = ? WHERE id = ?");
+                $stmt->bind_param("ssi", $new_email, $new_phone, $account_id);
+            }
+
+            $accountUpdated = $stmt->execute();
+            if (!$accountUpdated) {
+                $error = t('profile_update_error');
+            }
+            $stmt->close();
+
+            if (empty($error)) {
+                $message = t('profile_updated');
+            }
         }
     }
 
-    $existingPsychProfile = null;
-    if (empty($error) && $role === 'psychologist') {
+    if ($action === 'update_psych_profile' && $role === 'psychologist') {
+        $new_specialization = trim($_POST['specialization'] ?? '');
+        $new_experience_years = min(50, max(0, (int)($_POST['experience_years'] ?? 0)));
+        $new_description = trim($_POST['description'] ?? '');
+        $remove_profile_image = isset($_POST['remove_profile_image']);
+
         if ($new_specialization === '' || !in_array($new_specialization, $specialization_options, true)) {
             $error = t('spec_invalid');
         } else {
@@ -97,37 +122,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') !== 'delete
                 $error = t('profile_load_error');
             }
         }
-    }
 
-    if (empty($error)) {
-        // Atjaunina konta informāciju
-        if (!empty($new_password)) {
-            $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("UPDATE accounts SET email = ?, phone = ?, password_hash = ? WHERE id = ?");
-            $stmt->bind_param("sssi", $new_email, $new_phone, $password_hash, $account_id);
-        } else {
-            $stmt = $conn->prepare("UPDATE accounts SET email = ?, phone = ? WHERE id = ?");
-            $stmt->bind_param("ssi", $new_email, $new_phone, $account_id);
-        }
-        
-        $accountUpdated = $stmt->execute();
-        if (!$accountUpdated) {
-            $error = t('profile_update_error');
-        }
-        $stmt->close();
-
-        if (empty($error) && $role === 'psychologist' && $existingPsychProfile) {
+        if (empty($error)) {
             $updatedImagePath = (string)($existingPsychProfile['image_path'] ?? '');
-
             if ($remove_profile_image) {
-                $updatedImagePath = null;
+                $updatedImagePath = '';
             }
 
             if (isset($_FILES['profile_image']) && (int)($_FILES['profile_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
                 if ((int)$_FILES['profile_image']['error'] !== UPLOAD_ERR_OK) {
                     $error = t('image_upload_error');
                 } else {
-                    $uploadDir = 'uploads/profile_images/';
+                    $uploadDir = __DIR__ . '/../uploads/profile_images/';
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0777, true);
                     }
@@ -136,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') !== 'delete
                     $safeName = preg_replace('/[^A-Za-z0-9_\.-]/', '_', basename($originalName));
                     $safeName = $safeName ?: 'profile_image';
                     $targetPath = $uploadDir . time() . '_' . $safeName;
+                    $relativePath = 'uploads/profile_images/' . basename($targetPath);
                     $ext = strtolower((string)pathinfo($targetPath, PATHINFO_EXTENSION));
                     $allowedImageTypes = ['jpg', 'jpeg', 'png', 'webp'];
 
@@ -144,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') !== 'delete
                     } elseif (!move_uploaded_file($_FILES['profile_image']['tmp_name'], $targetPath)) {
                         $error = t('image_save_error');
                     } else {
-                        $updatedImagePath = $targetPath;
+                        $updatedImagePath = $relativePath;
                     }
                 }
             }
@@ -157,10 +164,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['action'] ?? '') !== 'delete
                 }
                 $profileStmt->close();
             }
-        }
 
-        if (empty($error)) {
-            $message = t('profile_updated');
+            if (empty($error)) {
+                $message = t('profile_updated');
+            }
         }
     }
 }
@@ -205,6 +212,7 @@ $stmt->close();
         <div class="flex flex-col gap-6">
 
             <form method="POST" enctype="multipart/form-data" class="ui-card p-6 flex flex-col gap-6">
+    <input type="hidden" name="action" value="update_account">
 
                 <!-- Account basics -->
                 <div>
@@ -258,10 +266,10 @@ $stmt->close();
             </form>
 
             <!-- Delete account -->
-            <div class="ui-card p-6 border border-red-200/50 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/10">
-                <h2 class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400 mb-2"><?php echo t('delete_account'); ?></h2>
+            <div class="ui-card p-6 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
+                <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-900 dark:text-white mb-2"><?php echo t('delete_account'); ?></h2>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4"><?php echo t('delete_warning'); ?></p>
-                <button type="button" id="openDeleteAccountModalBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-semibold text-sm">
+                <button type="button" id="openDeleteAccountModalBtn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition font-semibold text-sm">
                     <i class="fas fa-trash mr-2"></i><?php echo t('delete_my_account'); ?>
                 </button>
             </div>
@@ -271,6 +279,7 @@ $stmt->close();
         <!-- Right column: Psychologist profile (Šis tikkai parādās psihologam) -->
         <?php if ($role === 'psychologist'): ?>
         <form method="POST" enctype="multipart/form-data" class="ui-card p-6 flex flex-col gap-6">
+            <input type="hidden" name="action" value="update_psych_profile">
 
             <div>
                 <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4"><?php echo t('specialist_profile'); ?></h2>
