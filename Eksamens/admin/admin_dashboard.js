@@ -167,7 +167,12 @@ document.addEventListener('DOMContentLoaded', () => {
             profileEditSpecialization.value = data.spec || '';
             profileEditExperience.value = data.exp || 0;
             profileEditDescription.value = data.desc || '';
-            profileEditCertificate.textContent = data.cert ? data.cert : 'Nav sertifikāta';
+            if (data.cert) {
+                const certUrl = encodeURI(toPublicPath(data.cert));
+                profileEditCertificate.innerHTML = `<a href="${certUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline"><i class="fas fa-file-alt mr-2"></i>Apskatīt sertifikātu</a>`;
+            } else {
+                profileEditCertificate.textContent = 'Nav sertifikāta';
+            }
         } else {
             psychProfileFields.classList.add('hidden');
             profileEditSpecialization.value = '';
