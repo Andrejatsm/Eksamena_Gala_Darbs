@@ -187,6 +187,8 @@ return [
     'profile_info_title'    => 'Mana profila informācija',
     'profile_info'          => 'Profila informācija',
     'edit_profile_info'     => 'Rediģējiet savu profila informāciju.',
+    'account_info'          => 'Kontu informācija',
+    'specialist_profile'    => 'Speciālista profils',
     'username_readonly'     => 'Lietotājvārds (nevar mainīt)',
     'profile_image'         => 'Profila attēls (JPG, PNG, WEBP)',
     'old_password'          => 'Vecā parole (ja vēlaties mainīt paroli)',

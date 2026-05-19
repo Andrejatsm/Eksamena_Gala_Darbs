@@ -187,6 +187,8 @@ return [
     'profile_info_title'    => 'My Profile Information',
     'profile_info'          => 'Profile Information',
     'edit_profile_info'     => 'Edit your profile information.',
+    'account_info'          => 'Account Information',
+    'specialist_profile'    => 'Specialist Profile',
     'username_readonly'     => 'Username (cannot change)',
     'profile_image'         => 'Profile Picture (JPG, PNG, WEBP)',
     'old_password'          => 'Old Password (if you want to change)',
