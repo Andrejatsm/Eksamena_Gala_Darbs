@@ -20,6 +20,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const articleModal = document.getElementById('articleModal');
     const articleModalBackdrop = document.getElementById('articleModalBackdrop');
     const closeArticleModalBtn = document.getElementById('closeArticleModalBtn');
+    const profileEditModal = document.getElementById('profileEditModal');
+    const profileEditBackdrop = document.getElementById('profileEditBackdrop');
+    const closeProfileEditTopBtn = document.getElementById('closeProfileEditTopBtn');
+    const closeProfileEditBtn = document.getElementById('closeProfileEditBtn');
+    const saveProfileEditBtn = document.getElementById('saveProfileEditBtn');
+    const profileEditForm = document.getElementById('profileEditForm');
+    const profileEditAccountId = document.getElementById('profileEditAccountId');
+    const profileEditAccountRole = document.getElementById('profileEditAccountRole');
+    const profileEditUsername = document.getElementById('profileEditUsername');
+    const profileEditDisplayName = document.getElementById('profileEditDisplayName');
+    const profileEditEmail = document.getElementById('profileEditEmail');
+    const profileEditPhone = document.getElementById('profileEditPhone');
+    const profileEditStatus = document.getElementById('profileEditStatus');
+    const profileEditPassword = document.getElementById('profileEditPassword');
+    const psychProfileFields = document.getElementById('psychProfileFields');
+    const profileEditSpecialization = document.getElementById('profileEditSpecialization');
+    const profileEditExperience = document.getElementById('profileEditExperience');
+    const profileEditDescription = document.getElementById('profileEditDescription');
+    const profileEditCertificate = document.getElementById('profileEditCertificate');
     let accountsPage = 1;
     let adminChart = null;
 
@@ -132,6 +151,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const openProfileEditModal = (data) => {
+        if (!profileEditModal || !profileEditForm) return;
+        profileEditAccountId.value = data.id || '';
+        profileEditAccountRole.value = data.role || '';
+        profileEditUsername.value = data.username || '';
+        profileEditDisplayName.value = data.displayName || '';
+        profileEditEmail.value = data.email || '';
+        profileEditPhone.value = data.phone || '';
+        profileEditStatus.value = data.status || 'active';
+        profileEditPassword.value = '';
+
+        if (data.role === 'psychologist') {
+            psychProfileFields.classList.remove('hidden');
+            profileEditSpecialization.value = data.spec || '';
+            profileEditExperience.value = data.exp || 0;
+            profileEditDescription.value = data.desc || '';
+            profileEditCertificate.textContent = data.cert ? data.cert : 'Nav sertifikāta';
+        } else {
+            psychProfileFields.classList.add('hidden');
+            profileEditSpecialization.value = '';
+            profileEditExperience.value = 0;
+            profileEditDescription.value = '';
+            profileEditCertificate.textContent = '';
+        }
+
+        profileEditModal.classList.remove('hidden');
+    };
+
+    const closeProfileEditModal = () => {
+        if (!profileEditModal) return;
+        profileEditModal.classList.add('hidden');
+    };
+
+    const submitProfileEdit = async () => {
+        if (!profileEditForm || !adminAccountsConfig?.actionUrl) return;
+        const formData = new FormData(profileEditForm);
+        formData.set('action', 'save_account_profile');
+        formData.set('account_id', profileEditAccountId.value);
+
+        try {
+            const response = await fetch(adminAccountsConfig.actionUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData,
+            });
+            const payload = await response.json();
+            if (!response.ok || !payload.success) {
+                showFeedback(payload.message || 'Neizdevās saglabāt profilu.', 'error');
+                return;
+            }
+            showFeedback(payload.message || 'Profils saglabāts.', 'success');
+            closeProfileEditModal();
+            loadAccounts(accountsPage);
+        } catch {
+            showFeedback('Notika kļūda, saglabājot profilu.', 'error');
+        }
+    };
+
     const showFeedback = (message, type = 'success') => {
         if (!feedbackBox || !message) return;
         const styles = type === 'error'
@@ -228,6 +307,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    if (accountsContainer) {
+        accountsContainer.addEventListener('click', (event) => {
+            const target = event.target;
+            const viewButton = target.closest('.view-profile-btn');
+            if (viewButton) {
+                openProfileEditModal({
+                    id: viewButton.dataset.id,
+                    role: viewButton.dataset.role,
+                    username: viewButton.dataset.username,
+                    displayName: viewButton.dataset.displayName,
+                    email: viewButton.dataset.email,
+                    phone: viewButton.dataset.phone,
+                    status: viewButton.dataset.status,
+                    spec: viewButton.dataset.spec,
+                    exp: viewButton.dataset.exp,
+                    desc: viewButton.dataset.desc,
+                    cert: viewButton.dataset.cert,
+                });
+                return;
+            }
+
+            const actionButton = target.closest('[data-account-action]');
+            if (actionButton) {
+                const confirmMessage = actionButton.dataset.confirm;
+                if (confirmMessage && !window.confirm(confirmMessage)) {
+                    return;
+                }
+                const action = actionButton.dataset.accountAction;
+                const accountId = actionButton.dataset.accountId;
+                if (action && accountId) {
+                    runAccountAction(action, accountId);
+                }
+            }
+        });
+    }
+
     if (closeTestPreviewTop) {
         closeTestPreviewTop.addEventListener('click', closeTestPreviewModal);
     }
@@ -256,6 +371,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeArticleModalTopBtn = document.getElementById('closeArticleModalTopBtn');
     if (closeArticleModalTopBtn) {
         closeArticleModalTopBtn.addEventListener('click', closeArticleModal);
+    }
+
+    if (profileEditBackdrop) {
+        profileEditBackdrop.addEventListener('click', closeProfileEditModal);
+    }
+    if (closeProfileEditTopBtn) {
+        closeProfileEditTopBtn.addEventListener('click', closeProfileEditModal);
+    }
+    if (closeProfileEditBtn) {
+        closeProfileEditBtn.addEventListener('click', closeProfileEditModal);
+    }
+    if (saveProfileEditBtn) {
+        saveProfileEditBtn.addEventListener('click', submitProfileEdit);
     }
 
     // Confirm before deleting an article in the modal

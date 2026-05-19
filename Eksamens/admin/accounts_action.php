@@ -182,6 +182,82 @@ try {
 
         $conn->commit();
         $message = 'Psihologa konts un saistītie dati izdzēsti.';
+    } elseif ($action === 'save_account_profile') {
+        $email = trim((string)($_POST['email'] ?? ''));
+        $phone = trim((string)($_POST['phone'] ?? ''));
+        $status = trim((string)($_POST['status'] ?? 'active'));
+        $password = trim((string)($_POST['password'] ?? ''));
+        $specialization = trim((string)($_POST['specialization'] ?? ''));
+        $experienceYears = min(50, max(0, (int)($_POST['experience_years'] ?? 0)));
+        $description = trim((string)($_POST['description'] ?? ''));
+
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeException('Lūdzu ievadiet derīgu e-pasta adresi.');
+        }
+
+        $allowedStatuses = ['active', 'pending', 'rejected', 'disabled'];
+        if (!in_array($status, $allowedStatuses, true)) {
+            $status = 'active';
+        }
+
+        $stmt = $conn->prepare("SELECT role FROM accounts WHERE id = ?");
+        if (!$stmt) {
+            throw new RuntimeException('Datubāzes kļūda.');
+        }
+        $stmt->bind_param('i', $accountId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $accountRow = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        if (!$accountRow) {
+            throw new RuntimeException('Konts netika atrasts.');
+        }
+
+        $role = (string)($accountRow['role'] ?? 'user');
+        $conn->begin_transaction();
+
+        if ($password !== '') {
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $conn->prepare("UPDATE accounts SET email = ?, phone = ?, status = ?, password_hash = ? WHERE id = ?");
+            if (!$stmt) {
+                throw new RuntimeException('Datubāzes kļūda, atjauninot kontu.');
+            }
+            $stmt->bind_param('ssssi', $email, $phone, $status, $passwordHash, $accountId);
+        } else {
+            $stmt = $conn->prepare("UPDATE accounts SET email = ?, phone = ?, status = ? WHERE id = ?");
+            if (!$stmt) {
+                throw new RuntimeException('Datubāzes kļūda, atjauninot kontu.');
+            }
+            $stmt->bind_param('sssi', $email, $phone, $status, $accountId);
+        }
+        $stmt->execute();
+        if ($stmt->errno) {
+            $stmt->close();
+            throw new RuntimeException('Neizdevās atjaunināt konta informāciju.');
+        }
+        $stmt->close();
+
+        if ($role === 'psychologist') {
+            if ($specialization === '') {
+                throw new RuntimeException('Lūdzu norādiet psihologa specializāciju.');
+            }
+
+            $stmt = $conn->prepare("UPDATE psychologist_profiles SET specialization = ?, experience_years = ?, description = ? WHERE account_id = ?");
+            if (!$stmt) {
+                throw new RuntimeException('Datubāzes kļūda, atjauninot psihologa profilu.');
+            }
+            $stmt->bind_param('sisi', $specialization, $experienceYears, $description, $accountId);
+            $stmt->execute();
+            if ($stmt->errno) {
+                $stmt->close();
+                throw new RuntimeException('Neizdevās atjaunināt psihologa profilu.');
+            }
+            $stmt->close();
+        }
+
+        $conn->commit();
+        $message = 'Profils ir veiksmīgi atjaunināts.';
     } elseif ($action === 'delete_user') {
         $conn->begin_transaction();
 
@@ -210,10 +286,6 @@ try {
 
         $conn->commit();
         $message = 'Lietotāja konts un saistītie dati izdzēsti.';
-    } else {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Neatbalstīta darbība.']);
-        exit();
     }
 
     echo json_encode([
