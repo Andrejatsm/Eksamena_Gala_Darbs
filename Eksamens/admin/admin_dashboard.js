@@ -550,26 +550,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadAccounts(1);
 
-    document.querySelectorAll('.view-article-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const articleModalTitle = document.getElementById('articleModalTitle');
-            const articleModalAuthor = document.getElementById('articleModalAuthor');
-            const articleModalContent = document.getElementById('articleModalContent');
-            const articleModalApproveId = document.getElementById('articleModalApproveId');
-            const articleModalRejectId = document.getElementById('articleModalRejectId');
-            const articleModalAccId = document.getElementById('articleModalAccId');
+    const clearArticleModal = () => {
+        const articleModalTitle = document.getElementById('articleModalTitle');
+        const articleModalAuthor = document.getElementById('articleModalAuthor');
+        const articleModalCategory = document.getElementById('articleModalCategory');
+        const articleModalContent = document.getElementById('articleModalContent');
+        const articleModalApproveId = document.getElementById('articleModalApproveId');
+        const articleModalRejectId = document.getElementById('articleModalRejectId');
+        const articleModalAccId = document.getElementById('articleModalAccId');
 
-            if (!articleModalTitle || !articleModalAuthor || !articleModalContent || !articleModalApproveId || !articleModalRejectId || !articleModalAccId || !articleModal) {
-                return;
-            }
+        if (!articleModalTitle || !articleModalAuthor || !articleModalCategory || !articleModalContent || !articleModalApproveId || !articleModalRejectId || !articleModalAccId) {
+            return;
+        }
 
-            articleModalTitle.textContent = btn.dataset.title || '';
-            articleModalAuthor.textContent = 'Autors: ' + (btn.dataset.author || '');
-            articleModalContent.innerHTML = btn.dataset.content || '';
-            articleModalApproveId.value = btn.dataset.id || '';
-            articleModalRejectId.value = btn.dataset.id || '';
-            articleModalAccId.value = btn.dataset.acc || '';
-            articleModal.classList.remove('hidden');
+        articleModalTitle.textContent = '';
+        articleModalAuthor.textContent = '';
+        articleModalCategory.textContent = '';
+        articleModalContent.innerHTML = '';
+        articleModalApproveId.value = '';
+        articleModalRejectId.value = '';
+        articleModalAccId.value = '';
+    };
+
+    const openArticleModal = (btn) => {
+        const articleModalTitle = document.getElementById('articleModalTitle');
+        const articleModalAuthor = document.getElementById('articleModalAuthor');
+        const articleModalCategory = document.getElementById('articleModalCategory');
+        const articleModalContent = document.getElementById('articleModalContent');
+        const articleModalApproveId = document.getElementById('articleModalApproveId');
+        const articleModalRejectId = document.getElementById('articleModalRejectId');
+        const articleModalAccId = document.getElementById('articleModalAccId');
+
+        if (!articleModalTitle || !articleModalAuthor || !articleModalCategory || !articleModalContent || !articleModalApproveId || !articleModalRejectId || !articleModalAccId || !articleModal) {
+            return;
+        }
+
+        articleModalTitle.textContent = btn.dataset.title || '';
+        articleModalAuthor.textContent = 'Autors: ' + (btn.dataset.author || '');
+        articleModalCategory.textContent = btn.dataset.category ? 'Kategorija: ' + btn.dataset.category : '';
+        articleModalContent.innerHTML = btn.dataset.content || '';
+        articleModalApproveId.value = btn.dataset.id || '';
+        articleModalRejectId.value = btn.dataset.id || '';
+        articleModalAccId.value = btn.dataset.acc || '';
+        articleModal.classList.remove('hidden');
+    };
+
+    const articlesTab = document.getElementById('articles');
+    if (articlesTab) {
+        articlesTab.addEventListener('click', (event) => {
+            const btn = event.target.closest('.view-article-btn');
+            if (!btn) return;
+            clearArticleModal();
+            openArticleModal(btn);
         });
-    });
+    }
 });

@@ -525,6 +525,7 @@ require '../includes/header.php';
                                         data-acc="<?php echo $article['account_id']; ?>"
                                         data-title="<?php echo htmlspecialchars($article['title']); ?>"
                                         data-author="<?php echo htmlspecialchars($article['full_name']); ?>"
+                                        data-category="<?php echo htmlspecialchars((string)($article['category'] ?? '')); ?>"
                                         data-content="<?php echo htmlspecialchars($article['content']); ?>">
                                     <i class="fas fa-book-open mr-2"></i><?php echo t('read_full_article'); ?>
                                 </button>
@@ -769,26 +770,31 @@ require '../includes/header.php';
                         <i class="fas fa-times fa-lg"></i>
                     </button>
                 </div>
-                <p class="text-sm text-primary font-semibold mb-5" id="articleModalAuthor"></p>
+                <p class="text-sm text-primary font-semibold mb-2" id="articleModalAuthor"></p>
+                <p class="text-xs uppercase tracking-wider text-[#095d7e] dark:text-[#ccecee] mb-4" id="articleModalCategory"></p>
                 <div class="text-sm text-gray-700 dark:text-gray-300 bg-[#f1f9ff] dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 p-4 rounded-xl leading-relaxed max-h-[60vh] overflow-y-auto overflow-x-hidden break-words article-body" id="articleModalContent"></div>
             </div>
-            <div class="bg-[#f1f9ff] dark:bg-zinc-700/30 border-t border-[#ccecee] dark:border-zinc-700 px-6 py-4 flex flex-row-reverse gap-2 rounded-b-2xl">
-                <form method="POST" class="inline m-0">
-                    <input type="hidden" name="action" value="approve_article">
-                    <input type="hidden" name="article_id" id="articleModalApproveId">
-                    <button type="submit" class="button-primary px-5 py-2">
-                        <i class="fas fa-check mr-2"></i>Publicēt
-                    </button>
-                </form>
-                <form method="POST" class="inline m-0">
-                    <input type="hidden" name="action" value="delete_article">
-                    <input type="hidden" name="article_id" id="articleModalRejectId">
-                    <input type="hidden" name="account_id" id="articleModalAccId">
-                    <button type="submit" class="confirm-delete-article px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold">
-                        <i class="fas fa-trash mr-2"></i>Dzēst
-                    </button>
-                </form>
-                <button id="closeArticleModalBtn" type="button" class="mr-auto px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">Atcelt</button>
+            <div class="bg-[#f1f9ff] dark:bg-zinc-700/30 border-t border-[#ccecee] dark:border-zinc-700 px-6 py-4 flex flex-wrap items-center gap-2 justify-between rounded-b-2xl">
+                <button type="button" id="closeArticleModalBtn" class="px-4 py-2 bg-surface dark:bg-zinc-700 border border-[#ccecee] dark:border-zinc-600 text-[#095d7e] dark:text-[#ccecee] rounded-lg hover:bg-[#ccecee] dark:hover:bg-zinc-600 transition font-semibold">
+                    Atcelt
+                </button>
+                <div class="flex flex-wrap gap-2">
+                    <form method="POST" class="inline m-0">
+                        <input type="hidden" name="action" value="approve_article">
+                        <input type="hidden" name="article_id" id="articleModalApproveId">
+                        <button type="submit" class="button-primary px-5 py-2">
+                            <i class="fas fa-check mr-2"></i>Publicēt
+                        </button>
+                    </form>
+                    <form method="POST" class="inline m-0">
+                        <input type="hidden" name="action" value="delete_article">
+                        <input type="hidden" name="article_id" id="articleModalRejectId">
+                        <input type="hidden" name="account_id" id="articleModalAccId">
+                        <button type="submit" class="confirm-delete-article px-4 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] transition font-semibold">
+                            <i class="fas fa-trash mr-2"></i>Dzēst
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
