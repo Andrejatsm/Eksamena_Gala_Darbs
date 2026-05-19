@@ -8,20 +8,6 @@ $error = '';
 $success = '';
 $token = trim($_GET['token'] ?? $_POST['token'] ?? '');
 
-function ensurePasswordResetColumns(mysqli $conn): void {
-    $tokenColumn = $conn->query("SHOW COLUMNS FROM accounts LIKE 'password_reset_token'");
-    if ($tokenColumn && $tokenColumn->num_rows === 0) {
-        $conn->query("ALTER TABLE accounts ADD COLUMN password_reset_token VARCHAR(64) NULL");
-    }
-
-    $expiresColumn = $conn->query("SHOW COLUMNS FROM accounts LIKE 'password_reset_expires_at'");
-    if ($expiresColumn && $expiresColumn->num_rows === 0) {
-        $conn->query("ALTER TABLE accounts ADD COLUMN password_reset_expires_at DATETIME NULL");
-    }
-}
-
-ensurePasswordResetColumns($conn);
-
 function tokenIsValid(mysqli $conn, string $token): bool {
     $stmt = $conn->prepare("SELECT id FROM accounts WHERE password_reset_token = ? AND password_reset_expires_at > NOW() LIMIT 1");
     if (!$stmt) {

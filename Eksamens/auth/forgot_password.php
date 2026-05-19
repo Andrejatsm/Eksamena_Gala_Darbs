@@ -8,26 +8,12 @@ $error = '';
 $success = '';
 $email = '';
 
-function ensurePasswordResetColumns(mysqli $conn): void {
-    $tokenColumn = $conn->query("SHOW COLUMNS FROM accounts LIKE 'password_reset_token'");
-    if ($tokenColumn && $tokenColumn->num_rows === 0) {
-        $conn->query("ALTER TABLE accounts ADD COLUMN password_reset_token VARCHAR(64) NULL");
-    }
-
-    $expiresColumn = $conn->query("SHOW COLUMNS FROM accounts LIKE 'password_reset_expires_at'");
-    if ($expiresColumn && $expiresColumn->num_rows === 0) {
-        $conn->query("ALTER TABLE accounts ADD COLUMN password_reset_expires_at DATETIME NULL");
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim(strtolower($_POST['email'] ?? ''));
 
     if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = t('enter_valid_email');
     } else {
-        ensurePasswordResetColumns($conn);
-
         $stmt = $conn->prepare("SELECT id, username FROM accounts WHERE email = ? AND status = 'active' LIMIT 1");
         if ($stmt) {
             $stmt->bind_param('s', $email);
@@ -91,7 +77,7 @@ require '../includes/header.php';
             <div class="space-y-4">
                 <div>
                     <label for="email" class="field-label"><?php echo t('email'); ?></label>
-                    <input id="email" name="email" type="email" required class="input-control" placeholder="<?php echo t('enter_email'); ?>" value="<?php echo htmlspecialchars($email); ?>">
+                    <input id="email" name="email" type="email" required class="input-control" placeholder="<?php echo t('E-mail'); ?>" value="<?php echo htmlspecialchars($email); ?>">
                 </div>
             </div>
 
