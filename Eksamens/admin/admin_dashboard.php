@@ -388,6 +388,99 @@ require '../includes/header.php';
                         <p><?php echo t('loading_accounts'); ?></p>
                     </div>
                 </div>
+
+                <div id="profileEditModal" class="hidden fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="profile-edit-title" role="dialog" aria-modal="true">
+                    <div id="profileEditBackdrop" class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+                    <div class="relative mx-auto mt-16 max-w-3xl p-4">
+                        <div class="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-700 shadow-2xl overflow-hidden">
+                            <div class="flex items-center justify-between px-6 py-5 bg-[#f8fafc] dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700">
+                                <div>
+                                    <h2 id="profileEditTitle" class="text-2xl font-bold text-gray-900 dark:text-white">Profila rediģēšana</h2>
+                                    <p id="profileEditSubtitle" class="text-sm text-gray-600 dark:text-gray-400">Pārvaldiet lietotāja vai psihologa konta datus.</p>
+                                </div>
+                                <button id="closeProfileEditTopBtn" type="button" class="text-gray-500 hover:text-gray-900 dark:text-gray-300 transition p-2">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <form id="profileEditForm" class="space-y-6 px-6 py-6" novalidate>
+                                <input type="hidden" name="action" value="save_account_profile">
+                                <input type="hidden" name="account_id" id="profileEditAccountId" value="">
+                                <input type="hidden" name="account_role" id="profileEditAccountRole" value="">
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="field-label" for="profileEditUsername">Lietotājvārds</label>
+                                        <input id="profileEditUsername" type="text" disabled class="input-control bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100">
+                                    </div>
+                                    <div>
+                                        <label class="field-label" for="profileEditDisplayName">Rādāmais vārds</label>
+                                        <input id="profileEditDisplayName" type="text" disabled class="input-control bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="field-label" for="profileEditEmail">E-pasts</label>
+                                        <input id="profileEditEmail" name="email" type="email" required class="input-control" placeholder="name@example.com">
+                                    </div>
+                                    <div>
+                                        <label class="field-label" for="profileEditPhone">Telefons</label>
+                                        <input id="profileEditPhone" name="phone" type="tel" class="input-control" placeholder="+371...">
+                                    </div>
+                                    <div>
+                                        <label class="field-label" for="profileEditStatus">Statuss</label>
+                                        <select id="profileEditStatus" name="status" class="select-control">
+                                            <option value="active"><?php echo t('status_active'); ?></option>
+                                            <option value="pending"><?php echo t('status_pending'); ?></option>
+                                            <option value="rejected"><?php echo t('status_rejected'); ?></option>
+                                            <option value="disabled"><?php echo t('status_disabled'); ?></option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="field-label" for="profileEditPassword">Jauna parole</label>
+                                        <input id="profileEditPassword" name="password" type="password" class="input-control" placeholder="Atstāj tukšu, lai nemainītu">
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 pt-8">Atstāj tukšu, ja nevēlaties mainīt paroli.</p>
+                                    </div>
+                                </div>
+
+                                <div id="psychProfileFields" class="hidden space-y-4 bg-[#f8fafc] dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl p-4">
+                                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Psihologa profils</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="field-label" for="profileEditSpecialization">Specializācija</label>
+                                            <input id="profileEditSpecialization" name="specialization" type="text" class="input-control" placeholder="Psiholoģijas joma">
+                                        </div>
+                                        <div>
+                                            <label class="field-label" for="profileEditExperience">Pieredze (gadi)</label>
+                                            <input id="profileEditExperience" name="experience_years" type="number" min="0" max="50" class="input-control">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="field-label" for="profileEditDescription">Apraksts</label>
+                                        <textarea id="profileEditDescription" name="description" rows="4" class="textarea-control" placeholder="Īss apraksts par psihologu"></textarea>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Sertifikāts: <span id="profileEditCertificate" class="font-semibold"></span></p>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                                    <button id="closeProfileEditBtn" type="button" class="button-secondary w-full sm:w-auto">
+                                        Atcelt
+                                    </button>
+                                    <button id="saveProfileEditBtn" type="button" class="button-primary w-full sm:w-auto">
+                                        Saglabāt izmaiņas
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

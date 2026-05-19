@@ -186,21 +186,23 @@ $makePageButton = static function (int $targetPage, string $label, bool $isActiv
                 <td class="px-4 py-4 align-top text-sm text-gray-600 dark:text-gray-400"><?php echo date('d.m.Y H:i', strtotime((string)$row['created_at'])); ?></td>
                 <td class="px-4 py-4 align-top">
                     <div class="flex flex-wrap justify-end gap-2">
-                        <?php if (($row['role'] ?? '') === 'psychologist'): ?>
                         <button
                             type="button"
-                            class="view-psych-btn px-3 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition text-sm font-semibold"
+                            class="view-profile-btn px-3 py-2 bg-primary text-white rounded-lg hover:bg-primaryHover transition text-sm font-semibold"
                             data-id="<?php echo (int)$row['id']; ?>"
+                            data-role="<?php echo htmlspecialchars((string)$row['role']); ?>"
+                            data-username="<?php echo htmlspecialchars((string)$row['username']); ?>"
+                            data-display-name="<?php echo htmlspecialchars((string)$row['display_name']); ?>"
+                            data-email="<?php echo htmlspecialchars((string)$row['email']); ?>"
+                            data-phone="<?php echo htmlspecialchars((string)($row['phone'] ?? '')); ?>"
                             data-status="<?php echo htmlspecialchars((string)($row['status'] ?? '')); ?>"
-                            data-name="<?php echo htmlspecialchars((string)$row['display_name']); ?>"
                             data-spec="<?php echo htmlspecialchars((string)($row['specialization'] ?? '')); ?>"
                             data-exp="<?php echo (int)($row['experience_years'] ?? 0); ?>"
                             data-desc="<?php echo htmlspecialchars((string)($row['description'] ?? '')); ?>"
-                            data-email="<?php echo htmlspecialchars((string)$row['email']); ?>"
-                            data-phone="<?php echo htmlspecialchars((string)($row['phone'] ?? '')); ?>"
                             data-cert="<?php echo htmlspecialchars((string)($row['certificate_path'] ?? '')); ?>">
-                            <i class="fas fa-eye mr-2"></i>Skatīt
+                            <i class="fas fa-eye mr-2"></i>Skatīt / Labot
                         </button>
+                        <?php if (($row['role'] ?? '') === 'psychologist'): ?>
                         <button type="button" data-account-action="delete_psych" data-account-id="<?php echo (int)$row['id']; ?>" data-confirm="Vai tiešām dzēst šo psihologa kontu?" class="px-3 py-2 bg-[#095d7e] text-white rounded-lg hover:bg-[#074e6b] dark:bg-[#095d7e] dark:hover:bg-[#074e6b] transition text-sm font-semibold">
                             <i class="fas fa-trash mr-2"></i>Dzēst
                         </button>
