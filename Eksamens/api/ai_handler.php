@@ -91,6 +91,8 @@ function sanitize_ai_reply(string $reply, string $mode, array $allowedTargets, a
 {
     $sanitized = trim($reply);
 
+    $sanitized = preg_replace('/\*\*(.*?)\*\*/', '$1', $sanitized) ?? $sanitized;
+
     $sanitized = preg_replace('/^\[MODE:(clarify|answer)\]\s*/i', '', $sanitized) ?? $sanitized;
 
     $sanitized = preg_replace_callback(
