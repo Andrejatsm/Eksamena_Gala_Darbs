@@ -16,6 +16,7 @@ return [
     'logout'                => 'Log Out',
     'login'                 => 'Log In',
     'dark_mode'             => 'Dark Mode',
+    'language'              => 'Language',
     'role_admin'            => 'Administrator',
     'role_psychologist'     => 'Psychologist',
     'role_user'             => 'User',

@@ -16,6 +16,7 @@ return [
     'logout'                => 'Iziet',
     'login'                 => 'Ielogoties',
     'dark_mode'             => 'Tumšais režīms',
+    'language'              => 'Valoda',
     'role_admin'            => 'Administrators',
     'role_psychologist'     => 'Psihologs',
     'role_user'             => 'Lietotājs',

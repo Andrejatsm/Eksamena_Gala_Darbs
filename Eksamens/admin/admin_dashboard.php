@@ -112,19 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
                         $loginUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/auth/login.php';
                         $name = htmlspecialchars(trim($psychRow['full_name'] ?: $psychRow['email']), ENT_QUOTES, 'UTF-8');
+                        $lang = currentLang();
                         $subject = t('psych_approval_email_subject');
-                        $htmlBody = '<!DOCTYPE html><html lang="' . htmlspecialchars(currentLang(), ENT_QUOTES, 'UTF-8') . '"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>' . htmlspecialchars($subject, ENT_QUOTES, 'UTF-8') . '</title></head><body style="margin:0;padding:32px;background:#f4f6f8;font-family:Segoe UI,Arial,sans-serif;color:#111827;">'
-                            . '<div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,0.08);">'
-                            . '<div style="padding:32px 32px 24px;background:#2563eb;color:#ffffff;">'
-                            . '<h1 style="margin:0;font-size:24px;line-height:1.2;">' . htmlspecialchars(t('psych_approval_email_heading'), ENT_QUOTES, 'UTF-8') . '</h1>'
-                            . '</div>'
-                            . '<div style="padding:28px 32px 32px;">'
-                            . '<p style="margin:0 0 18px;font-size:16px;line-height:1.75;">' . htmlspecialchars(t('psych_approval_email_greeting', $name), ENT_QUOTES, 'UTF-8') . '</p>'
-                            . '<p style="margin:0 0 18px;font-size:16px;line-height:1.75;">' . htmlspecialchars(t('psych_approval_email_intro'), ENT_QUOTES, 'UTF-8') . '</p>'
-                            . '<a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" style="display:inline-block;padding:12px 22px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">' . htmlspecialchars(t('psych_approval_email_button'), ENT_QUOTES, 'UTF-8') . '</a>'
-                            . '<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#6b7280;">' . htmlspecialchars(t('psych_approval_email_support_text'), ENT_QUOTES, 'UTF-8') . '</p>'
-                            . '<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#6b7280;">' . nl2br(htmlspecialchars(t('email_regards'), ENT_QUOTES, 'UTF-8')) . '</p>'
-                            . '</div></div></body></html>';
+                        $htmlBody = build_approval_email_html($name, $loginUrl, $lang);
                         send_html_email($psychRow['email'], $subject, $htmlBody);
                     }
                 }

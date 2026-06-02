@@ -255,7 +255,7 @@ if (isset($_SESSION['account_id'], $_SESSION['role'])) {
                         </label>
                     </div>
                     <div class="flex items-center justify-between px-3 py-2">
-                        <span class="text-gray-700 dark:text-gray-300 font-medium">Language</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium"><?php echo t('language'); ?></span>
                         <div class="flex gap-1">
                             <a href="?lang=lv" class="px-2 py-1 text-xs font-bold rounded border <?php echo currentLang() === 'lv' ? 'bg-primary text-white border-primary' : 'border-[#ccecee] dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:text-primary hover:border-primary'; ?> transition">LV</a>
                             <a href="?lang=en" class="px-2 py-1 text-xs font-bold rounded border <?php echo currentLang() === 'en' ? 'bg-primary text-white border-primary' : 'border-[#ccecee] dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:text-primary hover:border-primary'; ?> transition">EN</a>

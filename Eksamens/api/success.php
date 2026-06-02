@@ -220,7 +220,23 @@ require __DIR__ . '/../includes/header.php';
             <p class="text-[#095d7e] dark:text-[#ccecee]">
                 <strong><?php echo t('time_label'); ?></strong> <?php echo date('d.m.Y H:i', strtotime($scheduled_at)); ?><br>
                 <strong><?php echo t('type') . ':'; ?></strong> <?php echo $consultation_type === 'online' ? t('online') : t('in_person'); ?><br>
-                <strong><?php echo t('duration_label'); ?></strong> <?php echo t('duration_1h'); ?>
+                <strong><?php echo t('duration_label'); ?></strong> <?php 
+                    $slot_id_for_duration = (int)($metadata['slot_id'] ?? $_SESSION['booking_slot_id'] ?? 0);
+                    $duration_text = t('duration_1h');
+                    if ($slot_id_for_duration > 0) {
+                        $durationStmt = $conn->prepare('SELECT TIME_FORMAT(TIMEDIFF(ends_at, starts_at), \'%H:%i\') AS duration FROM availability_slots WHERE id = ? LIMIT 1');
+                        if ($durationStmt) {
+                            $durationStmt->bind_param('i', $slot_id_for_duration);
+                            $durationStmt->execute();
+                            $durationRow = $durationStmt->get_result()->fetch_assoc();
+                            $durationStmt->close();
+                            if ($durationRow && !empty($durationRow['duration'])) {
+                                $duration_text = $durationRow['duration'];
+                            }
+                        }
+                    }
+                    echo $duration_text;
+                ?>
             </p>
         </div>
         <?php endif; ?>

@@ -45,6 +45,8 @@ function send_email(string $to, string $subject, string $body, array $headers = 
 
 function send_html_email(string $to, string $subject, string $htmlBody, array $headers = []): bool
 {
+    $cfg = get_email_config();
+    $headers[] = 'From: ' . $cfg['from_name'] . ' <' . $cfg['from_address'] . '>';
     $headers[] = 'MIME-Version: 1.0';
     $headers[] = 'Content-type: text/html; charset=UTF-8';
     $headers[] = 'Content-Transfer-Encoding: 8bit';
@@ -121,4 +123,66 @@ function smtp_send_command($fp, string $command): string
 {
     fwrite($fp, $command . "\r\n");
     return smtp_get_response($fp);
+}
+
+function build_approval_email_html(string $recipientName, string $loginUrl, string $lang = 'lv'): string
+{
+    $isDark = false;
+    $heading = $lang === 'lv' ? 'Jūsu profils ir apstiprināts' : 'Your profile has been approved';
+    $greeting = $lang === 'lv' ? 'Labdien' : 'Hello';
+    $intro = $lang === 'lv' 
+        ? 'Jūsu psihologa profils platformā Saprasts ir veiksmīgi apstiprināts. Tagad varat ielogoties un sākt pārvaldīt savu grafiku, pieņemt pierakstus un publicēt rakstus.'
+        : 'Your psychologist profile on Saprasts has been approved. You can now log in and start managing your schedule, accepting appointments, and publishing articles.';
+    $buttonText = $lang === 'lv' ? 'Pieteikties Saprastā' : 'Log in to Saprasts';
+    $supportText = $lang === 'lv'
+        ? 'Ja Jūs nedarbojāt šo pieprasījumu, lūdzu sazinieties ar mūsu atbalstu.'
+        : 'If you did not request this, please contact our support team.';
+    $regards = $lang === 'lv' ? 'Ar cieņu' : 'Best regards';
+    $team = 'Saprasts';
+    
+    return <<<HTML
+<!DOCTYPE html>
+<html lang="$lang">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>$heading</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:'Segoe UI',Arial,sans-serif;">
+    <div style="max-width:600px;margin:0 auto;padding:20px;">
+        <div style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.1);">
+            <div style="padding:40px;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;text-align:center;">
+                <div style="font-size:48px;margin-bottom:16px;">✓</div>
+                <h1 style="margin:0;font-size:28px;font-weight:700;line-height:1.3;">$heading</h1>
+            </div>
+            <div style="padding:40px;color:#1f2937;">
+                <p style="margin:0 0 20px;font-size:16px;line-height:1.6;">
+                    $greeting $recipientName,
+                </p>
+                <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#4b5563;">
+                    $intro
+                </p>
+                <div style="text-align:center;margin:32px 0;">
+                    <a href="$loginUrl" style="display:inline-block;padding:14px 32px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px;transition:background 0.3s;">
+                        $buttonText
+                    </a>
+                </div>
+                <p style="margin:24px 0 0;font-size:13px;line-height:1.6;color:#6b7280;">
+                    $supportText
+                </p>
+                <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;">
+                    <p style="margin:0;font-size:13px;color:#9ca3af;">
+                        $regards,<br>
+                        <strong style="color:#1f2937;">$team</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:20px;font-size:12px;color:#9ca3af;">
+            <p style="margin:0;">&copy; 2024-2026 Saprasts. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
 }

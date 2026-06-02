@@ -156,19 +156,9 @@ try {
                 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
                 $loginUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/auth/login.php';
                 $name = htmlspecialchars(trim($psychRow['full_name'] ?: $psychRow['email']), ENT_QUOTES, 'UTF-8');
-                $subject = 'Saprasts: Jūsu psihologa profils ir apstiprināts';
-                $htmlBody = '<!DOCTYPE html><html lang="lv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>' . htmlspecialchars($subject, ENT_QUOTES, 'UTF-8') . '</title></head><body style="margin:0;padding:32px;background:#f4f6f8;font-family:Segoe UI,Arial,sans-serif;color:#111827;">'
-                    . '<div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,0.08);">'
-                    . '<div style="padding:32px 32px 24px;background:#2563eb;color:#ffffff;">'
-                    . '<h1 style="margin:0;font-size:24px;line-height:1.2;">Jūsu profils ir apstiprināts</h1>'
-                    . '</div>'
-                    . '<div style="padding:28px 32px 32px;">'
-                    . '<p style="margin:0 0 18px;font-size:16px;line-height:1.75;">Labdien ' . $name . ',</p>'
-                    . '<p style="margin:0 0 18px;font-size:16px;line-height:1.75;">Jūsu psihologa profils platformā Saprasts ir veiksmīgi apstiprināts. Tagad varat ielogoties un sākt pārvaldīt savu grafiku, pieņemt pierakstus un publicēt rakstus.</p>'
-                    . '<a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" style="display:inline-block;padding:12px 22px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">Pieteikties Saprastā</a>'
-                    . '<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#6b7280;">Ja Jūs nedarbojāt šo pieprasījumu, lūdzu sazinieties ar mūsu atbalstu.</p>'
-                    . '<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#6b7280;">Ar cieņu,<br>Saprasts komanda</p>'
-                    . '</div></div></body></html>';
+                $lang = 'lv';
+                $subject = t('psych_approval_email_subject');
+                $htmlBody = build_approval_email_html($name, $loginUrl, $lang);
                 send_html_email($psychRow['email'], $subject, $htmlBody);
             }
         }
@@ -286,16 +276,36 @@ try {
                 throw new RuntimeException('Neizdevās atjaunināt psihologa profilu.');
             }
             $stmt->close();
-        }
+
             if ($status === 'active') {
-                            $stmt = $conn->prepare("UPDATE psychologist_profiles SET approved_at = COALESCE(approved_at, NOW()) WHERE account_id = ?");
-                            if (!$stmt) {
-                                throw new RuntimeException('Datubāzes kļūda, atjauninot apstiprinājuma datumu.');
-                            }
-                            $stmt->bind_param('i', $accountId);
-                            $stmt->execute();
-                            $stmt->close();
-                        }
+                $stmt = $conn->prepare("UPDATE psychologist_profiles SET approved_at = COALESCE(approved_at, NOW()) WHERE account_id = ?");
+                if (!$stmt) {
+                    throw new RuntimeException('Datubāzes kļūda, atjauninot apstiprinājuma datumu.');
+                }
+                $stmt->bind_param('i', $accountId);
+                $stmt->execute();
+                $stmt->close();
+                
+                // Send approval email
+                $stmtEmail = $conn->prepare("SELECT email, COALESCE(NULLIF(full_name, ''), (SELECT username FROM accounts WHERE id = ?)) AS full_name FROM psychologist_profiles p JOIN accounts a ON p.account_id = a.id WHERE a.id = ?");
+                if ($stmtEmail) {
+                    $stmtEmail->bind_param('ii', $accountId, $accountId);
+                    $stmtEmail->execute();
+                    $emailRow = $stmtEmail->get_result()->fetch_assoc();
+                    $stmtEmail->close();
+                    
+                    if ($emailRow && filter_var($emailRow['email'], FILTER_VALIDATE_EMAIL)) {
+                        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                        $loginUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/auth/login.php';
+                        $name = htmlspecialchars(trim($emailRow['full_name'] ?: $emailRow['email']), ENT_QUOTES, 'UTF-8');
+                        $lang = 'lv';
+                        $subject = t('psych_approval_email_subject');
+                        $htmlBody = build_approval_email_html($name, $loginUrl, $lang);
+                        send_html_email($emailRow['email'], $subject, $htmlBody);
+                    }
+                }
+            }
+        }
         $conn->commit();
         $message = 'Profils ir veiksmīgi atjaunināts.';
     } elseif ($action === 'delete_user') {
