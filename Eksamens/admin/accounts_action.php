@@ -255,7 +255,15 @@ try {
             }
             $stmt->close();
         }
-
+            if ($status === 'active') {
+                            $stmt = $conn->prepare("UPDATE psychologist_profiles SET approved_at = COALESCE(approved_at, NOW()) WHERE account_id = ?");
+                            if (!$stmt) {
+                                throw new RuntimeException('Datubāzes kļūda, atjauninot apstiprinājuma datumu.');
+                            }
+                            $stmt->bind_param('i', $accountId);
+                            $stmt->execute();
+                            $stmt->close();
+                        }
         $conn->commit();
         $message = 'Profils ir veiksmīgi atjaunināts.';
     } elseif ($action === 'delete_user') {

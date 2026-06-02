@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 
 // Saņemam lietotāja ziņojumu
 $input = json_decode(file_get_contents('php://input'), true);
-$userMessage = trim((string)($input['message'] ?? ''));
+$userMessage = trim((string) ($input['message'] ?? ''));
 
 if ($userMessage !== '' && mb_strlen($userMessage) > 2000) {
     $userMessage = mb_substr($userMessage, 0, 2000);
@@ -19,8 +19,8 @@ if (empty($userMessage)) {
     exit;
 }
 
-$role = (string)($_SESSION['role'] ?? 'guest');
-$displayName = trim((string)($_SESSION['display_name'] ?? ''));
+$role = (string) ($_SESSION['role'] ?? 'guest');
+$displayName = trim((string) ($_SESSION['display_name'] ?? ''));
 $isLoggedIn = isset($_SESSION['account_id'], $_SESSION['role']);
 
 $roleLabel = match ($role) {
@@ -60,7 +60,8 @@ $blockedTechnicalTargets = [
 ];
 
 // Atļaujam tikai lietotājam drošas iekšējās lapas, lai AI nevarētu iedot tehniskus vai ārējus linkus.
-function is_allowed_link_target(string $target, array $allowedTargets, array $blockedTargets): bool {
+function is_allowed_link_target(string $target, array $allowedTargets, array $blockedTargets): bool
+{
     $normalized = trim($target);
     if ($normalized === '') {
         return false;
@@ -86,7 +87,8 @@ function is_allowed_link_target(string $target, array $allowedTargets, array $bl
 }
 
 // Pēc modeļa atbildes izfiltrējam režīma marķieri un nevēlamās saites, pirms teksts nonāk līdz lietotājam.
-function sanitize_ai_reply(string $reply, string $mode, array $allowedTargets, array $blockedTargets): string {
+function sanitize_ai_reply(string $reply, string $mode, array $allowedTargets, array $blockedTargets): string
+{
     $sanitized = trim($reply);
 
     $sanitized = preg_replace('/^\[MODE:(clarify|answer)\]\s*/i', '', $sanitized) ?? $sanitized;
@@ -123,7 +125,8 @@ function sanitize_ai_reply(string $reply, string $mode, array $allowedTargets, a
 }
 
 // Šī ir vienkārša servera hierarhija: tā palīdz noteikt, vai ziņojumam drīzāk vajag skaidru atbildi vai īsu precizēšanu.
-function detect_preferred_mode(string $message): string {
+function detect_preferred_mode(string $message): string
+{
     $trimmed = trim($message);
     if ($trimmed === '') {
         return 'clarify';
@@ -251,11 +254,11 @@ $sql = "SELECT p.full_name, p.specialization, p.description, p.experience_years
 $result = $conn->query($sql);
 $doctors = [];
 if ($result) {
-    while($row = $result->fetch_assoc()) {
-        $name = trim((string)$row['full_name']);
-        $spec = trim((string)$row['specialization']);
-        $exp = (int)($row['experience_years'] ?? 0);
-        $desc = trim((string)($row['description'] ?? ''));
+    while ($row = $result->fetch_assoc()) {
+        $name = trim((string) $row['full_name']);
+        $spec = trim((string) $row['specialization']);
+        $exp = (int) ($row['experience_years'] ?? 0);
+        $desc = trim((string) ($row['description'] ?? ''));
         $shortDesc = $desc !== '' ? mb_strimwidth($desc, 0, 120, '...') : 'Nav pievienota apraksta.';
         $doctors[] = "- {$name} | Specializācija: {$spec} | Pieredze: {$exp} gadi | {$shortDesc}";
     }
@@ -371,7 +374,7 @@ curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 $response = curl_exec($ch);
 
@@ -393,7 +396,7 @@ if (isset($json['error'])) {
     exit;
 }
 
-$aiReply = trim((string)($json['candidates'][0]['content']['parts'][0]['text'] ?? 'Neizdevās saņemt atbildi.'));
+$aiReply = trim((string) ($json['candidates'][0]['content']['parts'][0]['text'] ?? 'Neizdevās saņemt atbildi.'));
 $modelMode = preg_match('/^\[MODE:(clarify|answer)\]/i', $aiReply, $matches) === 1
     ? strtolower($matches[1])
     : $preferredMode;
