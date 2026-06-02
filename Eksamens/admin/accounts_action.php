@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../includes/db.php';
+require_once __DIR__ . '/../includes/lang.php';
 
 header('Content-Type: application/json');
 
@@ -137,7 +138,7 @@ try {
         $stmt->close();
 
         if (!$updated) {
-            throw new RuntimeException('Neizdevās apstiprināt psihologa profilu.');
+            throw new RuntimeException(t('psych_approve_error'));
         }
 
         $conn->commit();
@@ -172,7 +173,7 @@ try {
             }
         }
 
-        $message = 'Psihologs apstiprināts sekmīgi!';
+        $message = t('psych_approved');
     } elseif ($action === 'reject_psych') {
         $stmt = $conn->prepare("UPDATE accounts SET status = 'rejected' WHERE id = ? AND role = 'psychologist'");
         $stmt->bind_param('i', $accountId);
