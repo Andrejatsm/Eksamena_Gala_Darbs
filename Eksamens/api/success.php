@@ -7,36 +7,31 @@ require_once __DIR__ . '/../includes/mail.php';
 
 \Stripe\Stripe::setApiKey('sk_test_51S7XQt3b1XY7a31CCbstqHPSNYoEFGXr5zcqQaaB5t25CYs3mFuYzOl1GB9jQ0Hzh7MJC8Gc1XneHycmqUYbqn5O00hVcvezVP');
 
-function build_booking_confirmation_email(string $userName, ?string $scheduledAt, string $consultationType, string $lang = 'lv'): string {
-    $consultationLabel = $consultationType === 'online' ? t('email_consultation_online') : t('email_consultation_in_person');
-    $timeText = $scheduledAt ? date('d.m.Y H:i', strtotime($scheduledAt)) : t('email_time_tbd');
-    $safeName = htmlspecialchars(trim($userName) !== '' ? $userName : 'Client', ENT_QUOTES, 'UTF-8');
-    
-    $html = '<!DOCTYPE html><html lang="' . htmlspecialchars($lang, ENT_QUOTES, 'UTF-8') . '"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>' . htmlspecialchars(t('email_subject'), ENT_QUOTES, 'UTF-8') . '</title></head><body style="margin:0;padding:32px;background:#f4f6f8;font-family:Segoe UI,Arial,sans-serif;color:#111827;">';
-    $html .= '<div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,0.08);">';
-    $html .= '<div style="padding:32px 32px 24px;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#ffffff;">';
-    $html .= '<h1 style="margin:0;font-size:24px;line-height:1.2;font-weight:600;"><i style="font-style:normal;font-size:28px;margin-right:10px;">✓</i>' . htmlspecialchars(t('email_subject'), ENT_QUOTES, 'UTF-8') . '</h1>';
-    $html .= '</div>';
-    $html .= '<div style="padding:32px;">';
-    $html .= '<p style="margin:0 0 18px;font-size:16px;line-height:1.75;">' . htmlspecialchars(t('email_greeting', $safeName), ENT_QUOTES, 'UTF-8') . '</p>';
-    $html .= '<div style="background:#f0f9ff;border-left:4px solid #2563eb;padding:16px;border-radius:6px;margin:18px 0;">';
-    $html .= '<p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#0c4a6e;"><strong>' . htmlspecialchars(t('email_payment_ok'), ENT_QUOTES, 'UTF-8') . '</strong></p>';
-    $html .= '<p style="margin:8px 0;font-size:14px;line-height:1.6;color:#1e40af;"><strong>' . htmlspecialchars(t('email_type_line', $consultationLabel), ENT_QUOTES, 'UTF-8') . '</strong></p>';
-    $html .= '<p style="margin:8px 0;font-size:14px;line-height:1.6;color:#1e40af;"><strong>' . htmlspecialchars(t('email_time_line', $timeText), ENT_QUOTES, 'UTF-8') . '</strong></p>';
-    $html .= '</div>';
-    $html .= '<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#6b7280;">' . htmlspecialchars(t('email_contact_line'), ENT_QUOTES, 'UTF-8') . '</p>';
-    $html .= '<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#6b7280;">' . nl2br(htmlspecialchars(t('email_regards'), ENT_QUOTES, 'UTF-8')) . '</p>';
-    $html .= '</div></div></body></html>';
-    
-    return $html;
-}
-
 function send_payment_confirmation_email(string $toEmail, string $userName, ?string $scheduledAt, string $consultationType): bool {
     $subject = t('email_subject');
-    $lang = currentLang();
-    $htmlBody = build_booking_confirmation_email($userName, $scheduledAt, $consultationType, $lang);
-    
-    return send_html_email($toEmail, $subject, $htmlBody);
+    $consultationLabel = $consultationType === 'online' ? t('email_consultation_online') : t('email_consultation_in_person');
+    $timeText = $scheduledAt ? date('d.m.Y H:i', strtotime($scheduledAt)) : t('email_time_tbd');
+    $safeName = trim($userName) !== '' ? $userName : 'Client';
+
+    $body = t('email_greeting', $safeName) . "\n\n"
+        . t('email_payment_ok') . "\n"
+        . t('email_type_line', $consultationLabel) . "\n"
+        . t('email_time_line', $timeText) . "\n\n"
+        . t('email_contact_line') . "\n\n"
+        . t('email_regards');
+
+    $fromAddress = getenv('EMAIL_FROM_ADDRESS') ?: 'noreply@saprasts.local';
+    $fromName = getenv('EMAIL_FROM_NAME') ?: 'Saprasts';
+
+    $headers = [
+        'MIME-Version: 1.0',
+        'Content-type: text/plain; charset=UTF-8',
+        'From: ' . $fromName . ' <' . $fromAddress . '>',
+        'Reply-To: ' . $fromAddress,
+        'X-Mailer: PHP/' . phpversion(),
+    ];
+
+    return send_email($toEmail, $subject, $body, $headers);
 }
 
 // Pārbaudām, vai esam ielogojušies

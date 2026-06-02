@@ -2,7 +2,6 @@
 session_start();
 require '../includes/db.php';
 require_once __DIR__ . '/../includes/lang.php';
-require_once __DIR__ . '/../includes/mail.php';
 
 header('Content-Type: application/json');
 
@@ -299,7 +298,7 @@ try {
                         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
                         $loginUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/auth/login.php';
                         $name = htmlspecialchars(trim($emailRow['full_name'] ?: $emailRow['email']), ENT_QUOTES, 'UTF-8');
-                        $lang = currentLang();
+                        $lang = 'lv';
                         $subject = t('psych_approval_email_subject');
                         $htmlBody = build_approval_email_html($name, $loginUrl, $lang);
                         send_html_email($emailRow['email'], $subject, $htmlBody);

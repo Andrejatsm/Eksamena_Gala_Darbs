@@ -821,7 +821,7 @@ require '../includes/header.php';
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="application/json" id="admin-dashboard-data"><?php echo json_encode(['chartStats' => $chartStats, 'accountsConfig' => ['listUrl' => './accounts_table.php', 'actionUrl' => './accounts_action.php']], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?></script>
+<script type="application/json" id="admin-dashboard-data"><?php echo json_encode(['chartStats' => $chartStats, 'accountsConfig' => ['listUrl' => 'accounts_table.php', 'actionUrl' => 'accounts_action.php']], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?></script>
 <script src="admin_dashboard.js"></script>
 
 <?php require '../includes/footer.php'; ?>
