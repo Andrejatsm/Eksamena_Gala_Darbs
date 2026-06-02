@@ -20,8 +20,18 @@ function is_smtp_mail_configured(): bool
     return !empty($cfg['host']) && !empty($cfg['username']) && !empty($cfg['password']);
 }
 
+function encode_mime_header(string $text): string
+{
+    if (function_exists('mb_encode_mimeheader')) {
+        return mb_encode_mimeheader($text, 'UTF-8', 'B', "\r\n");
+    }
+    return $text;
+}
+
 function send_email(string $to, string $subject, string $body, array $headers = []): bool
 {
+    $subject = encode_mime_header($subject);
+
     if (is_smtp_mail_configured()) {
         return smtp_send_email($to, $subject, $body, $headers);
     }
@@ -31,6 +41,15 @@ function send_email(string $to, string $subject, string $body, array $headers = 
     }
 
     return @mail($to, $subject, $body, implode("\r\n", $headers));
+}
+
+function send_html_email(string $to, string $subject, string $htmlBody, array $headers = []): bool
+{
+    $headers[] = 'MIME-Version: 1.0';
+    $headers[] = 'Content-type: text/html; charset=UTF-8';
+    $headers[] = 'Content-Transfer-Encoding: 8bit';
+
+    return send_email($to, $subject, $htmlBody, $headers);
 }
 
 function smtp_send_email(string $to, string $subject, string $body, array $headers = []): bool

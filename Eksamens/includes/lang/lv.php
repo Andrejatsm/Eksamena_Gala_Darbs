@@ -566,6 +566,8 @@ return [
     'email_time_line'            => 'Konsultacijas laiks: %s',
     'email_contact_line'         => 'Ja vajadzigas izmainas, ludzu sazinieties ar specialistu platforma.',
     'email_regards'              => "Ar cienu,\nSaprasts komanda",
+    'psych_approval_email_subject'=> 'Saprasts: Jūsu psihologa profils ir apstiprināts',
+    'psych_approval_email_body'   => "Labdien %s,\n\nJūsu psihologa profils platformā Saprasts ir veiksmīgi apstiprināts. Tagad varat ielogoties un sākt pārvaldīt savu grafiku, pieņemt pierakstus un publicēt rakstus.\n\nLai pieteiktos, dodieties uz: %s\n\nAr cieņu,\nSaprasts komanda",
     'forgot_password'            => 'Aizmirsāt paroli?',
     'enter_email_to_reset'       => 'Ievadiet savu e-pastu, un mēs nosūtīsim atiestatīšanas saiti.',
     'send_reset_link'            => 'Nosūtīt atiestatīšanas saiti',

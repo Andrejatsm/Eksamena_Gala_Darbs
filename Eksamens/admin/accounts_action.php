@@ -141,6 +141,37 @@ try {
         }
 
         $conn->commit();
+
+        $stmt = $conn->prepare("SELECT a.email, COALESCE(NULLIF(p.full_name, ''), a.username) AS full_name FROM accounts a JOIN psychologist_profiles p ON p.account_id = a.id WHERE a.id = ? LIMIT 1");
+        if ($stmt) {
+            $stmt->bind_param('i', $accountId);
+            $stmt->execute();
+            $psychRow = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            if ($psychRow && filter_var($psychRow['email'], FILTER_VALIDATE_EMAIL)) {
+                require_once __DIR__ . '/../includes/mail.php';
+
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $loginUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/auth/login.php';
+                $name = htmlspecialchars(trim($psychRow['full_name'] ?: $psychRow['email']), ENT_QUOTES, 'UTF-8');
+                $subject = 'Saprasts: Jūsu psihologa profils ir apstiprināts';
+                $htmlBody = '<!DOCTYPE html><html lang="lv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>' . htmlspecialchars($subject, ENT_QUOTES, 'UTF-8') . '</title></head><body style="margin:0;padding:32px;background:#f4f6f8;font-family:Segoe UI,Arial,sans-serif;color:#111827;">'
+                    . '<div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,0.08);">'
+                    . '<div style="padding:32px 32px 24px;background:#2563eb;color:#ffffff;">'
+                    . '<h1 style="margin:0;font-size:24px;line-height:1.2;">Jūsu profils ir apstiprināts</h1>'
+                    . '</div>'
+                    . '<div style="padding:28px 32px 32px;">'
+                    . '<p style="margin:0 0 18px;font-size:16px;line-height:1.75;">Labdien ' . $name . ',</p>'
+                    . '<p style="margin:0 0 18px;font-size:16px;line-height:1.75;">Jūsu psihologa profils platformā Saprasts ir veiksmīgi apstiprināts. Tagad varat ielogoties un sākt pārvaldīt savu grafiku, pieņemt pierakstus un publicēt rakstus.</p>'
+                    . '<a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" style="display:inline-block;padding:12px 22px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">Pieteikties Saprastā</a>'
+                    . '<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#6b7280;">Ja Jūs nedarbojāt šo pieprasījumu, lūdzu sazinieties ar mūsu atbalstu.</p>'
+                    . '<p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#6b7280;">Ar cieņu,<br>Saprasts komanda</p>'
+                    . '</div></div></body></html>';
+                send_html_email($psychRow['email'], $subject, $htmlBody);
+            }
+        }
+
         $message = 'Psihologs apstiprināts sekmīgi!';
     } elseif ($action === 'reject_psych') {
         $stmt = $conn->prepare("UPDATE accounts SET status = 'rejected' WHERE id = ? AND role = 'psychologist'");

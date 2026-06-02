@@ -565,6 +565,8 @@ return [
     'email_time_line'            => 'Consultation time: %s',
     'email_contact_line'         => 'If changes are needed, please contact the specialist on the platform.',
     'email_regards'              => "Best regards,\nSaprasts team",
+    'psych_approval_email_subject'=> 'Saprasts: Your psychologist profile has been approved',
+    'psych_approval_email_body'   => "Hello %s,\n\nYour psychologist profile on Saprasts has been approved. You can now log in and start managing your schedule, accepting appointments, and publishing articles.\n\nTo log in, visit: %s\n\nBest regards,\nSaprasts team",
     'forgot_password'            => 'Forgot password?',
     'enter_email_to_reset'       => 'Enter your email address and we will send a reset link.',
     'send_reset_link'            => 'Send reset link',
