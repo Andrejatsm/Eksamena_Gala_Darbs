@@ -1,6 +1,6 @@
 #  Saprasts - Psiholoģiskā atbalsta un konsultāciju platforma
 
-* Links uz saiti: https://kristovskis.lv/4pt/rackovs/Eksamens/pages/dashboard.php
+* Links uz saiti: https://kristovskis.lv/4pt/rackovs/Eksamens/index.php
 
 * Projekta PDF fails: [Dokuments_Račkovs.pdf](https://github.com/user-attachments/files/28592923/Dokuments_Rackovs.pdf)
 
