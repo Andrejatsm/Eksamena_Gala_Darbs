@@ -1,8 +1,12 @@
 #  Saprasts - Psiholoģiskā atbalsta un konsultāciju platforma
 
+* Links uz saiti: https://kristovskis.lv/4pt/rackovs/Eksamens/pages/dashboard.php
+
+* Projekta PDF fails: [Dokuments_Račkovs.pdf](https://github.com/user-attachments/files/28592923/Dokuments_Rackovs.pdf)
+
 **Saprasts** ir tīmekļa platforma, kas izstrādāta kā kvalifikācijas darbs. Tās mērķis ir nodrošināt ērtu un drošu vidi, kurā klienti var atrast sertificētus psihologus, pieteikties konsultācijām, veikt pašnovērtējuma testus un saņemt AI ģenerētus ieteikumus mentālās veselības uzlabošanai.
 
-<img width="1920" height="3276" alt="homepgae1" src="https://github.com/user-attachments/assets/eaa75906-5fcb-4fe2-896b-8306c9c8384e" />
+<img width="1905" height="3219" alt="kristovskis lv_4pt_rackovs_Eksamens_index php (1)" src="https://github.com/user-attachments/assets/ab269493-97e4-4fc3-9ef0-efa20e48c2cb" />
 
 ##  Galvenās funkcijas
 
