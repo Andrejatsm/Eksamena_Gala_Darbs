@@ -2,7 +2,7 @@
 
 * Links uz saiti: https://kristovskis.lv/4pt/rackovs/Eksamens/index.php
 
-* Projekta PDF fails: [Dokuments_Račkovs.pdf](https://github.com/user-attachments/files/28592923/Dokuments_Rackovs.pdf)
+* Projekta PDF fails: [Kvalifikācija_Račkovs.docx](https://github.com/user-attachments/files/28699238/Kvalifikacija_Rackovs.docx)
 
 **Saprasts** ir tīmekļa platforma, kas izstrādāta kā kvalifikācijas darbs. Tās mērķis ir nodrošināt ērtu un drošu vidi, kurā klienti var atrast sertificētus psihologus, pieteikties konsultācijām, veikt pašnovērtējuma testus un saņemt AI ģenerētus ieteikumus mentālās veselības uzlabošanai.
 
